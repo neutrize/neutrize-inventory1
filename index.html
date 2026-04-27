@@ -331,6 +331,24 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     </details>
   </div>
   <div class="card">
+    <div class="ct">Categories — カテゴリ管理</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:12px">商品マスタ・解析で使用するカテゴリを編集できます。</p>
+    <div id="cat-list" style="margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="inp-cat" placeholder="新しいカテゴリ名" style="flex:1">
+      <button class="btn bp" onclick="addCat()">追加</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">Suppliers — 仕入先管理</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:12px">仕入先の追加・削除ができます。</p>
+    <div id="sup-list" style="margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="inp-sup2" placeholder="新しい仕入先名" style="flex:1">
+      <button class="btn bp" onclick="addSup()">追加</button>
+    </div>
+  </div>
+  <div class="card">
     <div class="ct">Data Management — データ管理</div>
     <p style="font-size:11px;color:var(--muted);margin-bottom:14px">全データはブラウザに保存されています。</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -599,8 +617,20 @@ async function runAnalysis() {
     catch { throw new Error('解析結果の読み取りに失敗しました（JSONパースエラー）'); }
 
     extItems = parsed.items || [];
-    if (parsed.supplier) document.getElementById('del-sup').value = parsed.supplier;
-    if (parsed.date)     document.getElementById('del-date').value = parsed.date;
+    if (parsed.supplier) {
+      // 登録済み仕入先と照合、なければ選択肢に追加して選択
+      const supSel = document.getElementById('del-sup');
+      const exists = [...supSel.options].some(o=>o.value===parsed.supplier);
+      if (!exists) {
+        const opt = document.createElement('option');
+        opt.value = opt.textContent = parsed.supplier + '（解析）';
+        supSel.appendChild(opt);
+        supSel.value = opt.value;
+      } else {
+        supSel.value = parsed.supplier;
+      }
+    }
+    if (parsed.date) document.getElementById('del-date').value = parsed.date;
 
     if (extItems.length === 0) {
       document.getElementById('ana-result').innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品が検出できませんでした</div>';
@@ -617,23 +647,56 @@ async function runAnalysis() {
   }
 }
 
+// 登録商品との自動照合（部分一致）
+function autoMatch(itemName) {
+  const n = itemName.toLowerCase().replace(/\s/g,'');
+  // 完全一致 → 部分一致 → 含む の順で探す
+  return prods.find(p => p.name === itemName)
+    || prods.find(p => p.name.toLowerCase().replace(/\s/g,'') === n)
+    || prods.find(p => p.name.toLowerCase().replace(/\s/g,'').includes(n) || n.includes(p.name.toLowerCase().replace(/\s/g,'')))
+    || null;
+}
+
 function renderEditItems() {
   const CAT = ['シャンプー','トリートメント','カラー剤','薬剤','消耗品','備品'];
+
+  // 未照合なら自動照合を試みる
+  extItems.forEach(item => {
+    if (item.linkedId === undefined) {
+      const match = autoMatch(item.name);
+      item.linkedId = match ? match.id : '';
+    }
+  });
+
   const total = extItems.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
   document.getElementById('ana-result').innerHTML = `
     <div style="font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:12px">
       解析結果 — 編集してから登録してください（${extItems.length}点）
     </div>
     <div id="edit-items">
-      ${extItems.map((item,idx)=>`
-        <div style="border:1px solid var(--bdr);padding:12px;margin-bottom:8px;position:relative">
+      ${extItems.map((item,idx) => {
+        const matched = prods.find(p=>p.id===item.linkedId);
+        const linkColor = matched ? 'var(--green)' : item.linkedId==='' ? 'var(--muted)' : 'var(--orange)';
+        const linkLabel = matched ? `✓ ${matched.name}` : '未紐付け（在庫は更新されません）';
+        return `
+        <div style="border:1px solid var(--bdr);padding:12px;margin-bottom:8px">
           <div style="font-size:10px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between">
             <span># ${idx+1}</span>
             <span style="cursor:pointer;color:var(--red)" onclick="removeItem(${idx})">✕ 削除</span>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div style="grid-column:1/-1"><label>商品名</label>
+            <div style="grid-column:1/-1"><label>商品名（納品書の表記）</label>
               <input type="text" value="${item.name}" oninput="extItems[${idx}].name=this.value"></div>
+            <div style="grid-column:1/-1">
+              <label style="display:flex;justify-content:space-between">
+                <span>登録商品との紐付け</span>
+                <span style="color:${linkColor};font-size:10px">${linkLabel}</span>
+              </label>
+              <select onchange="extItems[${idx}].linkedId=this.value;renderEditItems()" style="border-color:${matched?'var(--green2, #3a6b50)':'var(--bdr)'}">
+                <option value="">— 紐付けなし（在庫更新しない）</option>
+                ${prods.map(p=>`<option value="${p.id}" ${p.id===item.linkedId?'selected':''}>${p.name}（現在: ${p.stock}${p.unit||'本'}）</option>`).join('')}
+              </select>
+            </div>
             <div><label>カテゴリ</label>
               <select onchange="extItems[${idx}].category=this.value">
                 ${CAT.map(c=>`<option ${c===item.category?'selected':''}>${c}</option>`).join('')}
@@ -650,7 +713,8 @@ function renderEditItems() {
           <div style="margin-top:8px;font-size:11px;color:var(--muted);text-align:right">
             小計 ¥<span id="sub-${idx}">${((item.qty||0)*(item.price||0)).toLocaleString()}</span>
           </div>
-        </div>`).join('')}
+        </div>`;
+      }).join('')}
     </div>
     <button class="btn bg sm" onclick="addItem()" style="margin-bottom:12px">＋ 行を追加</button>
     <div style="border-top:1px solid var(--bdr);padding-top:10px;display:flex;justify-content:space-between;font-size:12px">
@@ -691,9 +755,9 @@ function registerDelivery() {
   dels.push({ id:Date.now().toString(), date, supplier, items:extItems });
   sv('nz_dels', dels);
 
-  // Update stock
+  // Update stock — linkedId で紐付けされた商品のみ更新
   extItems.forEach(item => {
-    const p = prods.find(p=>p.name===item.name);
+    const p = item.linkedId ? prods.find(p=>p.id===item.linkedId) : null;
     if (p) { p.stock=(p.stock||0)+(item.qty||0); if(item.price) p.price=item.price; }
   });
   sv('nz_prods', prods);
@@ -874,6 +938,48 @@ function renderReport() {
 function renderSettings() {
   if(cfg.apiKey){document.getElementById('inp-api').value=cfg.apiKey;document.getElementById('api-st').textContent='✓ APIキーが設定されています';document.getElementById('api-st').style.color='var(--green)';}
   if(cfg.gasUrl) document.getElementById('inp-gas').value=cfg.gasUrl;
+  renderCatList();
+  renderSupList();
+}
+
+function renderCatList() {
+  document.getElementById('cat-list').innerHTML = cats.map((c,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr)">
+      <input type="text" value="${c}" oninput="cats[${i}]=this.value;sv('nz_cats',cats)" style="flex:1;padding:5px 8px;font-size:12px">
+      <button class="btn bd sm" onclick="removeCat(${i})">削除</button>
+    </div>`).join('');
+}
+
+function addCat() {
+  const v=document.getElementById('inp-cat').value.trim();
+  if(!v){toast('カテゴリ名を入力してください','e');return;}
+  if(cats.includes(v)){toast('すでに存在します','e');return;}
+  cats.push(v); sv('nz_cats',cats);
+  document.getElementById('inp-cat').value='';
+  renderCatList(); toast('カテゴリを追加しました');
+}
+
+function removeCat(i) {
+  if(!confirm(`「${cats[i]}」を削除しますか？`))return;
+  cats.splice(i,1); sv('nz_cats',cats);
+  renderCatList(); toast('削除しました');
+}
+
+function renderSupList() {
+  document.getElementById('sup-list').innerHTML = sups.map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr)">
+      <input type="text" value="${s}" oninput="sups[${i}]=this.value;sv('nz_sups',sups)" style="flex:1;padding:5px 8px;font-size:12px">
+      <button class="btn bd sm" onclick="removeSup(${i})">削除</button>
+    </div>`).join('');
+}
+
+function addSup() {
+  const v=document.getElementById('inp-sup2').value.trim();
+  if(!v){toast('仕入先名を入力してください','e');return;}
+  if(sups.includes(v)){toast('すでに存在します','e');return;}
+  sups.push(v); sv('nz_sups',sups);
+  document.getElementById('inp-sup2').value='';
+  renderSupList(); toast('仕入先を追加しました');
 }
 
 function saveApiKey() {
