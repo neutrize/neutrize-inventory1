@@ -566,12 +566,22 @@ async function runAnalysis() {
           content: [
             { type:'image', source:{ type:'base64', media_type:curImg.mediaType, data:curImg.data } },
             { type:'text', text:
-`この納品書・請求書の画像から商品情報を抽出してください。
-以下のJSON形式のみで返答してください（説明文・コードブロック不要）：
-{"supplier":"仕入先名","date":"YYYY-MM-DD","items":[{"name":"商品名","category":"カテゴリ（シャンプー/トリートメント/カラー剤/薬剤/消耗品/備品）","qty":数量,"unit":"本","price":単価}]}
-・日付不明なら今日の日付
+`あなたは日本の美容サロン向け納品書・請求書の読み取り専門AIです。
+画像に写っている納品書・請求書を注意深く読み取り、以下のJSON形式のみで返答してください。
+説明文・コードブロック・バッククォートは一切不要です。
+
+{"supplier":"仕入先名","date":"YYYY-MM-DD","items":[{"name":"商品名","category":"カテゴリ","qty":数量の数値,"unit":"本","price":1本あたりの単価の数値}]}
+
+【厳守事項】
+・商品名は画像に書いてある文字をそのままコピーする（省略・翻訳・推測禁止）
+・数量は本数・個数・袋数など個別の数を読む（合計数量ではなく1行ごとの数）
+・単価は1本あたりの価格（税抜き優先。税込しかなければ税込で）
+・小計・合計欄の数字を単価と混同しない
+・1行1商品として全行を漏れなく抽出する
+・日付はYYYY-MM-DD形式（不明なら今日の日付）
 ・仕入先不明なら空文字
-・数量・単価不明なら0` }
+・カテゴリはシャンプー/トリートメント/カラー剤/薬剤/消耗品/備品のいずれか
+・数量・単価が読めない場合のみ0にする` }
           ]
         }]
       })
@@ -595,16 +605,7 @@ async function runAnalysis() {
     if (extItems.length === 0) {
       document.getElementById('ana-result').innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品が検出できませんでした</div>';
     } else {
-      const total = extItems.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
-      document.getElementById('ana-result').innerHTML = `
-        <div style="font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:12px">抽出された商品（${extItems.length}点）</div>
-        ${extItems.map(i=>`<div class="exitem">
-          <div><div>${i.name}</div><div style="font-size:10px;color:var(--muted)">${i.category} · ${i.qty}${i.unit||'本'}</div></div>
-          <div style="text-align:right"><div>¥${(i.price||0).toLocaleString()}</div><div style="font-size:10px;color:var(--muted)">小計 ¥${((i.qty||0)*(i.price||0)).toLocaleString()}</div></div>
-        </div>`).join('')}
-        <div style="border-top:1px solid var(--bdr);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;font-size:12px">
-          <span style="color:var(--muted)">合計</span><span style="color:var(--gold)">¥${total.toLocaleString()}</span>
-        </div>`;
+      renderEditItems();
       document.getElementById('reg-wrap').style.display = 'block';
     }
 
@@ -614,6 +615,72 @@ async function runAnalysis() {
   } finally {
     btn.textContent = '✦ AI解析を実行'; btn.disabled = false;
   }
+}
+
+function renderEditItems() {
+  const CAT = ['シャンプー','トリートメント','カラー剤','薬剤','消耗品','備品'];
+  const total = extItems.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
+  document.getElementById('ana-result').innerHTML = `
+    <div style="font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:12px">
+      解析結果 — 編集してから登録してください（${extItems.length}点）
+    </div>
+    <div id="edit-items">
+      ${extItems.map((item,idx)=>`
+        <div style="border:1px solid var(--bdr);padding:12px;margin-bottom:8px;position:relative">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between">
+            <span># ${idx+1}</span>
+            <span style="cursor:pointer;color:var(--red)" onclick="removeItem(${idx})">✕ 削除</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="grid-column:1/-1"><label>商品名</label>
+              <input type="text" value="${item.name}" oninput="extItems[${idx}].name=this.value"></div>
+            <div><label>カテゴリ</label>
+              <select onchange="extItems[${idx}].category=this.value">
+                ${CAT.map(c=>`<option ${c===item.category?'selected':''}>${c}</option>`).join('')}
+              </select></div>
+            <div><label>単位</label>
+              <select onchange="extItems[${idx}].unit=this.value">
+                ${['本','袋','箱','個','缶','kg'].map(u=>`<option ${u===(item.unit||'本')?'selected':''}>${u}</option>`).join('')}
+              </select></div>
+            <div><label>数量</label>
+              <input type="number" min="0" value="${item.qty}" oninput="extItems[${idx}].qty=+this.value;updateTotal()"></div>
+            <div><label>単価（円）</label>
+              <input type="number" min="0" value="${item.price}" oninput="extItems[${idx}].price=+this.value;updateTotal()"></div>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--muted);text-align:right">
+            小計 ¥<span id="sub-${idx}">${((item.qty||0)*(item.price||0)).toLocaleString()}</span>
+          </div>
+        </div>`).join('')}
+    </div>
+    <button class="btn bg sm" onclick="addItem()" style="margin-bottom:12px">＋ 行を追加</button>
+    <div style="border-top:1px solid var(--bdr);padding-top:10px;display:flex;justify-content:space-between;font-size:12px">
+      <span style="color:var(--muted)">合計</span>
+      <span style="color:var(--gold)">¥<span id="edit-total">${total.toLocaleString()}</span></span>
+    </div>`;
+}
+
+function updateTotal() {
+  const total = extItems.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
+  const el = document.getElementById('edit-total');
+  if (el) el.textContent = total.toLocaleString();
+  extItems.forEach((_,idx)=>{
+    const el2 = document.getElementById(`sub-${idx}`);
+    if (el2) el2.textContent = ((extItems[idx].qty||0)*(extItems[idx].price||0)).toLocaleString();
+  });
+}
+
+function removeItem(idx) {
+  extItems.splice(idx,1);
+  if (extItems.length===0) {
+    document.getElementById('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品がありません</div>';
+    document.getElementById('reg-wrap').style.display='none';
+  } else { renderEditItems(); }
+}
+
+function addItem() {
+  extItems.push({name:'',category:'消耗品',qty:0,unit:'本',price:0});
+  renderEditItems();
+  document.getElementById('reg-wrap').style.display='block';
 }
 
 function registerDelivery() {
