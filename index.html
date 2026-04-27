@@ -186,7 +186,16 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     <div class="stat"><div class="sl">Today's Stock</div><div class="sv" id="s-items">—</div><div class="su">管理商品数</div></div>
     <div class="stat"><div class="sl">Reorder Alerts</div><div class="sv" id="s-alerts">—</div><div class="su">要発注</div></div>
     <div class="stat"><div class="sl">This Month</div><div class="sv" id="s-month">—</div><div class="su">今月の仕入れ（円）</div></div>
-    <div class="stat"><div class="sl">Last Stocktake</div><div class="sv" id="s-stk">—</div><div class="su" id="s-stk2">—</div></div>
+    <div class="stat"><div class="sl">Stock Value</div><div class="sv" id="s-val">—</div><div class="su">現在庫総額（円）</div></div>
+  </div>
+  <div class="card" style="margin-bottom:20px">
+    <div class="ct">Stock Value — カテゴリ別在庫総額</div>
+    <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:14px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold)" id="dash-val-total">—</div>
+      <div style="font-size:11px;color:var(--muted)">現在庫総額</div>
+    </div>
+    <table><thead><tr><th>カテゴリ</th><th class="tr">在庫総額</th><th class="tr">比率</th><th>グラフ</th></tr></thead>
+    <tbody id="tb-val-cat"></tbody></table>
   </div>
   <div class="g20">
     <div class="card">
@@ -251,14 +260,24 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
 <!-- Stocktake -->
 <section id="p-stocktake" class="sec">
   <div class="ph"><div class="pt">週次棚卸し</div><div class="ps">実際の在庫数を入力して更新</div></div>
+  <div class="card" style="margin-bottom:20px">
+    <div class="ct">Stock Value — 棚卸し後の在庫総額</div>
+    <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:14px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold)" id="stk-val-total">—</div>
+      <div style="font-size:11px;color:var(--muted)">現在庫総額（登録単価 × 在庫数）</div>
+    </div>
+    <table><thead><tr><th>カテゴリ</th><th class="tr">在庫総額</th><th class="tr">点数</th><th>グラフ</th></tr></thead>
+    <tbody id="tb-stk-val"></tbody></table>
+  </div>
   <div class="card">
     <div class="ct">Manual Input — 手入力で更新</div>
-    <div style="display:grid;grid-template-columns:1fr 100px 60px 60px 90px;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--bdr);margin-bottom:4px">
+    <div style="display:grid;grid-template-columns:1fr 100px 60px 60px 90px 90px;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--bdr);margin-bottom:4px">
       <div style="font-size:10px;color:var(--muted)">商品名</div>
       <div style="font-size:10px;color:var(--muted)">詳細</div>
       <div style="font-size:10px;color:var(--muted);text-align:center">現在庫</div>
       <div style="font-size:10px;color:var(--muted);text-align:center">適正量</div>
       <div style="font-size:10px;color:var(--muted);text-align:center">実数入力</div>
+      <div style="font-size:10px;color:var(--gold);text-align:center">適正量を変更</div>
     </div>
     <div id="stk-list"></div>
     <div class="mt20 fb">
@@ -383,7 +402,26 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     </div>
   </div>
   <div class="card">
-    <div class="ct">Data Management — データ管理</div>
+    <div class="ct">Auto Deduction — 自動消費減算</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.9">
+      過去3ヶ月の発注量をもとに1日あたりの推定消費量を計算し、毎日自動で在庫を減算します。<br>
+      発注履歴がない商品・推定消費が0の商品は減算されません。棚卸しで実数に補正してください。
+    </p>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px;background:var(--sur2);border:1px solid var(--bdr)">
+      <input type="checkbox" id="auto-deduct-toggle" onchange="toggleAutoDeduct(this)" style="width:auto;width:16px;height:16px;cursor:pointer">
+      <div>
+        <div style="font-size:12px">自動減算を有効にする</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px" id="deduct-last-run">最終実行: 未実行</div>
+      </div>
+    </div>
+    <div class="ct">推定消費レート — 商品別</div>
+    <table><thead><tr><th>商品名</th><th>詳細</th><th>カテゴリ</th><th class="tr">月平均</th><th class="tr">日次推定</th><th class="tr">今日の減算</th></tr></thead>
+    <tbody id="tb-deduct-rates"></tbody></table>
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn bo" onclick="runAutoDeduct(true)">▶ 今すぐ実行</button>
+      <button class="btn bg" onclick="resetAutoDeduct()">リセット（最終実行日をクリア）</button>
+    </div>
+  </div>
     <p style="font-size:11px;color:var(--muted);margin-bottom:14px">全データはブラウザに保存されています。</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn bo" onclick="exportData()">📥 JSONエクスポート</button>
@@ -505,6 +543,31 @@ function ym(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,
 // ── Dashboard ──────────────────────────────────────────────────────
 function renderDash() {
   const now = new Date(), cur = ym(now);
+  // 在庫総額
+  const valByCat = {};
+  cats.forEach(c=>{ valByCat[c]={val:0,cnt:0}; });
+  prods.forEach(p=>{
+    const v = (p.stock||0)*(p.price||0);
+    if(!valByCat[p.category]) valByCat[p.category]={val:0,cnt:0};
+    valByCat[p.category].val += v;
+    valByCat[p.category].cnt += (p.stock||0);
+  });
+  const totalVal = Object.values(valByCat).reduce((s,v)=>s+v.val,0);
+  document.getElementById('s-val').textContent = totalVal.toLocaleString();
+  document.getElementById('dash-val-total').textContent = '¥'+totalVal.toLocaleString();
+  document.getElementById('tb-val-cat').innerHTML = cats.filter(c=>valByCat[c]&&valByCat[c].val>0).map(c=>{
+    const {val,cnt}=valByCat[c];
+    const pct=totalVal>0?Math.round(val/totalVal*100):0;
+    return `<tr>
+      <td>${catBadge(c)}</td>
+      <td class="tr" style="color:var(--gold)">¥${val.toLocaleString()}</td>
+      <td class="tr" style="color:var(--muted)">${cnt}点</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:4px;background:var(--bdr);max-width:120px"><div style="height:100%;width:${pct}%;background:var(--gold)"></div></div><span style="font-size:10px">${pct}%</span></div></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4" style="color:var(--muted);padding:14px">データがありません（商品マスタに単価を登録してください）</td></tr>';
+
+  renderDeductStat();
+
   document.getElementById('s-items').textContent = prods.length;
   const alertP = prods.filter(p => p.stock <= p.target);
   document.getElementById('s-alerts').textContent = alertP.length;
@@ -796,6 +859,23 @@ function registerDelivery() {
 
 // ── Stocktake ──────────────────────────────────────────────────────
 function renderStk() {
+  // 在庫総額（棚卸しページ用）
+  const valByCat2 = {};
+  cats.forEach(c=>{valByCat2[c]={val:0,cnt:0};});
+  prods.forEach(p=>{
+    const v=(p.stock||0)*(p.price||0);
+    if(!valByCat2[p.category])valByCat2[p.category]={val:0,cnt:0};
+    valByCat2[p.category].val+=v;
+    valByCat2[p.category].cnt+=(p.stock||0);
+  });
+  const tv=Object.values(valByCat2).reduce((s,v)=>s+v.val,0);
+  document.getElementById('stk-val-total').textContent='¥'+tv.toLocaleString();
+  document.getElementById('tb-stk-val').innerHTML=cats.filter(c=>valByCat2[c]&&valByCat2[c].val>0).map(c=>{
+    const {val,cnt}=valByCat2[c];
+    const pct=tv>0?Math.round(val/tv*100):0;
+    return`<tr><td>${catBadge(c)}</td><td class="tr" style="color:var(--gold)">¥${val.toLocaleString()}</td><td class="tr" style="color:var(--muted)">${cnt}点</td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:4px;background:var(--bdr);max-width:120px"><div style="height:100%;width:${pct}%;background:var(--gold)"></div></div><span style="font-size:10px">${pct}%</span></div></td></tr>`;
+  }).join('')||'<tr><td colspan="4" style="color:var(--muted);padding:14px">商品マスタに単価を登録してください</td></tr>';
+
   const list = document.getElementById('stk-list');
   if(prods.length===0){list.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:24px">商品マスタに商品を登録してください</div>';return;}
   // Group by category in cats order
@@ -815,18 +895,30 @@ function renderStk() {
 }
 
 function saveStocktake() {
-  const updated=[];
-  document.querySelectorAll('#stk-list input').forEach(inp=>{
-    if(inp.value==='')return;
-    const p=prods.find(x=>x.id===inp.dataset.id);
-    if(p){p.stock=parseInt(inp.value);updated.push({productId:p.id,name:p.name,detail:p.detail||'',cat:p.category,stock:p.stock,target:p.target});}
+  const updated = [];
+  // 在庫数の更新
+  document.querySelectorAll('#stk-list input[data-type="stock"]').forEach(inp=>{
+    if(inp.value==='') return;
+    const p = prods.find(x=>x.id===inp.dataset.id);
+    if(p){ p.stock=parseInt(inp.value); updated.push({productId:p.id,name:p.name,detail:p.detail||'',cat:p.category,stock:p.stock,target:p.target}); }
+  });
+  // 適正量の更新
+  document.querySelectorAll('#stk-list input[data-type="target"]').forEach(inp=>{
+    if(inp.value==='') return;
+    const p = prods.find(x=>x.id===inp.dataset.id);
+    if(p){
+      p.target=parseInt(inp.value);
+      const existing = updated.find(u=>u.productId===p.id);
+      if(existing) existing.target=p.target;
+      else updated.push({productId:p.id,name:p.name,detail:p.detail||'',cat:p.category,stock:p.stock,target:p.target});
+    }
   });
   if(updated.length===0){toast('変更がありません','e');return;}
   sv('nz_prods',prods);
   stks.push({id:Date.now().toString(),date:new Date().toISOString().slice(0,10),items:updated});
   sv('nz_stks',stks);
   gasSync({type:'stocktake',items:updated});
-  toast(`${updated.length}件の在庫を更新しました`);
+  toast(`${updated.length}件を更新しました`);
   renderStk();
 }
 
@@ -1069,12 +1161,129 @@ function renderReport() {
   document.getElementById('rpt-det').innerHTML=rows.join('')||'<tr><td colspan="7" style="color:var(--muted)">データなし</td></tr>';
 }
 
-// ── Settings ───────────────────────────────────────────────────────
+// ── Auto Deduction ─────────────────────────────────────────────────
+function calcDailyRate(p) {
+  const now = new Date();
+  let total = 0;
+  for(let m=1;m<=3;m++){
+    const d = new Date(now.getFullYear(), now.getMonth()-m, 1);
+    const k = ym(d);
+    dels.filter(dl=>dl.date.startsWith(k)).forEach(dl=>{
+      dl.items.forEach(i=>{
+        if(i.name===p.name && (i.detail||'')===(p.detail||'')) total+=(i.qty||0);
+      });
+    });
+  }
+  const monthlyAvg = total / 3;
+  return { monthlyAvg, dailyRate: monthlyAvg / 30 };
+}
+
+function runAutoDeduct(manual=false) {
+  const enabled = ld('nz_auto_deduct', false);
+  if(!enabled && !manual) return;
+
+  const today = new Date().toISOString().slice(0,10);
+  const lastDate = ld('nz_deduct_last', null);
+
+  if(!manual && lastDate === today) return; // 今日すでに実行済み
+
+  const daysElapsed = lastDate
+    ? Math.max(1, Math.floor((new Date(today)-new Date(lastDate))/(1000*60*60*24)))
+    : 1;
+
+  const log = [];
+  prods.forEach(p=>{
+    const {dailyRate} = calcDailyRate(p);
+    if(dailyRate <= 0) return;
+    const deduct = Math.round(dailyRate * daysElapsed * 10) / 10; // 小数1桁
+    const actual = Math.min(p.stock||0, Math.round(deduct));
+    if(actual > 0){
+      p.stock = Math.max(0, (p.stock||0) - actual);
+      log.push({name:p.name, detail:p.detail||'', deducted:actual});
+    }
+  });
+
+  sv('nz_prods', prods);
+  sv('nz_deduct_last', today);
+
+  // 減算ログを保存
+  const logs = ld('nz_deduct_log', []);
+  if(log.length>0) logs.push({date:today, days:daysElapsed, items:log});
+  sv('nz_deduct_log', logs.slice(-90)); // 90日分保持
+
+  if(manual){
+    toast(log.length>0 ? `${log.length}商品の在庫を自動減算しました` : '減算対象の商品がありません（発注履歴を確認してください）');
+    renderSettings();
+    renderDash();
+  } else if(log.length>0){
+    toast(`自動減算: ${log.length}商品 (${daysElapsed}日分)`);
+  }
+}
+
+function toggleAutoDeduct(el) {
+  sv('nz_auto_deduct', el.checked);
+  toast(el.checked ? '自動減算を有効にしました' : '自動減算を無効にしました');
+  renderSettings();
+}
+
+function resetAutoDeduct() {
+  if(!confirm('最終実行日をリセットしますか？\n次回アプリを開いたとき1日分の減算が実行されます。')) return;
+  localStorage.removeItem('nz_deduct_last');
+  toast('リセットしました');
+  renderSettings();
+}
+
+function renderDeductRates() {
+  const today = new Date().toISOString().slice(0,10);
+  const lastDate = ld('nz_deduct_last', null);
+  const daysElapsed = lastDate
+    ? Math.max(0, Math.floor((new Date(today)-new Date(lastDate))/(1000*60*60*24)))
+    : 1;
+
+  const rows = prods.map(p=>{
+    const {monthlyAvg, dailyRate} = calcDailyRate(p);
+    const today_deduct = Math.round(dailyRate * daysElapsed * 10)/10;
+    if(monthlyAvg===0) return null;
+    return `<tr>
+      <td>${p.name}</td>
+      <td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td>
+      <td>${catBadge(p.category)}</td>
+      <td class="tr">${monthlyAvg.toFixed(1)}${p.unit||'本'}/月</td>
+      <td class="tr" style="color:var(--gold)">${dailyRate.toFixed(2)}${p.unit||'本'}/日</td>
+      <td class="tr" style="color:${today_deduct>0?'var(--orange)':'var(--muted)'}">${today_deduct>0?'-'+today_deduct:'—'}</td>
+    </tr>`;
+  }).filter(Boolean);
+
+  document.getElementById('tb-deduct-rates').innerHTML = rows.join('')
+    || '<tr><td colspan="6" style="color:var(--muted);padding:16px;text-align:center">発注履歴がないと消費レートを計算できません</td></tr>';
+}
+
+  // ── Settings ───────────────────────────────────────────────────────
 function renderSettings() {
   if(cfg.apiKey){document.getElementById('inp-api').value=cfg.apiKey;document.getElementById('api-st').textContent='✓ APIキーが設定されています';document.getElementById('api-st').style.color='var(--green)';}
   if(cfg.gasUrl) document.getElementById('inp-gas').value=cfg.gasUrl;
+
+  // Auto deduction settings
+  const enabled = ld('nz_auto_deduct', false);
+  document.getElementById('auto-deduct-toggle').checked = enabled;
+  const lastRun = ld('nz_deduct_last', null);
+  document.getElementById('deduct-last-run').textContent = lastRun ? `最終実行: ${lastRun}` : '最終実行: 未実行';
+  renderDeductRates();
+
   renderCatList();
   renderSupList();
+}
+
+// Dashboard deduction stat
+function renderDeductStat() {
+  const lastRun = ld('nz_deduct_last', null);
+  const enabled = ld('nz_auto_deduct', false);
+  const logs = ld('nz_deduct_log', []);
+  const last = logs[logs.length-1];
+  document.getElementById('s-deduct').textContent = enabled ? (lastRun ? lastRun.slice(5).replace('-','/') : '未実行') : 'OFF';
+  document.getElementById('s-deduct2').textContent = enabled
+    ? (last ? `前回 ${last.items.length}商品減算` : '自動減算 有効')
+    : '自動減算 無効';
 }
 
 // カテゴリ並び替え（上下ボタン）
@@ -1172,6 +1381,7 @@ function toast(msg,t='s'){
 }
 
 // Init
+runAutoDeduct(); // アプリ起動時に自動実行（有効時のみ）
 renderDash();
 </script>
 </body>
