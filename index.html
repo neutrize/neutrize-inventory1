@@ -192,6 +192,18 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     <div class="card"><div class="ct">Monthly Purchase Trend</div><div class="cw"><canvas id="c-trend"></canvas></div></div>
     <div class="card"><div class="ct">Reorder Alerts — 要発注</div><div id="alert-list"></div></div>
   </div>
+  <div class="g20">
+    <div class="card">
+      <div class="ct">Supplier Cost — 仕入先別金額（今月）</div>
+      <table><thead><tr><th>仕入先</th><th class="tr">金額</th><th class="tr">比率</th></tr></thead>
+      <tbody id="tb-dash-sup"></tbody></table>
+    </div>
+    <div class="card">
+      <div class="ct">Category Cost — カテゴリ別金額（今月）</div>
+      <table><thead><tr><th>カテゴリ</th><th class="tr">金額</th><th class="tr">比率</th></tr></thead>
+      <tbody id="tb-dash-cat"></tbody></table>
+    </div>
+  </div>
   <div class="card">
     <div class="ct">Current Stock — 現在庫一覧</div>
     <table><thead><tr><th>カテゴリ</th><th>商品名</th><th>詳細</th><th>現在庫</th><th>適正量</th><th>充足率</th><th>状態</th></tr></thead>
@@ -272,6 +284,15 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     <div class="ct">Overstock Warning — 仕入れ過多チェック</div>
     <table><thead><tr><th>商品名</th><th>詳細</th><th>今月仕入</th><th>3ヶ月平均</th><th>過多判定</th><th>推定滞留</th></tr></thead>
     <tbody id="tb-over"></tbody></table>
+  </div>
+  <div class="card">
+    <div class="ct">All Delivery Log — 全入庫履歴（削除可）</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <select id="hist-ym" onchange="renderHistLog()" style="width:160px"></select>
+      <span style="font-size:11px;color:var(--muted);align-self:center">削除すると在庫数は自動で戻りません</span>
+    </div>
+    <table><thead><tr><th>日付</th><th>仕入先</th><th>商品名</th><th>詳細</th><th>カテゴリ</th><th>数量</th><th>単価</th><th class="tr">小計</th><th></th></tr></thead>
+    <tbody id="tb-hist-log"></tbody></table>
   </div>
 </section>
 
@@ -493,6 +514,43 @@ function renderDash() {
         <div><div>${p.name}${p.detail?` <span class="detail-badge">${p.detail}</span>`:''}</div><div style="font-size:10px;color:var(--muted)">${p.category}</div></div>
         <div style="text-align:right"><div style="color:var(--orange)">${p.stock}${p.unit||'本'}</div><div style="font-size:10px;color:var(--muted)">適正: ${p.target}</div></div>
       </div>`).join('');
+
+  // 仕入先別・カテゴリ別（今月）
+  const supT={}, catT2={};
+  dels.filter(d=>d.date.startsWith(cur)).forEach(d=>d.items.forEach(i=>{
+    supT[d.supplier]=(supT[d.supplier]||0)+(i.qty||0)*(i.price||0);
+    catT2[i.category]=(catT2[i.category]||0)+(i.qty||0)*(i.price||0);
+  }));
+  const supGrand=Object.values(supT).reduce((s,v)=>s+v,0);
+  const catGrand=Object.values(catT2).reduce((s,v)=>s+v,0);
+
+  document.getElementById('tb-dash-sup').innerHTML = Object.keys(supT).length===0
+    ? '<tr><td colspan="3" style="color:var(--muted);padding:16px;text-align:center">今月の仕入れデータがありません</td></tr>'
+    : Object.entries(supT).sort((a,b)=>b[1]-a[1]).map(([s,a])=>`
+        <tr>
+          <td>${s}</td>
+          <td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td>
+          <td class="tr">
+            <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+              <div style="width:50px;height:3px;background:var(--bdr)"><div style="height:100%;width:${supGrand>0?Math.round(a/supGrand*100):0}%;background:var(--gold)"></div></div>
+              <span style="font-size:10px">${supGrand>0?Math.round(a/supGrand*100):0}%</span>
+            </div>
+          </td>
+        </tr>`).join('');
+
+  document.getElementById('tb-dash-cat').innerHTML = Object.keys(catT2).length===0
+    ? '<tr><td colspan="3" style="color:var(--muted);padding:16px;text-align:center">今月の仕入れデータがありません</td></tr>'
+    : Object.entries(catT2).sort((a,b)=>b[1]-a[1]).map(([c,a])=>`
+        <tr>
+          <td>${catBadge(c)}</td>
+          <td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td>
+          <td class="tr">
+            <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+              <div style="width:50px;height:3px;background:var(--bdr)"><div style="height:100%;width:${catGrand>0?Math.round(a/catGrand*100):0}%;background:var(--gold)"></div></div>
+              <span style="font-size:10px">${catGrand>0?Math.round(a/catGrand*100):0}%</span>
+            </div>
+          </td>
+        </tr>`).join('');
 
   document.getElementById('tb-stock').innerHTML = prods.map(p => {
     const r = p.target>0 ? Math.round(p.stock/p.target*100) : 100;
@@ -810,6 +868,52 @@ function renderHist() {
     const stay=avg>0?Math.round(p.stock/(avg/30))+'日':'—';
     return `<tr><td>${p.name}</td><td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td><td>${tm}${p.unit||'本'}</td><td>${avg}${p.unit||'本'}</td><td>${isO?'<span class="badge low">過多</span>':'<span class="badge ok">適正</span>'}</td><td>${stay}</td></tr>`;
   }).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">データがありません</td></tr>';
+
+  // 全履歴ログのセレクタ初期化
+  renderHistLogSelector();
+  renderHistLog();
+}
+
+function renderHistLogSelector() {
+  const sel = document.getElementById('hist-ym');
+  if (!sel) return;
+  const now = new Date(), months = [];
+  for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({val:ym(d),lbl:`${d.getFullYear()}年${d.getMonth()+1}月`});}
+  const cur = sel.value || months[0].val;
+  sel.innerHTML = months.map(m=>`<option value="${m.val}" ${m.val===cur?'selected':''}>${m.lbl}</option>`).join('');
+}
+
+function renderHistLog() {
+  const sel = document.getElementById('hist-ym');
+  if (!sel) return;
+  const target = sel.value;
+  const filtered = dels.filter(d=>d.date.startsWith(target));
+  const rows = [];
+  filtered.forEach(d=>d.items.forEach(i=>{
+    rows.push(`<tr>
+      <td>${d.date}</td>
+      <td style="font-size:11px">${d.supplier}</td>
+      <td>${i.name}</td>
+      <td style="font-size:10px;color:var(--muted)">${i.detail||'—'}</td>
+      <td>${catBadge(i.category)}</td>
+      <td>${i.qty}${i.unit||''}</td>
+      <td>¥${(i.price||0).toLocaleString()}</td>
+      <td class="tr">¥${((i.qty||0)*(i.price||0)).toLocaleString()}</td>
+      <td><button class="btn bd sm" onclick="deleteDelHist('${d.id}')">削除</button></td>
+    </tr>`);
+  }));
+  const total = filtered.reduce((s,d)=>s+d.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0);
+  document.getElementById('tb-hist-log').innerHTML = rows.join('')
+    + (rows.length>0 ? `<tr style="background:rgba(201,169,110,.04)"><td colspan="7" style="text-align:right;font-size:11px;color:var(--muted)">合計</td><td class="tr" style="color:var(--gold)">¥${total.toLocaleString()}</td><td></td></tr>` : '')
+    || '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">この月のデータはありません</td></tr>';
+}
+
+function deleteDelHist(id) {
+  if (!confirm('この入庫データを削除しますか？\n（在庫数は自動で戻りません）')) return;
+  dels = dels.filter(d=>d.id!==id); sv('nz_dels',dels);
+  renderHistLog();
+  renderDelLog();
+  toast('削除しました');
 }
 
 // ── Products ───────────────────────────────────────────────────────
