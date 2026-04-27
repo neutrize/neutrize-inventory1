@@ -189,10 +189,6 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     <div class="stat"><div class="sl">Last Stocktake</div><div class="sv" id="s-stk">—</div><div class="su" id="s-stk2">—</div></div>
   </div>
   <div class="g20">
-    <div class="card"><div class="ct">Monthly Purchase Trend</div><div class="cw"><canvas id="c-trend"></canvas></div></div>
-    <div class="card"><div class="ct">Reorder Alerts — 要発注</div><div id="alert-list"></div></div>
-  </div>
-  <div class="g20">
     <div class="card">
       <div class="ct">Supplier Cost — 仕入先別金額（今月）</div>
       <table><thead><tr><th>仕入先</th><th class="tr">金額</th><th class="tr">比率</th></tr></thead>
@@ -203,6 +199,10 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
       <table><thead><tr><th>カテゴリ</th><th class="tr">金額</th><th class="tr">比率</th></tr></thead>
       <tbody id="tb-dash-cat"></tbody></table>
     </div>
+  </div>
+  <div class="g20">
+    <div class="card"><div class="ct">Monthly Purchase Trend</div><div class="cw"><canvas id="c-trend"></canvas></div></div>
+    <div class="card"><div class="ct">Reorder Alerts — 要発注</div><div id="alert-list"></div></div>
   </div>
   <div class="card">
     <div class="ct">Current Stock — 現在庫一覧</div>
@@ -279,6 +279,11 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     <div class="ct">Supplier Summary — 仕入先別合計</div>
     <table><thead><tr><th>仕入先</th><th class="tr">今月金額</th><th class="tr">件数</th><th class="tr">3ヶ月累計</th><th>主なカテゴリ</th></tr></thead>
     <tbody id="tb-sup-sum"></tbody></table>
+  </div>
+  <div class="card">
+    <div class="ct">Top Ordered — 発注量ランキング（今月）</div>
+    <table><thead><tr><th>順位</th><th>商品名</th><th>詳細</th><th>カテゴリ</th><th class="tr">数量</th><th class="tr">金額</th></tr></thead>
+    <tbody id="tb-top"></tbody></table>
   </div>
   <div class="card">
     <div class="ct">Overstock Warning — 仕入れ過多チェック</div>
@@ -858,6 +863,26 @@ function renderHist() {
         const topCat=Object.entries(supCat[s]||{}).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([c])=>catBadge(c)).join(' ');
         return `<tr><td>${s}</td><td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td><td class="tr">${supC[s]}件</td><td class="tr" style="color:var(--muted)">¥${(sup3[s]||0).toLocaleString()}</td><td>${topCat}</td></tr>`;
       }).join('');
+
+  // 発注量ランキング
+  const itemMap = {};
+  mDels.forEach(d=>d.items.forEach(i=>{
+    const key = i.name + '|' + (i.detail||'');
+    if (!itemMap[key]) itemMap[key] = {name:i.name,detail:i.detail||'',category:i.category,qty:0,amt:0};
+    itemMap[key].qty += (i.qty||0);
+    itemMap[key].amt += (i.qty||0)*(i.price||0);
+  }));
+  const ranked = Object.values(itemMap).sort((a,b)=>b.qty-a.qty);
+  document.getElementById('tb-top').innerHTML = ranked.length===0
+    ? '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">今月のデータがありません</td></tr>'
+    : ranked.slice(0,10).map((r,i)=>`<tr>
+        <td style="color:var(--muted);font-size:11px">${i+1}</td>
+        <td>${r.name}</td>
+        <td style="font-size:10px;color:var(--muted)">${r.detail||'—'}</td>
+        <td>${catBadge(r.category)}</td>
+        <td class="tr" style="color:var(--gold)">${r.qty}本</td>
+        <td class="tr">¥${r.amt.toLocaleString()}</td>
+      </tr>`).join('');
 
   document.getElementById('tb-over').innerHTML = prods.map(p=>{
     const tm=mDels.reduce((s,d)=>s+d.items.filter(i=>i.name===p.name).reduce((t,i)=>t+(i.qty||0),0),0);
