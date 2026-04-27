@@ -4,1444 +4,875 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>NEUTRIZE 在庫管理</title>
-<meta name="description" content="NEUTRIZE ヘアサロン 在庫管理システム">
 <meta name="theme-color" content="#0e0e0e">
-
-<!-- PWA: iOS -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="NEUTRIZE">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%230e0e0e'/%3E%3Crect x='40' y='40' width='432' height='432' fill='none' stroke='%23c9a84c' stroke-width='2'/%3E%3Ctext x='256' y='290' font-family='Georgia,serif' font-size='140' font-weight='300' fill='%23c9a84c' text-anchor='middle' letter-spacing='4'%3EN%3C/text%3E%3Ctext x='256' y='370' font-family='Arial,sans-serif' font-size='36' font-weight='300' fill='%238a6f2e' text-anchor='middle' letter-spacing='12'%3EUTRIZE%3C/text%3E%3C/svg%3E">
-
-<!-- PWA: Manifest inline -->
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22NEUTRIZE%20%E5%9C%A8%E5%BA%AB%E7%AE%A1%E7%90%86%22%2C%22short_name%22%3A%22NEUTRIZE%22%2C%22description%22%3A%22NEUTRIZE%20%E3%83%98%E3%82%A2%E3%82%B5%E3%83%AD%E3%83%B3%20%E5%9C%A8%E5%BA%AB%E7%AE%A1%E7%90%86%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230e0e0e%22%2C%22theme_color%22%3A%22%230e0e0e%22%2C%22orientation%22%3A%22portrait-primary%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%2520viewBox%3D'0%25200%2520512%2520512'%253E%253Crect%2520width%3D'512'%2520height%3D'512'%2520fill%3D'%25230e0e0e'%2F%253E%253Ctext%2520x%3D'256'%2520y%3D'310'%2520font-family%3D'Georgia%2Cserif'%2520font-size%3D'200'%2520fill%3D'%2523c9a84c'%2520text-anchor%3D'middle'%253EN%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
-
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22NEUTRIZE%20%E5%9C%A8%E5%BA%AB%E7%AE%A1%E7%90%86%22%2C%22short_name%22%3A%22NEUTRIZE%22%2C%22start_url%22%3A%22%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230e0e0e%22%2C%22theme_color%22%3A%22%230e0e0e%22%7D">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  :root {
-    --bg: #0e0e0e;
-    --surface: #161616;
-    --surface2: #1e1e1e;
-    --border: #2a2a2a;
-    --gold: #c9a84c;
-    --gold-dim: #8a6f2e;
-    --text: #e8e4dc;
-    --text-dim: #7a7570;
-    --text-muted: #4a4540;
-    --green: #4caf82;
-    --yellow: #c9a84c;
-    --red: #c9584c;
-    --blue: #4c82c9;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bg); color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-weight: 300; min-height: 100vh; overflow-x: hidden; }
+:root {
+  --bg: #0e0e0e;
+  --sur: #161616;
+  --sur2: #1e1e1e;
+  --bdr: #2a2a2a;
+  --gold: #c9a96e;
+  --gold2: #8a7450;
+  --txt: #e8e8e8;
+  --muted: #666;
+  --red: #c45252;
+  --orange: #c48a40;
+  --green: #52a070;
+  --blue: #5080c4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Noto Sans JP',sans-serif;font-size:13px;display:flex;min-height:100vh}
 
-  header { display: flex; align-items: center; justify-content: space-between; padding: 20px 32px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
-  .logo { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 22px; letter-spacing: 0.3em; color: var(--gold); }
-  .logo span { font-size: 11px; letter-spacing: 0.2em; color: var(--text-dim); display: block; font-family: 'Noto Sans JP', sans-serif; margin-top: 2px; }
-  .header-date { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-dim); letter-spacing: 0.1em; }
+/* ── Sidebar ── */
+#sidebar{width:200px;min-height:100vh;background:var(--sur);border-right:1px solid var(--bdr);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100}
+.logo{padding:24px 20px 18px;border-bottom:1px solid var(--bdr)}
+.logo-en{font-family:'Cormorant Garamond',serif;font-size:19px;letter-spacing:.2em;color:var(--gold)}
+.logo-ja{font-size:10px;color:var(--muted);letter-spacing:.12em;margin-top:3px}
+#nav{flex:1;padding:10px 0}
+.nl{display:flex;align-items:center;gap:10px;padding:10px 20px;color:var(--muted);text-decoration:none;font-size:12px;letter-spacing:.04em;cursor:pointer;transition:all .15s;user-select:none}
+.nl:hover{color:var(--txt);background:rgba(201,169,110,.05)}
+.nl.active{color:var(--gold);background:rgba(201,169,110,.08);border-right:2px solid var(--gold)}
+.nl .ic{width:15px;text-align:center;font-size:14px}
 
-  .nav-tabs { display: flex; gap: 0; padding: 0 32px; border-bottom: 1px solid var(--border); background: var(--bg); }
-  .nav-tab { padding: 14px 24px; font-size: 12px; letter-spacing: 0.15em; color: var(--text-dim); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap; }
-  .nav-tab:hover { color: var(--text); }
-  .nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+/* ── Main ── */
+#main{margin-left:200px;flex:1;padding:32px;min-height:100vh}
+.sec{display:none}.sec.active{display:block}
 
-  main { padding: 32px; max-width: 1200px; margin: 0 auto; }
-  .section { display: none; }
-  .section.active { display: block; }
+/* ── Page header ── */
+.ph{margin-bottom:28px}
+.pt{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--gold);letter-spacing:.1em}
+.ps{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.08em;text-transform:uppercase}
 
-  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; overflow: hidden; }
-  .kpi-card { background: var(--surface); border: 1px solid var(--border); padding: 20px; position: relative; overflow: hidden; min-width: 0; }
-  .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gold-dim); }
-  .kpi-card.alert::before { background: var(--red); }
-  .kpi-card.ok::before { background: var(--green); }
-  .kpi-label { font-size: 10px; letter-spacing: 0.2em; color: var(--text-dim); margin-bottom: 10px; }
-  .kpi-value { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 300; color: var(--text); line-height: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .kpi-value .unit { font-size: 14px; color: var(--text-dim); font-family: 'Noto Sans JP', sans-serif; }
-  .kpi-sub { font-size: 11px; color: var(--text-dim); margin-top: 8px; }
+/* ── Card ── */
+.card{background:var(--sur);border:1px solid var(--bdr);padding:20px;margin-bottom:20px}
+.ct{font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--bdr)}
 
-  .table-section { background: var(--surface); border: 1px solid var(--border); margin-bottom: 24px; overflow: hidden; }
-  .table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .table-title { font-size: 11px; letter-spacing: 0.2em; color: var(--gold); }
-  table { width: 100%; border-collapse: collapse; table-layout: auto; }
-  th { font-size: 10px; letter-spacing: 0.15em; color: var(--text-muted); text-align: left; padding: 10px 20px; border-bottom: 1px solid var(--border); font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  td { font-size: 13px; padding: 12px 20px; border-bottom: 1px solid #1a1a1a; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  td:first-child { white-space: normal; word-break: keep-all; overflow-wrap: anywhere; min-width: 120px; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--surface2); }
+/* ── Stats ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bdr);margin-bottom:20px}
+.stat{background:var(--sur);padding:20px;text-align:center}
+.sl{font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.sv{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--gold)}
+.su{font-size:11px;color:var(--muted);margin-top:3px}
 
-  .badge { display: inline-block; padding: 2px 8px; font-size: 10px; letter-spacing: 0.1em; border-radius: 2px; }
-  .badge-alert { background: rgba(201,88,76,0.15); color: var(--red); }
-  .badge-ok { background: rgba(76,175,130,0.15); color: var(--green); }
-  .badge-warn { background: rgba(201,168,76,0.15); color: var(--yellow); }
+/* ── Table ── */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--bdr);font-weight:400}
+td{padding:10px 12px;border-bottom:1px solid rgba(42,42,42,.5)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(201,169,110,.02)}
+.tr{text-align:right}
 
-  .stock-bar-wrap { display: flex; align-items: center; gap: 10px; }
-  .stock-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; max-width: 100px; }
-  .stock-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s; }
+/* ── Badge ── */
+.badge{display:inline-block;padding:2px 8px;font-size:10px;letter-spacing:.04em}
+.ok{background:rgba(82,160,112,.15);color:#52a070;border:1px solid rgba(82,160,112,.3)}
+.low{background:rgba(196,138,64,.15);color:#c48a40;border:1px solid rgba(196,138,64,.3)}
+.out{background:rgba(196,82,82,.15);color:#c45252;border:1px solid rgba(196,82,82,.3)}
+.over{background:rgba(80,120,196,.15);color:#5080c4;border:1px solid rgba(80,120,196,.3)}
 
-  .ocr-area { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-  .upload-zone { border: 1px dashed var(--border); background: var(--surface); padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s; min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; position: relative; }
-  .upload-zone:hover { border-color: var(--gold-dim); background: var(--surface2); }
-  .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-  .upload-icon { width: 48px; height: 48px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 20px; }
-  .upload-text { font-size: 12px; color: var(--text-dim); letter-spacing: 0.1em; line-height: 1.8; }
-  .result-panel { background: var(--surface); border: 1px solid var(--border); padding: 24px; min-height: 300px; }
-  .result-label { font-size: 10px; letter-spacing: 0.2em; color: var(--gold); margin-bottom: 16px; }
-  .result-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #1a1a1a; font-size: 12px; }
-  .result-item:last-child { border-bottom: none; }
-  .result-name { color: var(--text); }
-  .result-qty { font-family: 'DM Mono', monospace; color: var(--gold); font-size: 13px; }
+/* ── Button ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;font-size:11px;letter-spacing:.08em;cursor:pointer;border:none;font-family:'Noto Sans JP',sans-serif;transition:all .15s}
+.btn:disabled{opacity:.5;cursor:default}
+.bp{background:var(--gold);color:#0e0e0e}
+.bp:hover:not(:disabled){background:#e2c99a}
+.bo{background:transparent;color:var(--gold);border:1px solid var(--gold2)}
+.bo:hover{background:rgba(201,169,110,.08)}
+.bg{background:transparent;color:var(--muted);border:1px solid var(--bdr)}
+.bg:hover{color:var(--txt);border-color:#444}
+.bd{background:rgba(196,82,82,.12);color:#c45252;border:1px solid rgba(196,82,82,.3)}
+.sm{padding:5px 10px;font-size:10px}
 
-  .loading { display: none; flex-direction: column; align-items: center; gap: 16px; padding: 40px; }
-  .loading.show { display: flex; }
-  .spinner { width: 32px; height: 32px; border: 1px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text { font-size: 11px; color: var(--text-dim); letter-spacing: 0.15em; }
+/* ── Form ── */
+input,select,textarea{background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);padding:8px 12px;font-size:12px;font-family:'Noto Sans JP',sans-serif;outline:none;width:100%;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--gold2)}
+select option{background:var(--sur2)}
+label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margin-bottom:5px}
+.fr{margin-bottom:14px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 
-  .btn { padding: 10px 24px; font-size: 11px; letter-spacing: 0.2em; cursor: pointer; transition: all 0.2s; font-family: 'Noto Sans JP', sans-serif; border: none; }
-  .btn-primary { background: var(--gold); color: #0e0e0e; }
-  .btn-primary:hover { background: #d4b35c; }
-  .btn-primary:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
-  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
-  .btn-ghost:hover { border-color: var(--gold-dim); color: var(--text); }
+/* ── Drop zone ── */
+.dz{border:1px dashed var(--bdr);padding:36px;text-align:center;cursor:pointer;transition:all .2s}
+.dz:hover,.dz.drag{border-color:var(--gold2);background:rgba(201,169,110,.03)}
+.dz-icon{font-size:30px;margin-bottom:10px}
+.dz-txt{font-size:12px;color:var(--muted);line-height:1.9}
+#prev{max-width:100%;max-height:260px;margin-top:12px;display:none}
 
-  .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-  .inv-card { background: var(--surface); border: 1px solid var(--border); padding: 16px; }
-  .inv-name { font-size: 11px; color: var(--text-dim); margin-bottom: 12px; letter-spacing: 0.05em; }
-  .inv-input-wrap { display: flex; align-items: center; gap: 8px; }
-  .inv-input { width: 60px; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; font-family: 'DM Mono', monospace; font-size: 16px; text-align: center; }
-  .inv-unit { font-size: 11px; color: var(--text-dim); }
-  .inv-stock-info { font-size: 10px; color: var(--text-muted); margin-top: 8px; font-family: 'DM Mono', monospace; }
+/* ── AI result ── */
+.exitem{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bdr);font-size:12px}
+.exitem:last-child{border-bottom:none}
 
-  .chart-wrap { background: var(--surface); border: 1px solid var(--border); padding: 24px; margin-bottom: 24px; overflow: hidden; }
-  .chart-title { font-size: 11px; letter-spacing: 0.2em; color: var(--gold); margin-bottom: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 160px; overflow: hidden; border-bottom: 1px solid var(--border); padding-bottom: 0; }
-  .bar-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; flex: 1; min-width: 0; height: 100%; padding-bottom: 20px; position: relative; }
-  .bar-fill { width: 70%; background: var(--gold-dim); transition: height 0.5s; flex-shrink: 0; }
-  .bar-fill.current { background: var(--gold); }
-  .bar-label { position: absolute; bottom: 0; font-size: 9px; color: var(--text-muted); letter-spacing: 0.05em; text-align: center; white-space: nowrap; }
-  .bar-value { position: absolute; top: 0; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-dim); white-space: nowrap; }
+/* ── Stocktake ── */
+.ski{display:grid;grid-template-columns:1fr 60px 60px 90px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)}
+.ski:last-child{border-bottom:none}
 
-  .section-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; color: var(--text); margin-bottom: 6px; }
-  .section-sub { font-size: 11px; color: var(--text-dim); letter-spacing: 0.1em; margin-bottom: 28px; }
+/* ── Alert item ── */
+.ali{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(196,138,64,.05);border-left:2px solid var(--orange);margin-bottom:8px;font-size:12px}
 
-  .alert-banner { background: rgba(201,88,76,0.08); border: 1px solid rgba(201,88,76,0.3); padding: 14px 20px; display: flex; align-items: center; gap: 12px; margin-bottom: 20px; font-size: 12px; }
-  .alert-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); flex-shrink: 0; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+/* ── Chart ── */
+.cw{position:relative;height:200px}
 
-  #preview-img { max-width: 100%; max-height: 260px; object-fit: contain; display: none; }
+/* ── Modal ── */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center}
+.mo.open{display:flex}
+.mb{background:var(--sur);border:1px solid var(--bdr);padding:28px;width:480px;max-width:92vw;max-height:90vh;overflow-y:auto}
+.mt2{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold);margin-bottom:20px}
+.ma{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
 
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; min-width: 0; }
-  .two-col > * { min-width: 0; overflow: hidden; }
+/* ── Toast ── */
+#toast{position:fixed;bottom:24px;right:24px;padding:11px 18px;font-size:12px;letter-spacing:.04em;z-index:9999;display:none;animation:fi .2s}
+#toast.show{display:block}
+.ts{background:rgba(82,160,112,.92);color:#fff;border:1px solid #52a070}
+.te{background:rgba(196,82,82,.92);color:#fff;border:1px solid #c45252}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-  .api-key-bar { background: var(--surface); border: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-  .api-key-bar label { font-size: 10px; letter-spacing: 0.15em; color: var(--text-dim); white-space: nowrap; }
-  .api-key-bar input { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; font-family: 'DM Mono', monospace; font-size: 12px; }
+/* ── Util ── */
+.fb{display:flex;justify-content:space-between;align-items:center}
+.g8{gap:8px}.mt12{margin-top:12px}.mt20{margin-top:20px}
+.g20{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 
-  .success-banner { background: rgba(76,175,130,0.08); border: 1px solid rgba(76,175,130,0.3); padding: 14px 20px; font-size: 12px; color: var(--green); margin-bottom: 16px; display: none; }
-  .success-banner.show { display: block; }
+/* ── Mobile ── */
+@media(max-width:768px){
+  #sidebar{width:52px}
+  .logo-en,.logo-ja,.nl span:not(.ic){display:none}
+  .nl{padding:14px;justify-content:center}
+  #main{margin-left:52px;padding:16px}
+  .stats{grid-template-columns:1fr 1fr}
+  .fg,.g20{grid-template-columns:1fr}
+}
 
-  .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); font-size: 13px; line-height: 2.5; }
-  .empty-state .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.4; }
-
-  @media (max-width: 768px) {
-    main { padding: 16px; }
-    .kpi-row { grid-template-columns: repeat(2, 1fr); }
-    .ocr-area, .two-col { grid-template-columns: 1fr; }
-    .inventory-grid { grid-template-columns: repeat(2, 1fr); }
-    .nav-tab { padding: 12px 14px; font-size: 11px; }
-  }
-  /* Safe area for notch / home indicator */
-  body { padding-top: env(safe-area-inset-top); }
-  main { padding-bottom: max(32px, env(safe-area-inset-bottom)); }
-
-  /* Install banner */
-  #install-banner {
-    position: fixed;
-    bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
-    left: 50%; transform: translateX(-50%);
-    background: var(--surface);
-    border: 1px solid var(--gold-dim);
-    padding: 14px 18px;
-    width: calc(100% - 32px);
-    max-width: 480px;
-    z-index: 200;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.7);
-    align-items: center;
-    gap: 12px;
-    display: none;
-  }
-  #install-banner.show { display: flex; }
-  .install-icon { font-size: 22px; flex-shrink: 0; }
-  .install-text { flex: 1; }
-  .install-title { font-size: 12px; color: var(--text); margin-bottom: 3px; }
-  .install-sub { font-size: 10px; color: var(--text-dim); line-height: 1.6; }
-  .install-actions { display: flex; gap: 8px; flex-shrink: 0; }
-  @media print {
-    header, nav.nav-tabs, .section:not(#section-report), #section-report > div:first-child { display: none !important; }
-    #section-report { display: block !important; }
-    body { background: #fff !important; color: #111 !important; }
-    :root { --bg: #fff; --surface: #f8f8f8; --border: #ddd; --gold: #8a6f2e; --text: #111; --text-dim: #555; --text-muted: #888; --green: #2a7a50; --red: #a03030; }
-    .btn, #save-indicator { display: none !important; }
-  }
+/* ── Print ── */
+@media print{
+  #sidebar,.np{display:none!important}
+  #main{margin-left:0;padding:0}
+  body{background:#fff;color:#000}
+  .card{border:1px solid #ddd;break-inside:avoid}
+  .sv,.pt,.gold{color:#333}
+}
 </style>
 </head>
 <body>
 
-<header>
+<aside id="sidebar">
   <div class="logo">
-    NEUTRIZE
-    <span>在庫管理システム</span>
+    <div class="logo-en">NEUTRIZE</div>
+    <div class="logo-ja">在庫管理システム</div>
   </div>
-  <div class="header-date" id="header-date"></div>
-</header>
-
-<nav class="nav-tabs">
-  <div class="nav-tab active" onclick="switchTab('dashboard')">ダッシュボード</div>
-  <div class="nav-tab" onclick="switchTab('delivery')">納品書解析</div>
-  <div class="nav-tab" onclick="switchTab('stocktake')">週次棚卸し</div>
-  <div class="nav-tab" onclick="switchTab('history')">仕入れ履歴</div>
-  <div class="nav-tab" onclick="switchTab('master')">商品マスタ</div>
-  <div class="nav-tab" onclick="switchTab('report')">月次レポート</div>
-  <div class="nav-tab" onclick="switchTab('settings')">設定</div>
-  <div style="flex:1"></div>
-  <div id="save-indicator" style="font-size:10px;color:var(--green);letter-spacing:0.1em;padding:14px 16px;opacity:0;transition:opacity 0.5s;align-self:center;"></div>
-</nav>
-
-<main>
-
-  <!-- Install banner -->
-  <div id="install-banner">
-    <div class="install-icon">📲</div>
-    <div class="install-text">
-      <div class="install-title">NEUTRIZE 在庫管理をインストール</div>
-      <div class="install-sub">ホーム画面に追加してアプリとして使えます</div>
-    </div>
-    <div class="install-actions">
-      <button class="btn btn-primary" style="padding:8px 16px;font-size:10px;" onclick="installApp()">追加</button>
-      <button class="btn btn-ghost" style="padding:8px 12px;font-size:10px;" onclick="dismissInstall()">✕</button>
-    </div>
+  <div id="nav">
+    <div class="nl active" data-p="dashboard"><span class="ic">▣</span><span>ダッシュボード</span></div>
+    <div class="nl" data-p="delivery"><span class="ic">📄</span><span>納品書解析</span></div>
+    <div class="nl" data-p="stocktake"><span class="ic">📦</span><span>週次棚卸し</span></div>
+    <div class="nl" data-p="history"><span class="ic">📊</span><span>仕入れ履歴</span></div>
+    <div class="nl" data-p="products"><span class="ic">☰</span><span>商品マスタ</span></div>
+    <div class="nl" data-p="report"><span class="ic">📋</span><span>月次レポート</span></div>
+    <div class="nl" data-p="settings"><span class="ic">⚙</span><span>設定</span></div>
   </div>
+</aside>
 
-  <!-- ========== DASHBOARD ========== -->
-  <div class="section active" id="section-dashboard">
-    <div class="section-title">在庫概況</div>
-    <div class="section-sub" id="dash-subtitle">読み込み中...</div>
+<main id="main">
 
-    <div id="alert-banner" class="alert-banner" style="display:none;">
-      <div class="alert-dot"></div>
-      <span id="alert-text"></span>
-    </div>
-
-    <div class="kpi-row" id="kpi-row">
-      <div class="kpi-card"><div class="kpi-label">TODAY'S STOCK ITEMS</div><div class="kpi-value" id="kpi-items">—</div><div class="kpi-sub">管理商品数</div></div>
-      <div class="kpi-card" id="kpi-card-alert"><div class="kpi-label">REORDER ALERTS</div><div class="kpi-value" id="kpi-alerts">—</div><div class="kpi-sub">要発注</div></div>
-      <div class="kpi-card"><div class="kpi-label">THIS MONTH PURCHASE</div><div class="kpi-value" id="kpi-purchase">—</div><div class="kpi-sub" id="kpi-purchase-sub">今月の仕入れ</div></div>
-      <div class="kpi-card ok"><div class="kpi-label">LAST STOCKTAKE</div><div class="kpi-value" style="color:var(--green)" id="kpi-stocktake">—</div><div class="kpi-sub" id="kpi-stocktake-sub">—</div></div>
-    </div>
-
-    <div class="chart-wrap">
-      <div class="chart-title">MONTHLY PURCHASE TREND — 仕入れ月次推移</div>
-      <div class="bar-chart" id="bar-chart"></div>
-    </div>
-
-    <div class="table-section">
-      <div class="table-header">
-        <div class="table-title">CURRENT STOCK — 現在庫一覧</div>
-        <div style="font-size:11px;color:var(--text-dim)">適正量比で状態を判定</div>
-      </div>
-      <table><thead><tr><th>商品名</th><th>カテゴリ</th><th>現在庫</th><th>適正量</th><th>充足率</th><th>状態</th></tr></thead>
-      <tbody id="stock-table"></tbody></table>
-    </div>
+<!-- ── Dashboard ── -->
+<section id="p-dashboard" class="sec active">
+  <div class="ph"><div class="pt">Dashboard</div><div class="ps">在庫概況</div></div>
+  <div class="stats">
+    <div class="stat"><div class="sl">Today's Stock</div><div class="sv" id="s-items">—</div><div class="su">管理商品数</div></div>
+    <div class="stat"><div class="sl">Reorder Alerts</div><div class="sv" id="s-alerts">—</div><div class="su">要発注</div></div>
+    <div class="stat"><div class="sl">This Month</div><div class="sv" id="s-month">—</div><div class="su">今月の仕入れ（円）</div></div>
+    <div class="stat"><div class="sl">Last Stocktake</div><div class="sv" id="s-stk">—</div><div class="su" id="s-stk2">—</div></div>
   </div>
-
-  <!-- ========== DELIVERY OCR ========== -->
-  <div class="section" id="section-delivery">
-    <div class="section-title">納品書 AI解析</div>
-    <div class="section-sub">写真をアップロードするだけで、入庫データを自動生成します</div>
-
-    <div class="api-key-bar">
-      <label>ANTHROPIC API KEY</label>
-      <input type="password" id="api-key" placeholder="sk-ant-..." />
-      <button class="btn btn-ghost" onclick="saveKey()">保存</button>
-      <span id="key-status" style="font-size:11px;color:var(--text-dim)"></span>
-    </div>
-
-    <div class="ocr-area">
-      <div>
-        <div class="upload-zone" id="upload-zone">
-          <input type="file" accept="image/*" onchange="handleFile(event)" />
-          <div class="upload-icon">📄</div>
-          <div class="upload-text">納品書の写真をここにドロップ<br>またはタップして選択<br><span style="color:var(--text-muted);font-size:10px">JPG / PNG / HEIC 対応</span></div>
-          <img id="preview-img" />
-        </div>
-        <div style="margin-top:12px;display:flex;gap:8px;">
-          <button class="btn btn-primary" id="analyze-btn" onclick="analyzeImage()" disabled>AI解析を実行</button>
-        </div>
-      </div>
-      <div>
-        <div class="result-panel">
-          <div class="result-label">EXTRACTED DATA — 解析結果</div>
-          <div class="loading" id="loading"><div class="spinner"></div><div class="loading-text">AI が解析中...</div></div>
-          <div id="result-content"><div style="color:var(--text-muted);font-size:12px;text-align:center;padding:40px 0;">納品書をアップロードすると<br>ここに解析結果が表示されます</div></div>
-        </div>
-        <div class="success-banner" id="success-banner">✓ 入庫データを記録しました</div>
-        <button class="btn btn-primary" id="register-btn" style="display:none;margin-top:12px;width:100%;" onclick="registerDelivery()">入庫データとして登録</button>
-      </div>
-    </div>
-
-    <div class="table-section" style="margin-top:24px;">
-      <div class="table-header"><div class="table-title">DELIVERY LOG — 今月の入庫履歴</div></div>
-      <table><thead><tr><th>日付</th><th>仕入先</th><th>商品名</th><th>カテゴリ</th><th>数量</th><th>単価</th><th>小計</th></tr></thead>
-      <tbody id="delivery-log"></tbody></table>
-    </div>
+  <div class="g20">
+    <div class="card"><div class="ct">Monthly Purchase Trend — 仕入れ推移</div><div class="cw"><canvas id="c-trend"></canvas></div></div>
+    <div class="card"><div class="ct">Reorder Alerts — 要発注</div><div id="alert-list"></div></div>
   </div>
-
-  <!-- ========== STOCKTAKE ========== -->
-  <div class="section" id="section-stocktake">
-    <div class="section-title">週次棚卸し</div>
-    <div class="section-sub">実際の在庫数を入力して更新します</div>
-
-    <div class="two-col" style="margin-bottom:24px;">
-      <div class="upload-zone" style="min-height:180px;" id="shelf-zone">
-        <input type="file" accept="image/*" onchange="handleShelfFile(event)" />
-        <div class="upload-icon">📸</div>
-        <div class="upload-text">棚の写真をアップロード<br><span style="font-size:10px;color:var(--text-muted)">AIが本数を自動カウント（β）</span></div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);padding:20px;font-size:12px;color:var(--text-dim);line-height:2;">
-        <div style="color:var(--gold);font-size:10px;letter-spacing:0.2em;margin-bottom:12px;">HOW IT WORKS</div>
-        ① 下の入力欄で各商品の実数を入力<br>
-        ② 「在庫を更新する」で保存<br>
-        ③ 発注点以下の商品がアラート表示<br>
-        ④ GAS連携でスプレッドシートにも記録<br>
-        <div style="margin-top:12px;padding:10px;background:var(--bg);border:1px solid var(--border);font-size:11px;color:var(--text-muted);">
-          棚の写真からのAI自動カウントは開発中です
-        </div>
-      </div>
-    </div>
-
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <div style="font-size:11px;letter-spacing:0.15em;color:var(--gold);">MANUAL INPUT — 手入力で更新</div>
-      <button class="btn btn-primary" onclick="saveStocktake()">在庫を更新する</button>
-    </div>
-    <div class="inventory-grid" id="inventory-grid"></div>
+  <div class="card">
+    <div class="ct">Current Stock — 現在庫一覧</div>
+    <table><thead><tr><th>商品名</th><th>カテゴリ</th><th>現在庫</th><th>適正量</th><th>充足率</th><th>状態</th></tr></thead>
+    <tbody id="tb-stock"></tbody></table>
   </div>
+</section>
 
-  <!-- ========== HISTORY ========== -->
-  <div class="section" id="section-history">
-    <div class="section-title">仕入れ分析</div>
-    <div class="section-sub">カテゴリ別・仕入先別のコスト推移</div>
-
-    <div class="two-col">
-      <div class="chart-wrap" style="margin-bottom:0;">
-        <div class="chart-title">CATEGORY BREAKDOWN — カテゴリ別比率（今月）</div>
-        <div id="category-chart"></div>
+<!-- ── Delivery ── -->
+<section id="p-delivery" class="sec">
+  <div class="ph"><div class="pt">納品書 AI解析</div><div class="ps">写真をアップロードするだけで入庫データを自動生成</div></div>
+  <div class="g20">
+    <div class="card">
+      <div class="ct">Upload — 納品書をアップロード</div>
+      <div class="dz" id="dz" onclick="document.getElementById('fi').click()">
+        <input type="file" id="fi" accept="image/*" style="display:none" onchange="onFile(this)">
+        <div class="dz-icon" id="dz-icon">📄</div>
+        <div class="dz-txt" id="dz-txt">納品書・請求書の写真をここにドロップ<br>またはタップして選択<br><span style="font-size:10px;color:#444">JPG / PNG / HEIF 対応</span></div>
+        <img id="prev" alt="preview">
       </div>
-      <div class="chart-wrap" style="margin-bottom:0;">
-        <div class="chart-title">SUPPLIER BREAKDOWN — 仕入先別（今月）</div>
-        <div id="supplier-chart"></div>
+      <div class="mt12" style="display:flex;gap:8px">
+        <select id="del-sup" style="flex:1"><option value="">仕入先を選択</option></select>
+        <input type="date" id="del-date" style="width:140px">
+      </div>
+      <div class="mt12">
+        <button class="btn bp" id="btn-ana" onclick="runAnalysis()">✦ AI解析を実行</button>
       </div>
     </div>
-
-    <div class="table-section" style="margin-top:24px;">
-      <div class="table-header"><div class="table-title">OVERSTOCK WARNING — 仕入れ過多チェック</div></div>
-      <table><thead><tr><th>商品名</th><th>今月仕入</th><th>3ヶ月平均</th><th>過多判定</th><th>推定滞留期間</th></tr></thead>
-      <tbody id="overstock-table"></tbody></table>
-    </div>
-  </div>
-
-  <!-- ========== MASTER ========== -->
-  <div class="section" id="section-master">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-      <div><div class="section-title">商品マスタ</div><div class="section-sub">管理商品の追加・編集・削除</div></div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-ghost" onclick="toggleCatManager()">カテゴリ編集</button>
-        <button class="btn btn-primary" onclick="showAddForm()">＋ 商品を追加</button>
-      </div>
-    </div>
-
-    <div id="cat-manager" style="display:none;background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:20px;">
-      <div style="font-size:11px;letter-spacing:0.2em;color:var(--gold);margin-bottom:14px;">CATEGORY MANAGER — カテゴリ編集</div>
-      <div id="cat-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;"></div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input id="new-cat-input" type="text" placeholder="新しいカテゴリ名"
-          style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 12px;font-size:12px;font-family:'Noto Sans JP',sans-serif;"
-          onkeydown="if(event.key==='Enter')addCategory()" />
-        <button class="btn btn-primary" onclick="addCategory()">追加</button>
-      </div>
-    </div>
-
-    <div id="master-form" style="display:none;background:var(--surface);border:1px solid var(--gold-dim);padding:24px;margin-bottom:24px;">
-      <div style="font-size:11px;letter-spacing:0.2em;color:var(--gold);margin-bottom:16px;" id="form-title">新規商品を追加</div>
-      <input type="hidden" id="edit-index" value="-1" />
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-        <div>
-          <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.1em;">商品名 *</div>
-          <input id="f-name" type="text" placeholder="例: oggiotto モイスチャーシャンプー 700ml"
-            style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;font-size:12px;font-family:'Noto Sans JP',sans-serif;" />
-        </div>
-        <div>
-          <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.1em;">カテゴリ *</div>
-          <select id="f-cat" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;font-size:12px;font-family:'Noto Sans JP',sans-serif;"></select>
-        </div>
-        <div>
-          <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.1em;">適正量（発注点）*</div>
-          <div style="display:flex;gap:8px;">
-            <input id="f-target" type="number" min="1" placeholder="8"
-              style="width:80px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;font-size:14px;font-family:'DM Mono',monospace;text-align:center;" />
-            <select id="f-unit" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;font-size:12px;font-family:'Noto Sans JP',sans-serif;">
-              <option value="本">本</option><option value="袋">袋</option><option value="箱">箱</option>
-              <option value="個">個</option><option value="缶">缶</option><option value="kg">kg</option>
-            </select>
-          </div>
-        </div>
-        <div>
-          <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.1em;">仕入先</div>
-          <input id="f-supplier" type="text" placeholder="例: ガモウ"
-            style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;font-size:12px;font-family:'Noto Sans JP',sans-serif;" />
-        </div>
-        <div>
-          <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;letter-spacing:0.1em;">現在庫数</div>
-          <input id="f-stock" type="number" min="0" placeholder="0"
-            style="width:80px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;font-size:14px;font-family:'DM Mono',monospace;text-align:center;" />
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;margin-top:4px;">
-        <button class="btn btn-primary" onclick="saveMasterItem()">保存</button>
-        <button class="btn btn-ghost" onclick="hideMasterForm()">キャンセル</button>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-      <input id="master-search" type="text" placeholder="商品名で検索..." oninput="renderMasterTable()"
-        style="flex:1;min-width:160px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 12px;font-size:12px;font-family:'Noto Sans JP',sans-serif;" />
-      <select id="master-filter-cat" onchange="renderMasterTable()"
-        style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 12px;font-size:12px;font-family:'Noto Sans JP',sans-serif;">
-        <option value="">全カテゴリ</option>
-      </select>
-      <div style="font-size:11px;color:var(--text-dim);align-self:center;" id="master-count"></div>
-    </div>
-
-    <div class="table-section">
-      <table><thead><tr><th style="width:35%;">商品名</th><th>カテゴリ</th><th>適正量</th><th>現在庫</th><th>仕入先</th><th style="width:100px;"></th></tr></thead>
-      <tbody id="master-table"></tbody></table>
-    </div>
-  </div>
-
-  <!-- ========== MONTHLY REPORT ========== -->
-  <div class="section" id="section-report">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap;">
-      <div><div class="section-title">月次レポート</div><div class="section-sub">仕入れ・在庫のトータルをPDF出力します</div></div>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <select id="report-month" onchange="renderReport()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 14px;font-family:'Noto Sans JP',sans-serif;font-size:12px;"></select>
-        <button class="btn btn-primary" onclick="printReport()">📄 PDFで出力</button>
-      </div>
-    </div>
-
-    <div id="report-print-area">
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:20px;border-bottom:2px solid var(--gold);margin-bottom:28px;">
-        <div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--gold);letter-spacing:0.2em;">NEUTRIZE</div>
-          <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;margin-top:4px;">北区丸の内1-12-6 / 086-238-7758</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:18px;color:var(--text);font-family:'Cormorant Garamond',serif;" id="report-title-month"></div>
-          <div style="font-size:11px;color:var(--text-dim);letter-spacing:0.15em;">月次 仕入れ・在庫レポート</div>
-          <div style="font-size:10px;color:var(--text-muted);margin-top:4px;" id="report-generated"></div>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;" id="report-kpi"></div>
-      <div style="margin-bottom:28px;">
-        <div style="font-size:11px;letter-spacing:0.2em;color:var(--gold);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);">仕入れ合計 — カテゴリ別</div>
-        <table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">カテゴリ</th><th style="text-align:right;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">金額</th><th style="text-align:right;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">比率</th><th style="text-align:left;padding:8px 12px;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">グラフ</th></tr></thead><tbody id="report-category-table"></tbody><tfoot id="report-category-total"></tfoot></table>
-      </div>
-      <div style="margin-bottom:28px;">
-        <div style="font-size:11px;letter-spacing:0.2em;color:var(--gold);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);">仕入れ合計 — 仕入先別</div>
-        <table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">仕入先</th><th style="text-align:right;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">金額</th><th style="text-align:right;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">件数</th></tr></thead><tbody id="report-supplier-table"></tbody></table>
-      </div>
-      <div style="margin-bottom:28px;">
-        <div style="font-size:11px;letter-spacing:0.2em;color:var(--gold);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);">現在庫状況</div>
-        <table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">商品名</th><th style="text-align:left;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">カテゴリ</th><th style="text-align:right;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">現在庫</th><th style="text-align:right;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">適正量</th><th style="text-align:center;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">状態</th></tr></thead><tbody id="report-stock-table"></tbody></table>
-      </div>
-      <div>
-        <div style="font-size:11px;letter-spacing:0.2em;color:var(--gold);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);">入庫明細</div>
-        <table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">日付</th><th style="text-align:left;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">仕入先</th><th style="text-align:left;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">商品名</th><th style="text-align:left;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">カテゴリ</th><th style="text-align:right;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">数量</th><th style="text-align:right;padding:8px 0;font-size:10px;letter-spacing:0.15em;color:var(--text-muted);font-weight:400;">小計</th></tr></thead><tbody id="report-delivery-table"></tbody></table>
-      </div>
-      <div style="margin-top:32px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);">
-        <span>NEUTRIZE 在庫管理システム</span>
-        <span id="report-footer-date"></span>
+    <div class="card">
+      <div class="ct">Extracted Data — 解析結果</div>
+      <div id="ana-result"><div style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">納品書をアップロードすると<br>ここに解析結果が表示されます</div></div>
+      <div id="reg-wrap" style="display:none;margin-top:14px">
+        <button class="btn bp" onclick="registerDelivery()">✓ 入庫データを記録する</button>
       </div>
     </div>
   </div>
+  <div class="card">
+    <div class="ct">Delivery Log — 今月の入庫履歴</div>
+    <table><thead><tr><th>日付</th><th>仕入先</th><th>商品名</th><th>カテゴリ</th><th>数量</th><th>単価</th><th>小計</th></tr></thead>
+    <tbody id="tb-dellog"></tbody></table>
+  </div>
+</section>
 
-  <!-- ========== SETTINGS ========== -->
-  <div class="section" id="section-settings">
-    <div class="section-title">設定</div>
-    <div class="section-sub">APIキー・Googleスプレッドシート連携の設定</div>
+<!-- ── Stocktake ── -->
+<section id="p-stocktake" class="sec">
+  <div class="ph"><div class="pt">週次棚卸し</div><div class="ps">実際の在庫数を入力して更新</div></div>
+  <div class="card">
+    <div class="ct">Manual Input — 手入力で更新</div>
+    <div style="display:grid;grid-template-columns:1fr 60px 60px 90px;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--bdr);margin-bottom:4px">
+      <div style="font-size:10px;color:var(--muted);letter-spacing:.1em">商品名</div>
+      <div style="font-size:10px;color:var(--muted);letter-spacing:.1em;text-align:center">現在庫</div>
+      <div style="font-size:10px;color:var(--muted);letter-spacing:.1em;text-align:center">適正量</div>
+      <div style="font-size:10px;color:var(--muted);letter-spacing:.1em;text-align:center">実数入力</div>
+    </div>
+    <div id="stk-list"></div>
+    <div class="mt20 fb">
+      <span style="font-size:11px;color:var(--muted)">空欄の商品は更新されません</span>
+      <button class="btn bp" onclick="saveStocktake()">在庫を更新する</button>
+    </div>
+  </div>
+</section>
 
-    <div class="table-section" style="margin-bottom:24px;">
-      <div class="table-header"><div class="table-title">ANTHROPIC API KEY — 納品書AI解析用</div></div>
-      <div style="padding:20px;display:flex;flex-direction:column;gap:12px;">
-        <div style="font-size:12px;color:var(--text-dim);line-height:2;">納品書写真をAIで解析するために必要です。<br><a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gold);">console.anthropic.com</a> でキーを取得してください。</div>
-        <div style="display:flex;gap:10px;align-items:center;">
-          <input type="password" id="api-key-s" placeholder="sk-ant-api03-..." style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;font-family:'DM Mono',monospace;font-size:12px;" />
-          <button class="btn btn-primary" onclick="saveApiKey()">保存</button>
-          <span id="api-key-status" style="font-size:11px;color:var(--green);"></span>
+<!-- ── History ── -->
+<section id="p-history" class="sec">
+  <div class="ph"><div class="pt">仕入れ分析</div><div class="ps">カテゴリ別・仕入先別のコスト推移</div></div>
+  <div class="g20">
+    <div class="card"><div class="ct">Category Breakdown — カテゴリ別（今月）</div><div class="cw"><canvas id="c-cat"></canvas></div></div>
+    <div class="card"><div class="ct">Supplier Breakdown — 仕入先別（今月）</div><div class="cw"><canvas id="c-sup"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="ct">Overstock Warning — 仕入れ過多チェック</div>
+    <table><thead><tr><th>商品名</th><th>今月仕入</th><th>3ヶ月平均</th><th>過多判定</th><th>推定滞留期間</th></tr></thead>
+    <tbody id="tb-over"></tbody></table>
+  </div>
+</section>
+
+<!-- ── Products ── -->
+<section id="p-products" class="sec">
+  <div class="ph fb">
+    <div><div class="pt">商品マスタ</div><div class="ps">管理商品の追加・編集・削除</div></div>
+    <button class="btn bp" onclick="openProd()">＋ 商品を追加</button>
+  </div>
+  <div class="card">
+    <div style="display:flex;gap:10px;margin-bottom:14px">
+      <select id="flt-cat" onchange="renderProducts()" style="width:160px"><option value="">全カテゴリ</option></select>
+      <input type="text" id="flt-name" placeholder="商品名で検索..." oninput="renderProducts()" style="flex:1">
+    </div>
+    <table><thead><tr><th>商品名</th><th>カテゴリ</th><th>適正量</th><th>現在庫</th><th>仕入先</th><th></th></tr></thead>
+    <tbody id="tb-prod"></tbody></table>
+  </div>
+</section>
+
+<!-- ── Report ── -->
+<section id="p-report" class="sec">
+  <div class="ph fb">
+    <div><div class="pt">月次レポート</div><div class="ps">仕入れ・在庫のトータルをPDF出力</div></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <select id="rpt-month" onchange="renderReport()" style="width:160px"></select>
+      <button class="btn bo np" onclick="window.print()">📄 PDFで出力</button>
+    </div>
+  </div>
+  <div class="card" id="rpt-body">
+    <div style="text-align:center;padding:8px 0 20px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;letter-spacing:.2em;color:var(--gold)">NEUTRIZE</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">北区丸の内1-12-6 ／ 086-238-7758</div>
+      <div style="font-size:12px;margin-top:10px" id="rpt-period">月次 仕入れ・在庫レポート</div>
+    </div>
+    <div style="margin-bottom:24px"><div class="ct">仕入れ合計 — カテゴリ別</div>
+      <table><thead><tr><th>カテゴリ</th><th class="tr">金額</th><th class="tr">比率</th><th>グラフ</th></tr></thead><tbody id="rpt-cat"></tbody></table></div>
+    <div style="margin-bottom:24px"><div class="ct">仕入れ合計 — 仕入先別</div>
+      <table><thead><tr><th>仕入先</th><th class="tr">金額</th><th class="tr">件数</th></tr></thead><tbody id="rpt-sup"></tbody></table></div>
+    <div style="margin-bottom:24px"><div class="ct">現在庫状況</div>
+      <table><thead><tr><th>商品名</th><th>カテゴリ</th><th>現在庫</th><th>適正量</th><th>状態</th></tr></thead><tbody id="rpt-stk"></tbody></table></div>
+    <div><div class="ct">入庫明細</div>
+      <table><thead><tr><th>日付</th><th>仕入先</th><th>商品名</th><th>カテゴリ</th><th>数量</th><th class="tr">小計</th></tr></thead><tbody id="rpt-det"></tbody></table></div>
+  </div>
+</section>
+
+<!-- ── Settings ── -->
+<section id="p-settings" class="sec">
+  <div class="ph"><div class="pt">設定</div><div class="ps">APIキー・スプレッドシート連携の設定</div></div>
+  <div class="card">
+    <div class="ct">Anthropic API Key — 納品書AI解析用</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.9">納品書写真をAIで解析するために必要です。<br><a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gold)">console.anthropic.com</a> でキーを取得してください。</p>
+    <div style="display:flex;gap:8px">
+      <input type="password" id="inp-api" placeholder="sk-ant-..." style="flex:1">
+      <button class="btn bp" onclick="saveApiKey()">保存</button>
+    </div>
+    <div id="api-st" style="font-size:11px;margin-top:8px;color:var(--muted)"></div>
+  </div>
+  <div class="card">
+    <div class="ct">Google Apps Script — スプレッドシート自動保存</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.9">入庫データ・棚卸しデータをGoogleスプレッドシートに自動保存します。</p>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input type="url" id="inp-gas" placeholder="https://script.google.com/macros/s/..." style="flex:1">
+      <button class="btn bp" onclick="saveGas()">保存</button>
+      <button class="btn bg" onclick="testGas()">接続テスト</button>
+    </div>
+    <details>
+      <summary style="font-size:11px;color:var(--muted);cursor:pointer;letter-spacing:.05em">GASコード（クリックで展開）</summary>
+      <pre id="gas-code" style="background:var(--sur2);border:1px solid var(--bdr);padding:14px;font-size:10px;overflow-x:auto;margin-top:10px;line-height:1.7;color:#999;white-space:pre-wrap"></pre>
+    </details>
+  </div>
+  <div class="card">
+    <div class="ct">Data Management — データ管理</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:14px">全データはブラウザに保存されています。</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn bo" onclick="exportData()">📥 JSONでエクスポート</button>
+      <button class="btn bg" onclick="document.getElementById('imp-file').click()">📤 JSONからインポート</button>
+      <input type="file" id="imp-file" accept=".json" style="display:none" onchange="importData(this)">
+      <button class="btn bd" onclick="clearAll()">⚠ 全データ削除</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ── Product Modal ── -->
+<div class="mo" id="prod-modal" onclick="if(event.target===this)closeProd()">
+  <div class="mb">
+    <div class="mt2" id="m-title">新規商品を追加</div>
+    <input type="hidden" id="m-id">
+    <div class="fg">
+      <div class="fr"><label>商品名 *</label><input type="text" id="m-name" placeholder="シャンプー A"></div>
+      <div class="fr"><label>カテゴリ *</label><select id="m-cat"></select></div>
+      <div class="fr">
+        <label>適正量（発注点）*</label>
+        <div style="display:flex;gap:6px">
+          <input type="number" id="m-target" min="0" placeholder="10" style="flex:1">
+          <select id="m-unit" style="width:70px"><option>本</option><option>袋</option><option>箱</option><option>個</option><option>缶</option><option>kg</option></select>
         </div>
       </div>
+      <div class="fr"><label>仕入先</label><input type="text" id="m-sup" placeholder="〇〇商事"></div>
+      <div class="fr"><label>現在庫数</label><input type="number" id="m-stock" min="0" placeholder="0"></div>
+      <div class="fr"><label>単価（円）</label><input type="number" id="m-price" min="0" placeholder="1000"></div>
     </div>
+    <div class="ma">
+      <button class="btn bg" onclick="closeProd()">キャンセル</button>
+      <button class="btn bp" onclick="saveProd()">保存</button>
+    </div>
+  </div>
+</div>
 
-    <div class="table-section" style="margin-bottom:24px;">
-      <div class="table-header"><div class="table-title">GOOGLE APPS SCRIPT — スプレッドシート自動保存</div></div>
-      <div style="padding:20px;display:flex;flex-direction:column;gap:16px;">
-        <div style="font-size:12px;color:var(--text-dim);line-height:2;">入庫データ・棚卸しデータをGoogleスプレッドシートに自動保存します。<br>下のGASコードをコピーして設定してください。</div>
-        <div style="display:flex;gap:10px;align-items:center;">
-          <input type="text" id="gas-url-s" placeholder="https://script.google.com/macros/s/..." style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;font-family:'DM Mono',monospace;font-size:11px;" />
-          <button class="btn btn-primary" onclick="saveGasUrl()">保存</button>
-          <button class="btn btn-ghost" onclick="testGas()">接続テスト</button>
-          <span id="gas-status" style="font-size:11px;color:var(--green);"></span>
-        </div>
-        <div>
-          <div style="font-size:10px;letter-spacing:0.15em;color:var(--gold);margin-bottom:8px;">GASコード</div>
-          <div style="position:relative;">
-            <pre id="gas-code" style="background:var(--bg);border:1px solid var(--border);padding:16px;font-family:'DM Mono',monospace;font-size:11px;color:#aaa;line-height:1.7;overflow-x:auto;white-space:pre-wrap;">const SHEET_ID = 'YOUR_SPREADSHEET_ID';
+<div id="toast"></div>
+
+<script>
+// ─── GAS code string ───────────────────────────────────────────────
+document.getElementById('gas-code').textContent =
+`const SHEET_ID = 'YOUR_SPREADSHEET_ID';
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
     const ss = SpreadsheetApp.openById(SHEET_ID);
     if (data.type === 'delivery') {
-      const sheet = ss.getSheetByName('入庫ログ') || ss.insertSheet('入庫ログ');
-      if (sheet.getLastRow() === 0) sheet.appendRow(['日付','仕入先','商品名','カテゴリ','数量','単価','小計']);
-      data.items.forEach(item => sheet.appendRow([data.date,data.supplier,item.name,item.category,item.qty,item.price,item.qty*item.price]));
+      const sh = ss.getSheetByName('入庫ログ') || ss.insertSheet('入庫ログ');
+      if (sh.getLastRow() === 0) sh.appendRow(['日付','仕入先','商品名','カテゴリ','数量','単価','小計']);
+      data.items.forEach(i => sh.appendRow([data.date,data.supplier,i.name,i.category,i.qty,i.price,i.qty*i.price]));
     }
     if (data.type === 'stocktake') {
-      const sheet = ss.getSheetByName('棚卸しログ') || ss.insertSheet('棚卸しログ');
-      if (sheet.getLastRow() === 0) sheet.appendRow(['日時','商品名','カテゴリ','在庫数','適正量']);
-      data.items.forEach(item => sheet.appendRow([new Date(),item.name,item.cat,item.stock,item.target]));
+      const sh = ss.getSheetByName('棚卸しログ') || ss.insertSheet('棚卸しログ');
+      if (sh.getLastRow() === 0) sh.appendRow(['日時','商品名','カテゴリ','在庫数','適正量']);
+      data.items.forEach(i => sh.appendRow([new Date(),i.name,i.cat,i.stock,i.target]));
     }
     return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);
   } catch(err) {
     return ContentService.createTextOutput(JSON.stringify({status:'error',message:err.message})).setMimeType(ContentService.MimeType.JSON);
   }
 }
-function doGet(e) {
+function doGet() {
   return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);
-}</pre>
-            <button class="btn btn-ghost" onclick="copyGasCode()" style="position:absolute;top:8px;right:8px;font-size:10px;padding:6px 12px;">コピー</button>
-          </div>
-        </div>
-      </div>
-    </div>
+}`;
 
-    <div class="table-section" style="margin-bottom:24px;">
-      <div class="table-header"><div class="table-title">DATA MANAGEMENT — データ管理</div></div>
-      <div style="padding:20px;display:flex;flex-direction:column;gap:16px;">
-        <div style="font-size:12px;color:var(--text-dim);">全データはブラウザに保存されています。</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn btn-ghost" onclick="exportData()">📥 JSONでエクスポート</button>
-          <label class="btn btn-ghost" style="cursor:pointer;">
-            📤 JSONからインポート
-            <input type="file" accept=".json" onchange="importData(event)" style="display:none;" />
-          </label>
-          <button class="btn" style="background:transparent;border:1px solid rgba(201,88,76,0.3);color:var(--red);" onclick="clearAllData()">⚠ 全データ削除</button>
-        </div>
-      </div>
-    </div>
-  </div>
+// ─── Default data ──────────────────────────────────────────────────
+const DEF_CATS = ['シャンプー','トリートメント','カラー剤','薬剤','消耗品','備品'];
+const DEF_SUPS = ['共栄社','美薬株式会社','オッジィオット','その他'];
 
-</main>
+// ─── State ────────────────────────────────────────────────────────
+const ld = (k,d=null) => { try { const v=localStorage.getItem(k); return v?JSON.parse(v):d; } catch { return d; } };
+const sv = (k,v) => localStorage.setItem(k,JSON.stringify(v));
 
-<script>
-// ===== STATE =====
-let categories = ['シャンプー','トリートメント','カラー剤','ブリーチ','薬剤','ヘアオイル・スタイリング','店販品','消耗品','その他'];
-let stockData = [];
-let deliveryLog = [];
-let lastStocktakeDate = null;
-let apiKey = '';
-let gasUrl = '';
-let currentImageBase64 = '';
-let currentImageMime = 'image/jpeg';
-let analysisResult = null;
+let prods    = ld('nz_prods', []);
+let dels     = ld('nz_dels', []);
+let stks     = ld('nz_stks', []);
+let cats     = ld('nz_cats', DEF_CATS);
+let sups     = ld('nz_sups', DEF_SUPS);
+let cfg      = ld('nz_cfg', { apiKey:'', gasUrl:'' });
 
-const catColorMap = {
-  'シャンプー':'#4c82c9','トリートメント':'#4caf82','カラー剤':'#c9a84c',
-  'ブリーチ':'#c9584c','薬剤':'#9c6bc9','ヘアオイル・スタイリング':'#4cbfc9',
-  '店販品':'#c97b4c','消耗品':'#7a7570','その他':'#4a4540'
-};
-function getCatColor(cat) { return catColorMap[cat] || '#7a7570'; }
+let curImg = null;
+let extItems = [];
+let charts = {};
 
-// ===== STORAGE =====
-async function storageGet(key, def) {
-  try { const r = await window.storage.get(key); return JSON.parse(r.value); } catch { return def; }
-}
-async function storageSet(key, val) {
-  try { await window.storage.set(key, JSON.stringify(val)); } catch(e) { console.warn('Storage error:', e); }
-}
-async function saveStock() { await storageSet('nz:stock', stockData); }
-async function saveDelivery() { await storageSet('nz:delivery', deliveryLog); }
-async function saveCategories() { await storageSet('nz:cats', categories); }
-
-// ===== DYNAMIC CALCULATIONS =====
-function getYM(dateStr) { return dateStr ? dateStr.slice(0, 7) : ''; }
-function todayYMD() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function currentYM() { return todayYMD().slice(0, 7); }
-function monthYM(offset) {
-  const d = new Date();
-  d.setDate(1);
-  d.setMonth(d.getMonth() + offset);
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-}
-
-function getDeliveryForYM(ym) { return deliveryLog.filter(d => getYM(d.date) === ym); }
-function getThisMonthDelivery() { return getDeliveryForYM(currentYM()); }
-function getThisMonthTotal() { return getThisMonthDelivery().reduce((s, d) => s + d.sub, 0); }
-
-function getAlertItems() {
-  return stockData.filter(item => item.target > 0 && (item.stock / item.target) <= 0.33);
-}
-
-function getMonthlyTotals() {
-  const result = [];
-  for (let i = -6; i <= 0; i++) {
-    const ym = monthYM(i);
-    const [y, m] = ym.split('-');
-    const label = `${parseInt(m)}月`;
-    const amount = getDeliveryForYM(ym).reduce((s, d) => s + d.sub, 0);
-    result.push({ ym, label, amount, current: i === 0 });
-  }
-  return result;
-}
-
-function getOverstockItems() {
-  const thisYM = currentYM();
-  const thisMonthByName = {};
-  getThisMonthDelivery().forEach(d => {
-    thisMonthByName[d.name] = (thisMonthByName[d.name] || 0) + d.qty;
+// ─── Navigation ───────────────────────────────────────────────────
+document.querySelectorAll('.nl').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.nl').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.sec').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('p-' + el.dataset.p).classList.add('active');
+    render(el.dataset.p);
   });
-  const result = [];
-  Object.entries(thisMonthByName).forEach(([name, thisQty]) => {
-    let total = 0, count = 0;
-    for (let i = 1; i <= 3; i++) {
-      const ym = monthYM(-i);
-      const monthQty = getDeliveryForYM(ym).filter(d => d.name === name).reduce((s, d) => s + d.qty, 0);
-      if (monthQty > 0) { total += monthQty; count++; }
-    }
-    if (count === 0) return; // no history = can't judge
-    const avg = Math.round(total / count);
-    if (thisQty <= avg * 1.2) return;
-    const ratio = Math.round(thisQty / avg * 10) / 10;
-    const currentStock = stockData.find(s => s.name === name)?.stock || 0;
-    const stayMonths = avg > 0 ? Math.round(currentStock / avg * 10) / 10 : '?';
-    result.push({ name, purchased: thisQty, avg, ratio, stay: `約${stayMonths}ヶ月` });
-  });
-  return result.sort((a, b) => b.ratio - a.ratio);
+});
+
+function render(p) {
+  if (p==='dashboard') renderDash();
+  if (p==='delivery')  renderDel();
+  if (p==='stocktake') renderStk();
+  if (p==='history')   renderHist();
+  if (p==='products')  renderProducts();
+  if (p==='report')    renderReport();
+  if (p==='settings')  renderSettings();
 }
 
-function getCategoryBreakdown(ym) {
-  const cats = {};
-  getDeliveryForYM(ym || currentYM()).forEach(d => {
-    const cat = d.category || 'その他';
-    cats[cat] = (cats[cat] || 0) + d.sub;
-  });
-  return cats;
-}
-
-function getSupplierBreakdown(ym) {
-  const sups = {};
-  getDeliveryForYM(ym || currentYM()).forEach(d => {
-    const s = d.supplier || '不明';
-    sups[s] = (sups[s] || 0) + d.sub;
-  });
-  return sups;
-}
-
-// ===== DISPLAY HELPERS =====
-function fmtDate(dateStr) {
-  if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  return `${parseInt(m)}/${parseInt(d)}`;
-}
-function fmtDateJP(dateStr) {
-  if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  return `${y}年${parseInt(m)}月${parseInt(d)}日`;
-}
-function showSaveIndicator(msg) {
-  const el = document.getElementById('save-indicator');
-  if (!el) return;
-  el.textContent = msg || ('✓ 保存 ' + new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}));
-  el.style.opacity = '1';
-  setTimeout(() => { el.style.opacity = '0'; }, 3000);
-}
-function emptyRow(cols, msg) {
-  return `<tr><td colspan="${cols}" style="text-align:center;padding:32px;color:var(--text-muted);font-size:12px;">${msg}</td></tr>`;
-}
-
-// ===== GAS SYNC =====
-async function syncToGAS(type, payload) {
-  if (!gasUrl) return false;
-  try {
-    await fetch(gasUrl, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify({type,...payload}) });
-    showSaveIndicator('✓ スプレッドシートに保存 ' + new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}));
-    return true;
-  } catch(e) { return false; }
-}
-
-// ===== INIT =====
-async function init() {
+// ─── Dashboard ────────────────────────────────────────────────────
+function renderDash() {
   const now = new Date();
-  document.getElementById('header-date').textContent =
-    now.toLocaleDateString('ja-JP', {year:'numeric',month:'long',day:'numeric',weekday:'short'});
+  const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 
-  // Load persisted data
-  stockData = await storageGet('nz:stock', []);
-  deliveryLog = await storageGet('nz:delivery', []);
-  categories = await storageGet('nz:cats', ['シャンプー','トリートメント','カラー剤','ブリーチ','薬剤','ヘアオイル・スタイリング','店販品','消耗品','その他']);
-  lastStocktakeDate = await storageGet('nz:lastStocktake', null);
-  apiKey = await storageGet('nz:apikey', '');
-  gasUrl = await storageGet('nz:gasurl', '');
+  document.getElementById('s-items').textContent = prods.length;
 
-  if (apiKey) {
-    const dk = document.getElementById('api-key'); if (dk) dk.value = apiKey;
-    const sk = document.getElementById('api-key-s'); if (sk) sk.value = apiKey;
-    document.getElementById('key-status').textContent = '✓ 保存済み';
-    document.getElementById('api-key-status').textContent = '✓ 保存済み';
-  }
-  if (gasUrl) {
-    const sg = document.getElementById('gas-url-s'); if (sg) sg.value = gasUrl;
-    document.getElementById('gas-status').textContent = '✓ 設定済み';
+  const alertP = prods.filter(p => p.stock <= p.target);
+  document.getElementById('s-alerts').textContent = alertP.length;
+
+  const mDels = dels.filter(d => d.date.startsWith(ym));
+  const mTotal = mDels.reduce((s,d) => s + d.items.reduce((t,i) => t+(i.qty||0)*(i.price||0),0), 0);
+  document.getElementById('s-month').textContent = mTotal.toLocaleString();
+
+  const last = stks[stks.length-1];
+  if (last) {
+    document.getElementById('s-stk').textContent = last.date.slice(5).replace('-','/');
+    document.getElementById('s-stk2').textContent = last.date.slice(0,4);
   }
 
-  buildReportMonthSelect();
-  refreshCatSelects();
-  renderAll();
-}
+  // Alerts
+  const al = document.getElementById('alert-list');
+  al.innerHTML = alertP.length === 0
+    ? '<div style="color:var(--muted);font-size:12px;padding:20px 0;text-align:center">要発注商品はありません</div>'
+    : alertP.map(p => `<div class="ali">
+        <div><div style="font-size:12px">${p.name}</div><div style="font-size:10px;color:var(--muted)">${p.category}</div></div>
+        <div style="text-align:right"><div style="font-size:14px;color:var(--orange)">${p.stock}${p.unit||'本'}</div><div style="font-size:10px;color:var(--muted)">適正量: ${p.target}</div></div>
+      </div>`).join('');
 
-function renderAll() {
-  renderDashboard();
-  renderDeliveryLogTable();
-  renderInventoryGrid();
-  renderHistoryTab();
-}
-
-// ===== DASHBOARD =====
-function renderDashboard() {
-  const alerts = getAlertItems();
-  const thisTotal = getThisMonthTotal();
-  const lastTotal = getDeliveryForYM(monthYM(-1)).reduce((s, d) => s + d.sub, 0);
-  const momPct = lastTotal > 0 ? Math.round((thisTotal - lastTotal) / lastTotal * 100) : null;
-
-  // Subtitle
-  const sub = document.getElementById('dash-subtitle');
-  if (sub) sub.textContent = lastStocktakeDate ? `最終更新: 棚卸し（${fmtDateJP(lastStocktakeDate)}）` : '棚卸し未実施';
-
-  // Alert banner
-  const banner = document.getElementById('alert-banner');
-  if (alerts.length > 0) {
-    banner.style.display = 'flex';
-    document.getElementById('alert-text').textContent =
-      `発注アラート ${alerts.length}件 — ${alerts.map(a => a.name).join('・')} が発注点を下回っています`;
-  } else { banner.style.display = 'none'; }
-
-  // KPIs
-  document.getElementById('kpi-items').innerHTML = `${stockData.length}<span class="unit"> 品目</span>`;
-  const alertEl = document.getElementById('kpi-alerts');
-  alertEl.innerHTML = `<span style="color:var(--${alerts.length>0?'red':'text'})">${alerts.length}<span class="unit" style="color:var(--${alerts.length>0?'red':'text'})"> 件</span></span>`;
-  document.getElementById('kpi-card-alert').className = 'kpi-card' + (alerts.length > 0 ? ' alert' : '');
-
-  const pEl = document.getElementById('kpi-purchase');
-  pEl.innerHTML = `¥<span style="font-size:28px">${thisTotal.toLocaleString()}</span>`;
-  const pSub = document.getElementById('kpi-purchase-sub');
-  pSub.textContent = momPct !== null ? `前月比 ${momPct>=0?'+':''}${momPct}%` : '今月の仕入れ';
-
-  const daysSince = lastStocktakeDate
-    ? Math.floor((new Date() - new Date(lastStocktakeDate)) / 86400000) : null;
-  const nextDate = lastStocktakeDate ? (() => {
-    const d = new Date(lastStocktakeDate); d.setDate(d.getDate()+7);
-    return `${d.getMonth()+1}月${d.getDate()}日`;
-  })() : '未設定';
-  const stEl = document.getElementById('kpi-stocktake');
-  stEl.innerHTML = daysSince !== null
-    ? `<span style="color:var(--green)">${daysSince}<span class="unit" style="color:var(--green)"> 日前</span></span>`
-    : `<span style="color:var(--text-muted)">—</span>`;
-  document.getElementById('kpi-stocktake-sub').textContent = `次回: ${nextDate}`;
-
-  renderStockTable();
-  renderBarChart();
-}
-
-// ===== STOCK TABLE =====
-function renderStockTable() {
-  const tbody = document.getElementById('stock-table');
-  if (stockData.length === 0) {
-    tbody.innerHTML = emptyRow(6, '商品マスタに商品を追加してください');
-    return;
-  }
-  tbody.innerHTML = stockData.map(item => {
-    const pct = item.target > 0 ? Math.min(100, Math.round(item.stock / item.target * 100)) : 0;
-    const color = pct <= 33 ? 'var(--red)' : pct <= 60 ? 'var(--yellow)' : 'var(--green)';
-    const badge = pct <= 33
-      ? '<span class="badge badge-alert">要発注</span>'
-      : pct <= 60 ? '<span class="badge badge-warn">やや少</span>'
-      : '<span class="badge badge-ok">適正</span>';
+  // Stock table
+  document.getElementById('tb-stock').innerHTML = prods.map(p => {
+    const r = p.target>0 ? Math.round(p.stock/p.target*100) : 100;
+    const [lbl,cls] = p.stock===0 ? ['欠品','out'] : p.stock<=p.target ? ['要発注','low'] : r>200 ? ['過多','over'] : ['適正','ok'];
+    const barColor = r<50?'var(--red)':r<100?'var(--orange)':'var(--green)';
     return `<tr>
-      <td>${item.name}</td>
-      <td style="color:var(--text-dim)">${item.cat}</td>
-      <td><span style="font-family:'DM Mono',monospace;color:${color}">${item.stock}</span> ${item.unit}</td>
-      <td style="color:var(--text-muted)">${item.target} ${item.unit}</td>
-      <td><div class="stock-bar-wrap"><div class="stock-bar"><div class="stock-bar-fill" style="width:${pct}%;background:${color}"></div></div><span style="font-family:'DM Mono',monospace;font-size:11px;color:${color}">${pct}%</span></div></td>
-      <td>${badge}</td>
+      <td>${p.name}</td>
+      <td><span style="font-size:10px;color:var(--muted)">${p.category}</span></td>
+      <td>${p.stock}${p.unit||'本'}</td>
+      <td>${p.target}${p.unit||'本'}</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:3px;background:var(--bdr);max-width:60px"><div style="height:100%;width:${Math.min(r,100)}%;background:${barColor}"></div></div><span style="font-size:11px">${r}%</span></div></td>
+      <td><span class="badge ${cls}">${lbl}</span></td>
     </tr>`;
-  }).join('');
-}
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">商品マスタに商品を登録してください</td></tr>';
 
-// ===== BAR CHART =====
-function renderBarChart() {
-  const months = getMonthlyTotals();
-  const max = Math.max(...months.map(d => d.amount), 1);
-  const maxBarH = 110;
-  const chart = document.getElementById('bar-chart');
-  if (months.every(m => m.amount === 0)) {
-    chart.innerHTML = `<div style="width:100%;text-align:center;color:var(--text-muted);font-size:11px;padding:40px;">入庫データがありません</div>`;
-    return;
+  // Trend chart
+  const months=[], amounts=[];
+  for (let i=5;i>=0;i--) {
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    months.push(`${d.getMonth()+1}月`);
+    amounts.push(dels.filter(dl=>dl.date.startsWith(k)).reduce((s,dl)=>s+dl.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0));
   }
-  chart.innerHTML = months.map(d => {
-    const h = Math.max(d.amount > 0 ? 4 : 0, Math.round(d.amount / max * maxBarH));
-    return `<div class="bar-col">
-      ${d.amount > 0 ? `<div class="bar-value">¥${Math.round(d.amount/10000)}万</div>` : ''}
-      <div class="bar-fill${d.current?' current':''}" style="height:${h}px"></div>
-      <div class="bar-label">${d.label}</div>
-    </div>`;
-  }).join('');
-}
-
-// ===== DELIVERY LOG TABLE =====
-function renderDeliveryLogTable() {
-  const tbody = document.getElementById('delivery-log');
-  const thisMonth = getThisMonthDelivery().sort((a, b) => b.date.localeCompare(a.date));
-  if (thisMonth.length === 0) {
-    tbody.innerHTML = emptyRow(7, '今月の入庫データがありません');
-    return;
-  }
-  tbody.innerHTML = thisMonth.map(d => {
-    const col = getCatColor(d.category || 'その他');
-    const catBadge = d.category
-      ? `<span style="font-size:9px;padding:2px 7px;border:1px solid ${col}55;color:${col};border-left:2px solid ${col};">${d.category}</span>` : '';
-    return `<tr>
-      <td style="font-family:'DM Mono',monospace;color:var(--text-dim)">${fmtDate(d.date)}</td>
-      <td>${d.supplier}</td>
-      <td>${d.name}</td>
-      <td>${catBadge}</td>
-      <td style="font-family:'DM Mono',monospace">${d.qty}</td>
-      <td style="font-family:'DM Mono',monospace;color:var(--text-dim)">¥${d.price.toLocaleString()}</td>
-      <td style="font-family:'DM Mono',monospace;color:var(--gold)">¥${d.sub.toLocaleString()}</td>
-    </tr>`;
-  }).join('');
-}
-
-// ===== INVENTORY GRID =====
-function renderInventoryGrid() {
-  const grid = document.getElementById('inventory-grid');
-  if (stockData.length === 0) {
-    grid.innerHTML = `<div style="grid-column:1/-1;"><div class="empty-state"><div class="empty-icon">📦</div>商品マスタに商品を追加してから<br>棚卸しを行ってください</div></div>`;
-    return;
-  }
-  grid.innerHTML = stockData.map((item, i) => `
-    <div class="inv-card">
-      <div class="inv-name">${item.name}</div>
-      <div class="inv-input-wrap">
-        <input class="inv-input" type="number" value="${item.stock}" min="0" id="inv-${i}" />
-        <span class="inv-unit">${item.unit}</span>
-      </div>
-      <div class="inv-stock-info">適正量: ${item.target} ${item.unit}</div>
-    </div>`).join('');
-}
-
-// ===== HISTORY TAB =====
-function renderHistoryTab() {
-  renderCategoryChart();
-  renderSupplierChart();
-  renderOverstockTable();
-}
-
-function renderCategoryChart() {
-  const cats = getCategoryBreakdown();
-  const total = Object.values(cats).reduce((a,b)=>a+b,0);
-  const el = document.getElementById('category-chart');
-  if (total === 0) {
-    el.innerHTML = `<div class="empty-state" style="padding:24px 0;"><div class="empty-icon">📊</div>今月の入庫データがありません</div>`;
-    return;
-  }
-  el.innerHTML = Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v]) => {
-    const pct = Math.round(v/total*100);
-    return `<div style="display:grid;grid-template-columns:72px 1fr 36px;align-items:center;gap:8px;margin-bottom:10px;min-width:0;">
-      <div style="font-size:11px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${k}</div>
-      <div style="height:6px;background:var(--border);border-radius:3px;min-width:0;"><div style="width:${pct}%;height:100%;background:${getCatColor(k)};border-radius:3px;"></div></div>
-      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);text-align:right;">${pct}%</div>
-    </div>`;
-  }).join('');
-}
-
-function renderSupplierChart() {
-  const sups = getSupplierBreakdown();
-  const total = Object.values(sups).reduce((a,b)=>a+b,0);
-  const el = document.getElementById('supplier-chart');
-  if (total === 0) {
-    el.innerHTML = `<div class="empty-state" style="padding:24px 0;"><div class="empty-icon">📊</div>今月の入庫データがありません</div>`;
-    return;
-  }
-  el.innerHTML = Object.entries(sups).sort((a,b)=>b[1]-a[1]).map(([k,v]) => {
-    const pct = Math.round(v/total*100);
-    return `<div style="display:grid;grid-template-columns:90px 1fr 36px;align-items:center;gap:8px;margin-bottom:10px;min-width:0;">
-      <div style="font-size:11px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${k}</div>
-      <div style="height:6px;background:var(--border);border-radius:3px;min-width:0;"><div style="width:${pct}%;height:100%;background:var(--blue);border-radius:3px;"></div></div>
-      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--blue);text-align:right;">${pct}%</div>
-    </div>`;
-  }).join('');
-}
-
-function renderOverstockTable() {
-  const tbody = document.getElementById('overstock-table');
-  const items = getOverstockItems();
-  if (items.length === 0) {
-    tbody.innerHTML = emptyRow(5, '過多な仕入れは検出されていません');
-    return;
-  }
-  tbody.innerHTML = items.map(d => {
-    const badge = d.ratio >= 2 ? '<span class="badge badge-alert">⚠ 買いすぎ注意</span>' : '<span class="badge badge-warn">やや多め</span>';
-    return `<tr>
-      <td>${d.name}</td>
-      <td style="font-family:'DM Mono',monospace;color:var(--gold)">${d.purchased}本</td>
-      <td style="font-family:'DM Mono',monospace;color:var(--text-dim)">${d.avg}本</td>
-      <td>${badge}</td>
-      <td style="color:var(--text-dim)">${d.stay}</td>
-    </tr>`;
-  }).join('');
-}
-
-// ===== SETTINGS =====
-function saveApiKey() {
-  apiKey = document.getElementById('api-key-s').value.trim();
-  const dk = document.getElementById('api-key'); if (dk) dk.value = apiKey;
-  storageSet('nz:apikey', apiKey);
-  document.getElementById('api-key-status').textContent = apiKey ? '✓ 保存しました' : '';
-  document.getElementById('key-status').textContent = apiKey ? '✓ 保存済み' : '';
-}
-function saveKey() {
-  apiKey = document.getElementById('api-key').value.trim();
-  storageSet('nz:apikey', apiKey);
-  document.getElementById('key-status').textContent = apiKey ? '✓ 保存済み' : '';
-  const sk = document.getElementById('api-key-s'); if (sk) sk.value = apiKey;
-}
-function saveGasUrl() {
-  gasUrl = document.getElementById('gas-url-s').value.trim();
-  storageSet('nz:gasurl', gasUrl);
-  document.getElementById('gas-status').textContent = gasUrl ? '✓ 保存しました' : '';
-}
-async function testGas() {
-  if (!gasUrl) { alert('GAS URLを入力してください'); return; }
-  document.getElementById('gas-status').textContent = '接続中...';
-  try { await fetch(gasUrl+'?test=1',{mode:'no-cors'}); document.getElementById('gas-status').textContent='✓ 送信完了'; }
-  catch(e) { document.getElementById('gas-status').textContent='✓ 送信完了（no-cors）'; }
-}
-function copyGasCode() {
-  navigator.clipboard.writeText(document.getElementById('gas-code').textContent)
-    .then(()=>alert('✓ GASコードをコピーしました'))
-    .catch(()=>alert('手動で選択してコピーしてください'));
-}
-
-// ===== DATA EXPORT / IMPORT =====
-function exportData() {
-  const data = { stockData, deliveryLog, categories, lastStocktakeDate, exportedAt: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url;
-  a.download = `neutrize-inventory-${todayYMD()}.json`; a.click();
-  URL.revokeObjectURL(url);
-}
-async function importData(event) {
-  const file = event.target.files[0]; if (!file) return;
-  if (!confirm('現在のデータを上書きしてインポートします。続けますか？')) return;
-  try {
-    const text = await file.text();
-    const data = JSON.parse(text);
-    if (data.stockData) stockData = data.stockData;
-    if (data.deliveryLog) deliveryLog = data.deliveryLog;
-    if (data.categories) categories = data.categories;
-    if (data.lastStocktakeDate !== undefined) lastStocktakeDate = data.lastStocktakeDate;
-    await saveStock(); await saveDelivery(); await saveCategories();
-    await storageSet('nz:lastStocktake', lastStocktakeDate);
-    refreshCatSelects(); renderAll(); buildReportMonthSelect();
-    alert('✓ インポートが完了しました');
-  } catch(e) { alert('インポートに失敗しました: '+e.message); }
-}
-async function clearAllData() {
-  if (!confirm('全データを削除します。この操作は取り消せません。続けますか？')) return;
-  stockData = []; deliveryLog = []; lastStocktakeDate = null;
-  await saveStock(); await saveDelivery();
-  await storageSet('nz:lastStocktake', null);
-  renderAll(); buildReportMonthSelect();
-  alert('✓ 全データを削除しました');
-}
-
-// ===== TAB =====
-function switchTab(tab) {
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('section-'+tab).classList.add('active');
-  if (tab === 'report') renderReport();
-  if (tab === 'master') renderMasterTable();
-  if (tab === 'history') renderHistoryTab();
-  if (tab === 'dashboard') renderDashboard();
-  if (tab === 'stocktake') renderInventoryGrid();
-  if (tab === 'delivery') renderDeliveryLogTable();
-}
-function switchTabByName(name) {
-  const tabs = ['dashboard','delivery','stocktake','history','master','report','settings'];
-  document.querySelectorAll('.nav-tab').forEach((t,i)=>{
-    if (tabs[i]===name) t.classList.add('active'); else t.classList.remove('active');
+  if (charts.trend) charts.trend.destroy();
+  charts.trend = new Chart(document.getElementById('c-trend'), {
+    type:'bar',
+    data:{ labels:months, datasets:[{data:amounts,backgroundColor:'rgba(201,169,110,.35)',borderColor:'#c9a96e',borderWidth:1}] },
+    options:{ plugins:{legend:{display:false}}, scales:{ x:{grid:{color:'#222'},ticks:{color:'#555',font:{size:10}}}, y:{grid:{color:'#222'},ticks:{color:'#555',font:{size:10},callback:v=>v.toLocaleString()}} } }
   });
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  const sec = document.getElementById('section-'+name); if (sec) sec.classList.add('active');
-  if (name==='report') renderReport();
 }
 
-// ===== FILE UPLOAD =====
-function handleFile(event) {
-  const file = event.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const maxSize = 2000;
-      let w = img.width, h = img.height;
-      if (w > maxSize || h > maxSize) {
-        if (w > h) { h = Math.round(h*maxSize/w); w = maxSize; }
-        else { w = Math.round(w*maxSize/h); h = maxSize; }
-      }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.92);
-      const previewImg = document.getElementById('preview-img');
-      previewImg.src = jpegDataUrl; previewImg.style.display = 'block';
-      document.querySelector('#upload-zone .upload-icon').style.display = 'none';
-      document.querySelector('#upload-zone .upload-text').style.display = 'none';
-      currentImageBase64 = jpegDataUrl.split(',')[1];
-      currentImageMime = 'image/jpeg';
-      document.getElementById('analyze-btn').disabled = false;
-    };
-    img.onerror = () => alert('画像を読み込めませんでした');
+// ─── Delivery / AI Analysis ────────────────────────────────────────
+function renderDel() {
+  const sel = document.getElementById('del-sup');
+  sel.innerHTML = '<option value="">仕入先を選択</option>' + sups.map(s=>`<option>${s}</option>`).join('');
+  document.getElementById('del-date').value = new Date().toISOString().slice(0,10);
+  renderDelLog();
+}
+
+function renderDelLog() {
+  const ym = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
+  const rows = [];
+  dels.filter(d=>d.date.startsWith(ym)).forEach(d=>d.items.forEach(i=>{
+    rows.push(`<tr><td>${d.date}</td><td>${d.supplier}</td><td>${i.name}</td><td style="font-size:10px;color:var(--muted)">${i.category}</td><td>${i.qty}${i.unit||''}</td><td>¥${(i.price||0).toLocaleString()}</td><td class="tr">¥${((i.qty||0)*(i.price||0)).toLocaleString()}</td></tr>`);
+  }));
+  document.getElementById('tb-dellog').innerHTML = rows.join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">今月の入庫データはありません</td></tr>';
+}
+
+// Drag & drop
+const dz = document.getElementById('dz');
+dz.addEventListener('dragover', e=>{e.preventDefault();dz.classList.add('drag')});
+dz.addEventListener('dragleave', ()=>dz.classList.remove('drag'));
+dz.addEventListener('drop', e=>{e.preventDefault();dz.classList.remove('drag');if(e.dataTransfer.files[0])loadImg(e.dataTransfer.files[0])});
+
+function onFile(inp) { if(inp.files[0]) loadImg(inp.files[0]); }
+
+function loadImg(file) {
+  const r = new FileReader();
+  r.onload = e => {
+    const b64 = e.target.result.split(',')[1];
+    const mt = file.type || 'image/jpeg';
+    curImg = { data: b64, mediaType: mt };
+    const img = document.getElementById('prev');
     img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('dz-icon').style.display = 'none';
+    document.getElementById('dz-txt').style.display = 'none';
   };
-  reader.readAsDataURL(file);
-}
-function handleShelfFile(event) {
-  const file = event.target.files[0]; if (!file) return;
-  alert('📸 写真を受信しました。\nAI自動カウントは開発中です。\n下の手入力フォームで在庫数を更新してください。');
+  r.readAsDataURL(file);
 }
 
-// ===== AI ANALYZE =====
-async function analyzeImage() {
-  if (!apiKey) { alert('APIキーを入力してください（設定タブ）'); return; }
-  if (!currentImageBase64) return;
-  document.getElementById('loading').classList.add('show');
-  document.getElementById('result-content').innerHTML = '';
-  document.getElementById('register-btn').style.display = 'none';
+// ── THE FIX: anthropic-dangerous-direct-browser-access header ──────
+async function runAnalysis() {
+  if (!curImg) { toast('納品書の写真を選択してください','e'); return; }
+  if (!cfg.apiKey) { toast('設定画面でAPIキーを入力してください','e'); return; }
+
+  const btn = document.getElementById('btn-ana');
+  btn.textContent = '解析中...'; btn.disabled = true;
+  document.getElementById('ana-result').innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">AIが解析中...</div>';
+  document.getElementById('reg-wrap').style.display = 'none';
+
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'x-api-key': cfg.apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true'   // ← 必須
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        messages: [{ role: 'user', content: [
-          { type: 'image', source: { type: 'base64', media_type: currentImageMime, data: currentImageBase64 } },
-          { type: 'text', text: `この納品書から情報を読み取り、必ずJSON形式のみで返してください。
-カテゴリ: シャンプー/トリートメント/カラー剤/ブリーチ/薬剤/ヘアオイル・スタイリング/店販品/消耗品/その他
-形式: {"supplier":"仕入先名","date":"YYYY-MM-DD","items":[{"name":"商品名","qty":数量,"price":単価,"category":"カテゴリ"}]}
-読み取れない項目は空文字か0。日付不明は今日の日付。` }
-        ]}]
+        max_tokens: 1500,
+        messages: [{
+          role: 'user',
+          content: [
+            { type:'image', source:{ type:'base64', media_type:curImg.mediaType, data:curImg.data } },
+            { type:'text', text:
+`この納品書・請求書の画像から商品情報を抽出してください。
+以下のJSON形式のみで返答してください（説明文・コードブロック不要）：
+{"supplier":"仕入先名","date":"YYYY-MM-DD","items":[{"name":"商品名","category":"カテゴリ（シャンプー/トリートメント/カラー剤/薬剤/消耗品/備品）","qty":数量,"unit":"本","price":単価}]}
+・日付不明なら今日の日付
+・仕入先不明なら空文字
+・数量・単価不明なら0` }
+          ]
+        }]
       })
     });
-    if (!response.ok) { const e = await response.json().catch(()=>({})); throw new Error(e.error?.message||`APIエラー (${response.status})`); }
-    const data = await response.json();
-    let rawText = data.content.map(i=>i.text||'').join('').trim();
-    rawText = rawText.replace(/```json\s*/gi,'').replace(/```\s*/g,'');
-    const start = rawText.indexOf('{'), end = rawText.lastIndexOf('}');
-    if (start===-1||end===-1) throw new Error('JSONが見つかりませんでした');
-    const parsed = JSON.parse(rawText.slice(start,end+1));
-    if (!parsed.items||!Array.isArray(parsed.items)) throw new Error('商品リストが読み取れませんでした');
-    displayResult(parsed.supplier||'不明', parsed.date||todayYMD(), parsed.items);
-  } catch (err) {
-    document.getElementById('result-content').innerHTML = `
-      <div style="padding:20px;">
-        <div style="color:var(--red);font-size:12px;margin-bottom:12px;">⚠ エラー: ${err.message}</div>
-        <div style="font-size:11px;color:var(--text-muted);line-height:2;">• 写真が暗い・ぼけている場合は撮り直してください<br>• APIキーが正しいか設定タブで確認してください</div>
-      </div>`;
-  } finally { document.getElementById('loading').classList.remove('show'); }
-}
 
-function displayResult(supplier, date, items) {
-  analysisResult = { supplier, date, items };
-  const total = items.reduce((sum,i)=>sum+(i.qty*i.price),0);
-  const grouped = {};
-  items.forEach(item => { const cat=item.category||'その他'; if(!grouped[cat])grouped[cat]=[]; grouped[cat].push(item); });
-  const catTotals = Object.entries(grouped).map(([cat,its])=>({ cat, subtotal:its.reduce((s,i)=>s+i.qty*i.price,0), color:getCatColor(cat) }));
-  document.getElementById('result-content').innerHTML = `
-    <div style="display:flex;gap:20px;margin-bottom:16px;">
-      <div><div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;">仕入先</div><div style="font-size:13px;">${supplier}</div></div>
-      <div><div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;">日付</div><div style="font-size:13px;font-family:'DM Mono',monospace;">${date}</div></div>
-    </div>
-    <div style="font-size:10px;color:var(--gold);letter-spacing:0.15em;margin-bottom:8px;">CATEGORY BREAKDOWN</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">
-      ${catTotals.map(c=>`<div style="background:rgba(255,255,255,0.04);border:1px solid ${c.color}44;padding:5px 10px;border-left:2px solid ${c.color};">
-        <div style="font-size:9px;color:${c.color};letter-spacing:0.1em;">${c.cat}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text);">¥${c.subtotal.toLocaleString()}</div>
-      </div>`).join('')}
-    </div>
-    <div style="font-size:10px;color:var(--gold);letter-spacing:0.15em;margin-bottom:8px;">ITEMS BY CATEGORY</div>
-    ${Object.entries(grouped).map(([cat,its])=>`
-      <div style="margin-bottom:12px;">
-        <div style="font-size:9px;letter-spacing:0.15em;color:${getCatColor(cat)};padding:3px 0;border-bottom:1px solid ${getCatColor(cat)}44;margin-bottom:6px;">${cat}</div>
-        ${its.map(item=>`<div class="result-item">
-          <div class="result-name" style="font-size:12px;">${item.name}</div>
-          <div style="display:flex;gap:12px;align-items:center;">
-            <span style="color:var(--text-dim);font-size:11px;">×${item.qty}</span>
-            <span class="result-qty">¥${(item.qty*item.price).toLocaleString()}</span>
-          </div>
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const text = data.content[0].text;
+    let parsed;
+    try { const m=text.match(/\{[\s\S]*\}/); parsed=JSON.parse(m?m[0]:text); }
+    catch { throw new Error('解析結果の読み取りに失敗しました（JSONパースエラー）'); }
+
+    extItems = parsed.items || [];
+    if (parsed.supplier) document.getElementById('del-sup').value = parsed.supplier;
+    if (parsed.date)     document.getElementById('del-date').value = parsed.date;
+
+    if (extItems.length === 0) {
+      document.getElementById('ana-result').innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品が検出できませんでした</div>';
+    } else {
+      const total = extItems.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
+      document.getElementById('ana-result').innerHTML = `
+        <div style="font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:12px">抽出された商品（${extItems.length}点）</div>
+        ${extItems.map(i=>`<div class="exitem">
+          <div><div>${i.name}</div><div style="font-size:10px;color:var(--muted)">${i.category} · ${i.qty}${i.unit||'本'}</div></div>
+          <div style="text-align:right"><div>¥${(i.price||0).toLocaleString()}</div><div style="font-size:10px;color:var(--muted)">小計 ¥${((i.qty||0)*(i.price||0)).toLocaleString()}</div></div>
         </div>`).join('')}
-      </div>`).join('')}
-    <div style="display:flex;justify-content:flex-end;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
-      <span style="font-size:11px;color:var(--text-dim);margin-right:12px;">合計</span>
-      <span style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);">¥${total.toLocaleString()}</span>
-    </div>`;
-  document.getElementById('register-btn').style.display = 'block';
+        <div style="border-top:1px solid var(--bdr);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;font-size:12px">
+          <span style="color:var(--muted)">合計</span><span style="color:var(--gold)">¥${total.toLocaleString()}</span>
+        </div>`;
+      document.getElementById('reg-wrap').style.display = 'block';
+    }
+
+  } catch(e) {
+    document.getElementById('ana-result').innerHTML =
+      `<div style="color:var(--red);font-size:12px;padding:14px;background:rgba(196,82,82,.05);border:1px solid rgba(196,82,82,.2)">エラー: ${e.message}</div>`;
+  } finally {
+    btn.textContent = '✦ AI解析を実行'; btn.disabled = false;
+  }
 }
 
-async function registerDelivery() {
-  if (!analysisResult) return;
-  analysisResult.items.forEach(item => {
-    deliveryLog.unshift({
-      date: analysisResult.date,
-      supplier: analysisResult.supplier,
-      name: item.name,
-      category: item.category || 'その他',
-      qty: item.qty,
-      price: item.price,
-      sub: item.qty * item.price
-    });
+function registerDelivery() {
+  const supplier = document.getElementById('del-sup').value || '不明';
+  const date     = document.getElementById('del-date').value || new Date().toISOString().slice(0,10);
+  if (extItems.length===0) return;
+
+  dels.push({ id:Date.now().toString(), date, supplier, items:extItems });
+  sv('nz_dels', dels);
+
+  // Update stock
+  extItems.forEach(item => {
+    const p = prods.find(p=>p.name===item.name);
+    if (p) { p.stock=(p.stock||0)+(item.qty||0); if(item.price) p.price=item.price; }
   });
-  await saveDelivery();
-  renderDeliveryLogTable();
-  renderDashboard();
-  document.getElementById('register-btn').style.display = 'none';
-  document.getElementById('success-banner').classList.add('show');
-  setTimeout(()=>document.getElementById('success-banner').classList.remove('show'), 3000);
-  syncToGAS('delivery', { date:analysisResult.date, supplier:analysisResult.supplier, items:analysisResult.items });
+  sv('nz_prods', prods);
+
+  gasSync({ type:'delivery', date, supplier, items:extItems });
+  toast('入庫データを記録しました');
+  document.getElementById('reg-wrap').style.display = 'none';
+  extItems = [];
+  renderDelLog();
 }
 
-// ===== STOCKTAKE =====
-async function saveStocktake() {
-  stockData.forEach((item,i) => {
-    const val = parseInt(document.getElementById('inv-'+i).value);
-    if (!isNaN(val)) item.stock = val;
-  });
-  lastStocktakeDate = todayYMD();
-  await saveStock();
-  await storageSet('nz:lastStocktake', lastStocktakeDate);
-  syncToGAS('stocktake',{items:stockData}).then(ok=>{
-    alert(ok ? '✓ 在庫を更新し、スプレッドシートに保存しました。' : '✓ 在庫を更新しました。\n（GAS URLが未設定のためローカルのみ）');
-  });
-  switchTabByName('dashboard');
-}
-
-// ===== CATEGORY MANAGER =====
-function toggleCatManager() {
-  const el = document.getElementById('cat-manager');
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-  if (el.style.display === 'block') renderCatManager();
-}
-function renderCatManager() {
-  const list = document.getElementById('cat-list');
-  list.innerHTML = categories.map((cat,i)=>`
-    <div style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-left:2px solid ${getCatColor(cat)};padding:5px 10px;">
-      <span id="cat-label-${i}" style="font-size:12px;color:var(--text);min-width:80px;">${cat}</span>
-      <input id="cat-edit-${i}" type="text" value="${cat}" style="display:none;background:transparent;border:none;border-bottom:1px solid var(--gold);color:var(--text);font-size:12px;width:120px;" onkeydown="if(event.key==='Enter')saveCatEdit(${i})" />
-      <button onclick="startCatEdit(${i})" style="font-size:10px;background:transparent;border:none;color:var(--text-dim);cursor:pointer;" id="cat-edit-btn-${i}">編集</button>
-      <button onclick="saveCatEdit(${i})" style="display:none;font-size:10px;background:transparent;border:none;color:var(--green);cursor:pointer;" id="cat-save-btn-${i}">保存</button>
-      <button onclick="deleteCategory(${i})" style="font-size:10px;background:transparent;border:none;color:var(--red);cursor:pointer;">✕</button>
+// ─── Stocktake ────────────────────────────────────────────────────
+function renderStk() {
+  const list = document.getElementById('stk-list');
+  if (prods.length===0) { list.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:24px">商品マスタに商品を登録してください</div>'; return; }
+  list.innerHTML = prods.map(p=>`
+    <div class="ski">
+      <div><div style="font-size:12px">${p.name}</div><div style="font-size:10px;color:var(--muted)">${p.category}</div></div>
+      <div style="font-size:11px;color:var(--muted);text-align:center">${p.stock}</div>
+      <div style="font-size:11px;color:var(--muted);text-align:center">${p.target}</div>
+      <input type="number" min="0" placeholder="${p.stock}" data-id="${p.id}" style="text-align:center">
     </div>`).join('');
 }
-function startCatEdit(i) {
-  document.getElementById(`cat-label-${i}`).style.display='none';
-  document.getElementById(`cat-edit-${i}`).style.display='inline';
-  document.getElementById(`cat-edit-btn-${i}`).style.display='none';
-  document.getElementById(`cat-save-btn-${i}`).style.display='inline';
-  document.getElementById(`cat-edit-${i}`).focus();
-}
-async function saveCatEdit(i) {
-  const newName=document.getElementById(`cat-edit-${i}`).value.trim(); if(!newName)return;
-  const oldName=categories[i]; categories[i]=newName;
-  stockData.forEach(item=>{if(item.cat===oldName)item.cat=newName;});
-  deliveryLog.forEach(d=>{if(d.category===oldName)d.category=newName;});
-  await saveCategories(); await saveStock(); await saveDelivery();
-  renderCatManager(); refreshCatSelects(); renderMasterTable();
-  showSaveIndicator('✓ カテゴリを更新しました');
-}
-async function addCategory() {
-  const input=document.getElementById('new-cat-input');
-  const name=input.value.trim(); if(!name)return;
-  if(categories.includes(name)){alert('同じ名前のカテゴリがすでにあります');return;}
-  categories.push(name); input.value='';
-  await saveCategories(); renderCatManager(); refreshCatSelects();
-  showSaveIndicator('✓ カテゴリを追加しました');
-}
-async function deleteCategory(i) {
-  const cat=categories[i];
-  const used=stockData.filter(item=>item.cat===cat).length;
-  if(used>0){if(!confirm(`「${cat}」は${used}品目に使用中です。削除すると「その他」に変更されます。`))return;}
-  stockData.forEach(item=>{if(item.cat===cat)item.cat='その他';});
-  categories.splice(i,1);
-  await saveCategories(); await saveStock();
-  renderCatManager(); refreshCatSelects(); renderMasterTable();
-  showSaveIndicator('✓ カテゴリを削除しました');
-}
-function refreshCatSelects() {
-  const opts=categories.map(c=>`<option value="${c}">${c}</option>`).join('');
-  const fCat=document.getElementById('f-cat'); if(fCat)fCat.innerHTML=opts;
-  const filterCat=document.getElementById('master-filter-cat');
-  if(filterCat)filterCat.innerHTML=`<option value="">全カテゴリ</option>`+categories.map(c=>`<option value="${c}">${c}</option>`).join('');
-}
 
-// ===== MASTER TABLE =====
-function renderMasterTable() {
-  refreshCatSelects();
-  const search=(document.getElementById('master-search')?.value||'').toLowerCase();
-  const catFilter=document.getElementById('master-filter-cat')?.value||'';
-  const filtered=stockData.filter(item=>{
-    return item.name.toLowerCase().includes(search) && (!catFilter||item.cat===catFilter);
+function saveStocktake() {
+  const updated = [];
+  document.querySelectorAll('#stk-list input').forEach(inp => {
+    if (inp.value==='') return;
+    const p = prods.find(x=>x.id===inp.dataset.id);
+    if (p) { p.stock=parseInt(inp.value); updated.push({productId:p.id,name:p.name,cat:p.category,stock:p.stock,target:p.target}); }
   });
-  document.getElementById('master-count').textContent=`${filtered.length} / ${stockData.length} 品目`;
-  const tbody=document.getElementById('master-table');
-  if(stockData.length===0){tbody.innerHTML=emptyRow(6,'まだ商品が登録されていません。「＋ 商品を追加」から登録してください。');return;}
-  if(filtered.length===0){tbody.innerHTML=emptyRow(6,'検索条件に一致する商品が見つかりません');return;}
-  tbody.innerHTML=filtered.map(item=>{
-    const idx=stockData.indexOf(item);
-    const col=getCatColor(item.cat);
-    const pct=item.target>0?Math.min(100,Math.round(item.stock/item.target*100)):0;
-    const stockColor=pct<=33?'var(--red)':pct<=60?'var(--yellow)':'var(--green)';
-    return `<tr>
-      <td style="white-space:normal;word-break:keep-all;font-size:12px;">${item.name}</td>
-      <td><span style="font-size:9px;padding:2px 7px;border-left:2px solid ${col};color:${col};background:${col}11;">${item.cat}</span></td>
-      <td style="font-family:'DM Mono',monospace;">${item.target} ${item.unit}</td>
-      <td style="font-family:'DM Mono',monospace;color:${stockColor};">${item.stock} ${item.unit}</td>
-      <td style="color:var(--text-dim);font-size:11px;">${item.supplier||'—'}</td>
-      <td><div style="display:flex;gap:6px;">
-        <button class="btn btn-ghost" style="padding:4px 10px;font-size:10px;" onclick="editMasterItem(${idx})">編集</button>
-        <button class="btn" style="padding:4px 10px;font-size:10px;background:transparent;border:1px solid rgba(201,88,76,0.3);color:var(--red);" onclick="deleteMasterItem(${idx})">削除</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-function showAddForm() {
-  refreshCatSelects();
-  document.getElementById('form-title').textContent='新規商品を追加';
-  document.getElementById('edit-index').value='-1';
-  ['f-name','f-supplier'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-cat').value=categories[0]||'';
-  document.getElementById('f-target').value='';
-  document.getElementById('f-unit').value='本';
-  document.getElementById('f-stock').value='0';
-  document.getElementById('master-form').style.display='block';
-  document.getElementById('f-name').focus();
-}
-function hideMasterForm(){document.getElementById('master-form').style.display='none';}
-function editMasterItem(idx) {
-  const item=stockData[idx]; if(!item)return;
-  refreshCatSelects();
-  document.getElementById('form-title').textContent='商品を編集';
-  document.getElementById('edit-index').value=idx;
-  document.getElementById('f-name').value=item.name;
-  document.getElementById('f-cat').value=item.cat;
-  document.getElementById('f-target').value=item.target;
-  document.getElementById('f-unit').value=item.unit;
-  document.getElementById('f-supplier').value=item.supplier||'';
-  document.getElementById('f-stock').value=item.stock;
-  document.getElementById('master-form').style.display='block';
-  document.getElementById('f-name').focus();
-  document.getElementById('master-form').scrollIntoView({behavior:'smooth'});
-}
-async function saveMasterItem() {
-  const name=document.getElementById('f-name').value.trim();
-  const cat=document.getElementById('f-cat').value;
-  const target=parseInt(document.getElementById('f-target').value);
-  const unit=document.getElementById('f-unit').value;
-  const supplier=document.getElementById('f-supplier').value.trim();
-  const stock=parseInt(document.getElementById('f-stock').value)||0;
-  if(!name){alert('商品名を入力してください');return;}
-  if(!target||target<1){alert('適正量を入力してください');return;}
-  const idx=parseInt(document.getElementById('edit-index').value);
-  const item={name,cat,target,unit,supplier,stock};
-  if(idx===-1)stockData.push(item); else stockData[idx]=item;
-  await saveStock();
-  hideMasterForm(); renderMasterTable(); renderStockTable(); renderInventoryGrid();
-  showSaveIndicator(idx===-1?'✓ 商品を追加しました':'✓ 商品を更新しました');
-}
-async function deleteMasterItem(idx) {
-  const item=stockData[idx]; if(!item)return;
-  if(!confirm(`「${item.name}」を削除しますか？`))return;
-  stockData.splice(idx,1);
-  await saveStock();
-  renderMasterTable(); renderStockTable(); renderInventoryGrid();
-  showSaveIndicator('✓ 商品を削除しました');
+  if (updated.length===0) { toast('変更がありません','e'); return; }
+  sv('nz_prods', prods);
+  stks.push({ id:Date.now().toString(), date:new Date().toISOString().slice(0,10), items:updated });
+  sv('nz_stks', stks);
+  gasSync({ type:'stocktake', items:updated });
+  toast(`${updated.length}件の在庫を更新しました`);
+  renderStk();
 }
 
-// ===== REPORT =====
-function buildReportMonthSelect() {
-  const select=document.getElementById('report-month');
-  const months=[];
-  for(let i=0;i<12;i++){
-    const ym=monthYM(-i);
-    const [y,m]=ym.split('-');
-    months.push({value:ym,label:`${y}年${parseInt(m)}月`});
-  }
-  select.innerHTML=months.map(m=>`<option value="${m.value}">${m.label}</option>`).join('');
+// ─── History ──────────────────────────────────────────────────────
+function renderHist() {
+  const now = new Date();
+  const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const mDels = dels.filter(d=>d.date.startsWith(ym));
+  const golds = ['rgba(201,169,110,.7)','rgba(160,130,80,.7)','rgba(120,95,55,.7)','rgba(230,210,150,.7)','rgba(80,60,30,.7)','rgba(175,155,100,.7)'];
+
+  const catT={}, supT={};
+  mDels.forEach(d=>d.items.forEach(i=>{
+    catT[i.category]=(catT[i.category]||0)+(i.qty||0)*(i.price||0);
+    supT[d.supplier]=(supT[d.supplier]||0)+(i.qty||0)*(i.price||0);
+  }));
+
+  ['cat','sup'].forEach(k=>{
+    const data = k==='cat'?catT:supT;
+    if (charts[k]) charts[k].destroy();
+    charts[k] = new Chart(document.getElementById('c-'+k),{
+      type:'doughnut',
+      data:{ labels:Object.keys(data), datasets:[{data:Object.values(data),backgroundColor:golds,borderColor:'#161616',borderWidth:2}] },
+      options:{ plugins:{ legend:{ position:'bottom', labels:{color:'#888',font:{size:10},padding:10} } } }
+    });
+  });
+
+  document.getElementById('tb-over').innerHTML = prods.map(p=>{
+    const tm = mDels.reduce((s,d)=>s+d.items.filter(i=>i.name===p.name).reduce((t,i)=>t+(i.qty||0),0),0);
+    let avg3=0;
+    for(let m=1;m<=3;m++){const d=new Date(now.getFullYear(),now.getMonth()-m,1);const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;avg3+=dels.filter(dl=>dl.date.startsWith(k)).reduce((s,dl)=>s+dl.items.filter(i=>i.name===p.name).reduce((t,i)=>t+(i.qty||0),0),0);}
+    const avg=Math.round(avg3/3);
+    const isO=avg>0&&tm>avg*1.5;
+    const stay=avg>0?Math.round(p.stock/(avg/30))+'日':'—';
+    return `<tr><td>${p.name}</td><td>${tm}${p.unit||'本'}</td><td>${avg}${p.unit||'本'}</td><td>${isO?'<span class="badge low">過多</span>':'<span class="badge ok">適正</span>'}</td><td>${stay}</td></tr>`;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">データがありません</td></tr>';
 }
-function renderReport() {
-  const monthVal=document.getElementById('report-month').value;
-  const [y,m]=monthVal.split('-');
-  const label=`${y}年${parseInt(m)}月`;
-  document.getElementById('report-title-month').textContent=label;
-  const now=new Date();
-  document.getElementById('report-generated').textContent=`出力日: ${now.toLocaleDateString('ja-JP')}`;
-  document.getElementById('report-footer-date').textContent=`出力: ${now.toLocaleString('ja-JP')}`;
 
-  const monthDelivery=getDeliveryForYM(monthVal);
-  const totalPurchase=monthDelivery.reduce((s,d)=>s+d.sub,0);
-  const alertCount=getAlertItems().length;
-
-  document.getElementById('report-kpi').innerHTML=[
-    {label:'仕入れ合計',value:`¥${totalPurchase.toLocaleString()}`,sub:`${monthDelivery.length}件`},
-    {label:'管理商品数',value:`${stockData.length} 品目`,sub:`${[...new Set(stockData.map(d=>d.cat))].length} カテゴリ`},
-    {label:'要発注',value:`${alertCount} 件`,sub:'発注点以下',alert:alertCount>0},
-    {label:'棚卸し実施',value:lastStocktakeDate?fmtDateJP(lastStocktakeDate):'—',sub:'最終実施日'},
-  ].map(k=>`<div style="background:var(--surface);border:1px solid var(--border);border-top:2px solid ${k.alert?'var(--red)':'var(--gold)'};padding:14px;">
-    <div style="font-size:9px;letter-spacing:0.15em;color:var(--text-dim);margin-bottom:6px;">${k.label}</div>
-    <div style="font-family:'Cormorant Garamond',serif;font-size:${k.label==='棚卸し実施'?'14px':'22px'};color:${k.alert?'var(--red)':'var(--text)'};">${k.value}</div>
-    <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">${k.sub}</div>
-  </div>`).join('');
-
-  // Category
-  const catTotals={};
-  monthDelivery.forEach(d=>{const cat=d.category||'その他';catTotals[cat]=(catTotals[cat]||0)+d.sub;});
-  const catTotal=Object.values(catTotals).reduce((a,b)=>a+b,0);
-  document.getElementById('report-category-table').innerHTML=catTotal===0
-    ? `<tr><td colspan="4" style="padding:16px;color:var(--text-muted);font-size:12px;">データなし</td></tr>`
-    : Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).map(([cat,amt])=>{
-        const pct=Math.round(amt/catTotal*100);
-        return `<tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:9px 0;font-size:12px;">${cat}</td><td style="padding:9px 0;font-size:12px;text-align:right;font-family:'DM Mono',monospace;">¥${amt.toLocaleString()}</td><td style="padding:9px 0;font-size:12px;text-align:right;font-family:'DM Mono',monospace;color:var(--text-dim);">${pct}%</td><td style="padding:9px 0 9px 12px;"><div style="height:6px;background:var(--border);border-radius:3px;width:120px;"><div style="width:${pct}%;height:100%;background:${getCatColor(cat)};border-radius:3px;"></div></div></td></tr>`;
-      }).join('');
-  document.getElementById('report-category-total').innerHTML=`<tr style="border-top:1px solid var(--gold);"><td style="padding:10px 0;font-size:12px;color:var(--gold);">合計</td><td style="padding:10px 0;font-size:14px;text-align:right;font-family:'Cormorant Garamond',serif;color:var(--gold);">¥${catTotal.toLocaleString()}</td><td colspan="2"></td></tr>`;
-
-  // Supplier
-  const supTotals={},supCounts={};
-  monthDelivery.forEach(d=>{const s=d.supplier||'不明';supTotals[s]=(supTotals[s]||0)+d.sub;supCounts[s]=(supCounts[s]||0)+1;});
-  document.getElementById('report-supplier-table').innerHTML=Object.keys(supTotals).length===0
-    ? `<tr><td colspan="3" style="padding:16px;color:var(--text-muted);font-size:12px;">データなし</td></tr>`
-    : Object.entries(supTotals).sort((a,b)=>b[1]-a[1]).map(([sup,amt])=>`<tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:9px 0;font-size:12px;">${sup}</td><td style="padding:9px 0;font-size:12px;text-align:right;font-family:'DM Mono',monospace;">¥${amt.toLocaleString()}</td><td style="padding:9px 0;font-size:12px;text-align:right;font-family:'DM Mono',monospace;color:var(--text-dim);">${supCounts[sup]}件</td></tr>`).join('');
-
-  // Stock
-  document.getElementById('report-stock-table').innerHTML=stockData.length===0
-    ? `<tr><td colspan="5" style="padding:16px;color:var(--text-muted);font-size:12px;">商品未登録</td></tr>`
-    : stockData.map(item=>{
-        const pct=item.target>0?Math.round(item.stock/item.target*100):0;
-        const status=pct<=33?'要発注':pct<=60?'やや少':'適正';
-        const col=pct<=33?'var(--red)':pct<=60?'var(--yellow)':'var(--green)';
-        return `<tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:8px 0;font-size:12px;">${item.name}</td><td style="padding:8px 0;font-size:11px;color:var(--text-dim);">${item.cat}</td><td style="padding:8px 0;font-size:12px;text-align:right;font-family:'DM Mono',monospace;color:${col};">${item.stock} ${item.unit}</td><td style="padding:8px 0;font-size:12px;text-align:right;font-family:'DM Mono',monospace;color:var(--text-muted);">${item.target} ${item.unit}</td><td style="padding:8px 0;font-size:11px;text-align:center;color:${col};">${status}</td></tr>`;
-      }).join('');
-
-  // Delivery detail
-  document.getElementById('report-delivery-table').innerHTML=monthDelivery.length===0
-    ? `<tr><td colspan="6" style="padding:16px;color:var(--text-muted);font-size:12px;">入庫データなし</td></tr>`
-    : monthDelivery.sort((a,b)=>b.date.localeCompare(a.date)).map(d=>`<tr style="border-bottom:1px solid #1a1a1a;"><td style="padding:8px 0;font-size:11px;font-family:'DM Mono',monospace;color:var(--text-dim);">${fmtDate(d.date)}</td><td style="padding:8px 0;font-size:12px;">${d.supplier}</td><td style="padding:8px 0;font-size:12px;">${d.name}</td><td style="padding:8px 0;font-size:11px;color:var(--text-dim);">${d.category||''}</td><td style="padding:8px 0;font-size:12px;text-align:right;font-family:'DM Mono',monospace;">${d.qty}</td><td style="padding:8px 0;font-size:12px;text-align:right;font-family:'DM Mono',monospace;color:var(--gold);">¥${d.sub.toLocaleString()}</td></tr>`).join('');
+// ─── Products ─────────────────────────────────────────────────────
+function renderProducts() {
+  const fc=document.getElementById('flt-cat').value;
+  const fn=document.getElementById('flt-name').value.toLowerCase();
+  document.getElementById('flt-cat').innerHTML='<option value="">全カテゴリ</option>'+cats.map(c=>`<option ${c===fc?'selected':''}>${c}</option>`).join('');
+  let f=prods;
+  if(fc) f=f.filter(p=>p.category===fc);
+  if(fn) f=f.filter(p=>p.name.toLowerCase().includes(fn));
+  document.getElementById('tb-prod').innerHTML=f.map(p=>`<tr>
+    <td>${p.name}</td>
+    <td><span style="font-size:10px;color:var(--muted)">${p.category}</span></td>
+    <td>${p.target}${p.unit||'本'}</td>
+    <td>${p.stock}${p.unit||'本'}</td>
+    <td style="font-size:11px;color:var(--muted)">${p.supplier||'—'}</td>
+    <td><div style="display:flex;gap:6px"><button class="btn bg sm" onclick="openProd('${p.id}')">編集</button><button class="btn bd sm" onclick="delProd('${p.id}')">削除</button></div></td>
+  </tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">商品が登録されていません</td></tr>';
 }
-function printReport(){renderReport();setTimeout(()=>window.print(),300);}
 
-// ===== START =====
-init();
-</script>
-<script>
-// ===== PWA: SERVICE WORKER =====
-(function() {
-  const swCode = `
-const CACHE = 'neutrize-v1';
-const ASSETS = [location.href];
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
-});
-self.addEventListener('activate', e => {
-  e.waitUntil(clients.claim());
-});
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      const net = fetch(e.request).then(res => {
-        if (res.ok) caches.open(CACHE).then(c => c.put(e.request, res.clone()));
-        return res;
-      }).catch(() => cached);
-      return cached || net;
-    })
-  );
-});
-`;
-  if ('serviceWorker' in navigator) {
-    const blob = new Blob([swCode], { type: 'application/javascript' });
-    const url = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(url, { scope: './' })
-      .then(() => URL.revokeObjectURL(url))
-      .catch(() => {});
-  }
-})();
-
-// ===== PWA: INSTALL PROMPT =====
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  // Show banner if not dismissed before
-  if (!localStorage.getItem('neutrize_install_dismissed')) {
-    setTimeout(() => document.getElementById('install-banner').classList.add('show'), 1500);
-  }
-});
-window.addEventListener('appinstalled', () => {
-  document.getElementById('install-banner').classList.remove('show');
-  deferredPrompt = null;
-});
-function installApp() {
-  document.getElementById('install-banner').classList.remove('show');
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+function openProd(id) {
+  document.getElementById('m-cat').innerHTML = cats.map(c=>`<option>${c}</option>`).join('');
+  if (id) {
+    const p=prods.find(x=>x.id===id); if(!p)return;
+    document.getElementById('m-title').textContent='商品を編集';
+    document.getElementById('m-id').value=id;
+    document.getElementById('m-name').value=p.name;
+    document.getElementById('m-cat').value=p.category;
+    document.getElementById('m-target').value=p.target;
+    document.getElementById('m-unit').value=p.unit||'本';
+    document.getElementById('m-sup').value=p.supplier||'';
+    document.getElementById('m-stock').value=p.stock;
+    document.getElementById('m-price').value=p.price||'';
   } else {
-    // iOS fallback
-    alert('iPhoneの場合：\nSafariの共有ボタン（↑）をタップ\n→「ホーム画面に追加」を選択してください');
+    document.getElementById('m-title').textContent='新規商品を追加';
+    document.getElementById('m-id').value='';
+    ['m-name','m-target','m-sup','m-price'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('m-stock').value='0';
   }
+  document.getElementById('prod-modal').classList.add('open');
 }
-function dismissInstall() {
-  document.getElementById('install-banner').classList.remove('show');
-  localStorage.setItem('neutrize_install_dismissed', '1');
+function closeProd() { document.getElementById('prod-modal').classList.remove('open'); }
+
+function saveProd() {
+  const name=document.getElementById('m-name').value.trim();
+  if(!name){toast('商品名を入力してください','e');return;}
+  const obj={
+    name, category:document.getElementById('m-cat').value,
+    target:parseInt(document.getElementById('m-target').value)||0,
+    unit:document.getElementById('m-unit').value,
+    supplier:document.getElementById('m-sup').value.trim(),
+    stock:parseInt(document.getElementById('m-stock').value)||0,
+    price:parseInt(document.getElementById('m-price').value)||0
+  };
+  const eid=document.getElementById('m-id').value;
+  if(eid){ const idx=prods.findIndex(p=>p.id===eid); if(idx>=0) prods[idx]={...prods[idx],...obj}; }
+  else {
+    prods.push({id:Date.now().toString(),...obj});
+    if(obj.supplier&&!sups.includes(obj.supplier)){sups.push(obj.supplier);sv('nz_sups',sups);}
+  }
+  sv('nz_prods',prods);
+  closeProd(); renderProducts();
+  toast(eid?'商品を更新しました':'商品を追加しました');
 }
 
-// iOS スタンドアロン検出
-if (window.navigator.standalone) {
-  document.body.style.paddingTop = '0';
+function delProd(id) {
+  if(!confirm('この商品を削除しますか？'))return;
+  prods=prods.filter(p=>p.id!==id);
+  sv('nz_prods',prods);
+  renderProducts(); toast('削除しました');
 }
+
+// ─── Report ───────────────────────────────────────────────────────
+function renderReport() {
+  const sel=document.getElementById('rpt-month');
+  const now=new Date();
+  const months=[];
+  for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({val:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,lbl:`${d.getFullYear()}年${d.getMonth()+1}月`});}
+  const cur=sel.value||months[0].val;
+  sel.innerHTML=months.map(m=>`<option value="${m.val}" ${m.val===cur?'selected':''}>${m.lbl}</option>`).join('');
+  const ym=sel.value||months[0].val;
+  const[y,m]=ym.split('-');
+  document.getElementById('rpt-period').textContent=`${y}年${parseInt(m)}月 仕入れ・在庫レポート`;
+
+  const mDels=dels.filter(d=>d.date.startsWith(ym));
+  const catT={},supT={},supC={};
+  mDels.forEach(d=>{
+    d.items.forEach(i=>{catT[i.category]=(catT[i.category]||0)+(i.qty||0)*(i.price||0);});
+    supT[d.supplier]=(supT[d.supplier]||0)+d.items.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
+    supC[d.supplier]=(supC[d.supplier]||0)+1;
+  });
+  const grand=Object.values(catT).reduce((s,v)=>s+v,0);
+
+  document.getElementById('rpt-cat').innerHTML=Object.entries(catT).map(([c,a])=>`<tr><td>${c}</td><td class="tr">¥${a.toLocaleString()}</td><td class="tr">${grand>0?Math.round(a/grand*100):0}%</td><td><div style="height:5px;background:var(--bdr)"><div style="height:100%;width:${grand>0?Math.round(a/grand*100):0}%;background:var(--gold)"></div></div></td></tr>`).join('')||'<tr><td colspan="4" style="color:var(--muted)">データなし</td></tr>';
+
+  document.getElementById('rpt-sup').innerHTML=Object.entries(supT).map(([s,a])=>`<tr><td>${s}</td><td class="tr">¥${a.toLocaleString()}</td><td class="tr">${supC[s]}件</td></tr>`).join('')||'<tr><td colspan="3" style="color:var(--muted)">データなし</td></tr>';
+
+  document.getElementById('rpt-stk').innerHTML=prods.map(p=>{const r=p.target>0?Math.round(p.stock/p.target*100):100;const[lbl,cls]=p.stock===0?['欠品','out']:p.stock<=p.target?['要発注','low']:['適正','ok'];return`<tr><td>${p.name}</td><td>${p.category}</td><td>${p.stock}${p.unit||'本'}</td><td>${p.target}${p.unit||'本'}</td><td><span class="badge ${cls}">${lbl}</span></td></tr>`;}).join('')||'<tr><td colspan="5" style="color:var(--muted)">データなし</td></tr>';
+
+  const rows=[];
+  mDels.forEach(d=>d.items.forEach(i=>rows.push(`<tr><td>${d.date}</td><td>${d.supplier}</td><td>${i.name}</td><td>${i.category}</td><td>${i.qty}${i.unit||''}</td><td class="tr">¥${((i.qty||0)*(i.price||0)).toLocaleString()}</td></tr>`)));
+  document.getElementById('rpt-det').innerHTML=rows.join('')||'<tr><td colspan="6" style="color:var(--muted)">データなし</td></tr>';
+}
+
+// ─── Settings ─────────────────────────────────────────────────────
+function renderSettings() {
+  if(cfg.apiKey){document.getElementById('inp-api').value=cfg.apiKey;document.getElementById('api-st').textContent='✓ APIキーが設定されています';document.getElementById('api-st').style.color='var(--green)';}
+  if(cfg.gasUrl) document.getElementById('inp-gas').value=cfg.gasUrl;
+}
+
+function saveApiKey() {
+  const k=document.getElementById('inp-api').value.trim();
+  if(!k.startsWith('sk-')){toast('有効なAPIキーを入力してください','e');return;}
+  cfg.apiKey=k; sv('nz_cfg',cfg);
+  document.getElementById('api-st').textContent='✓ 保存しました'; document.getElementById('api-st').style.color='var(--green)';
+  toast('APIキーを保存しました');
+}
+
+function saveGas() {
+  cfg.gasUrl=document.getElementById('inp-gas').value.trim();
+  sv('nz_cfg',cfg); toast('GAS URLを保存しました');
+}
+
+async function testGas() {
+  if(!cfg.gasUrl){toast('GAS URLを入力してください','e');return;}
+  try{ await fetch(cfg.gasUrl); toast('接続成功'); } catch{ toast('接続に失敗しました','e'); }
+}
+
+function exportData() {
+  const blob=new Blob([JSON.stringify({prods,dels,stks,cats,sups},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`neutrize-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  toast('エクスポートしました');
+}
+
+function importData(inp) {
+  const f=inp.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      if(d.prods){prods=d.prods;sv('nz_prods',prods);}
+      if(d.dels){dels=d.dels;sv('nz_dels',dels);}
+      if(d.stks){stks=d.stks;sv('nz_stks',stks);}
+      if(d.cats){cats=d.cats;sv('nz_cats',cats);}
+      if(d.sups){sups=d.sups;sv('nz_sups',sups);}
+      toast('インポートしました');
+    } catch{toast('読み込みに失敗しました','e');}
+  };
+  r.readAsText(f);
+}
+
+function clearAll() {
+  if(!confirm('全データを削除しますか？\nこの操作は取り消せません。'))return;
+  ['nz_prods','nz_dels','nz_stks','nz_cats','nz_sups'].forEach(k=>localStorage.removeItem(k));
+  prods=[];dels=[];stks=[];cats=DEF_CATS;sups=DEF_SUPS;
+  toast('全データを削除しました');
+}
+
+// ─── GAS sync ─────────────────────────────────────────────────────
+async function gasSync(data) {
+  if(!cfg.gasUrl)return;
+  try{ await fetch(cfg.gasUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}); } catch(e){ console.warn('GAS sync failed',e); }
+}
+
+// ─── Toast ────────────────────────────────────────────────────────
+function toast(msg, t='s') {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className=`show t${t}`;
+  setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────
+renderDash();
 </script>
 </body>
 </html>
