@@ -543,6 +543,11 @@ function ym(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,
 // ── Dashboard ──────────────────────────────────────────────────────
 function renderDash() {
   const now = new Date(), cur = ym(now);
+  document.getElementById('s-items').textContent = prods.length;
+  const alertP = prods.filter(p => p.stock <= p.target);
+  document.getElementById('s-alerts').textContent = alertP.length;
+  const mTotal = dels.filter(d=>d.date.startsWith(cur)).reduce((s,d)=>s+d.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0);
+  document.getElementById('s-month').textContent = mTotal.toLocaleString();
   // 在庫総額
   const valByCat = {};
   cats.forEach(c=>{ valByCat[c]={val:0,cnt:0}; });
@@ -677,7 +682,7 @@ function renderDelLog() {
 function deleteDel(id) {
   if (!confirm('この入庫データを削除しますか？\n（在庫数は自動で戻りません）')) return;
   dels = dels.filter(d=>d.id!==id); sv('nz_dels',dels);
-  renderDelLog(); toast('削除しました');
+  renderDelLog(); renderDash(); toast('削除しました');
 }
 
 // Drag & drop
@@ -1369,8 +1374,10 @@ function importData(inp){
 }
 function clearAll(){
   if(!confirm('全データを削除しますか？\nこの操作は取り消せません。'))return;
-  ['nz_prods','nz_dels','nz_stks','nz_cats','nz_sups'].forEach(k=>localStorage.removeItem(k));
-  prods=[];dels=[];stks=[];cats=DEF_CATS;sups=DEF_SUPS;toast('全データを削除しました');
+  ['nz_prods','nz_dels','nz_stks','nz_cats','nz_sups','nz_deduct_last','nz_deduct_log'].forEach(k=>localStorage.removeItem(k));
+  prods=[];dels=[];stks=[];cats=DEF_CATS;sups=DEF_SUPS;
+  toast('全データを削除しました');
+  renderDash();
 }
 
 async function gasSync(data){
