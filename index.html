@@ -732,118 +732,137 @@ function autoMatch(name,detail) {
 }
 
 function renderEditItems() {
-  extItems.forEach(item=>{if(item.linkedId===undefined){const m=autoMatch(item.name,item.detail);item.linkedId=m?m.id:'';}});
+  extItems.forEach(item=>{
+    if(item.linkedId===undefined){
+      const m=autoMatch(item.name,item.detail);
+      item.linkedId=m?m.id:'';
+    }
+  });
   const total=extItems.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
   document.getElementById('ana-result').innerHTML=`
     <div style="font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:12px">解析結果 — 編集してから登録（${extItems.length}点）</div>
     ${extItems.map((item,idx)=>{
       const matched=prods.find(p=>p.id===item.linkedId);
-      return `<div style="border:1px solid var(--bdr);padding:12px;margin-bottom:8px" data-item-idx="${idx}">
+      return `<div style="border:1px solid var(--bdr);padding:12px;margin-bottom:8px">
         <div style="font-size:10px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between">
-          <span># ${idx+1}</span><span style="cursor:pointer;color:var(--red)" onclick="removeItem(${idx})">✕ 削除</span>
+          <span># ${idx+1}</span>
+          <span style="cursor:pointer;color:var(--red)" onclick="removeItem(${idx})">✕ 削除</span>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div style="grid-column:1/-1"><label>商品名（納品書の表記）</label>
-            <input type="text" value="${item.name}" data-field="name" oninput="extItems[${idx}].name=this.value"></div>
+            <input id="ei-name-${idx}" type="text" value="${item.name}"></div>
           <div style="grid-column:1/-1"><label>詳細（サイズ・仕様）</label>
-            <input type="text" value="${item.detail||''}" data-field="detail" oninput="extItems[${idx}].detail=this.value"></div>
+            <input id="ei-detail-${idx}" type="text" value="${item.detail||''}"></div>
           <div style="grid-column:1/-1">
             <label style="display:flex;justify-content:space-between">
               <span>登録商品との紐付け</span>
               <span style="font-size:10px;color:${matched?'var(--green)':'var(--muted)'}">${matched?'✓ '+matched.name+(matched.detail?' / '+matched.detail:''):'未紐付け'}</span>
             </label>
-            <select data-field="linkedId" onchange="extItems[${idx}].linkedId=this.value;renderEditItems()">
+            <select id="ei-linked-${idx}" onchange="extItems[${idx}].linkedId=this.value;renderEditItems()">
               <option value="">— 紐付けなし</option>
               ${prods.map(p=>`<option value="${p.id}" ${p.id===item.linkedId?'selected':''}>${p.name}${p.detail?' / '+p.detail:''} [現在: ${p.stock}${p.unit||'本'}]</option>`).join('')}
             </select>
           </div>
           <div><label>カテゴリ</label>
-            <select data-field="category" onchange="extItems[${idx}].category=this.value">
+            <select id="ei-cat-${idx}">
               ${cats.map(c=>`<option ${c===item.category?'selected':''}>${c}</option>`).join('')}
             </select></div>
           <div><label>単位</label>
-            <select data-field="unit" onchange="extItems[${idx}].unit=this.value">
+            <select id="ei-unit-${idx}">
               ${['本','袋','箱','個','缶','kg'].map(u=>`<option ${u===(item.unit||'本')?'selected':''}>${u}</option>`).join('')}
             </select></div>
           <div><label>数量</label>
-            <input type="number" min="0" value="${item.qty}" data-field="qty" oninput="extItems[${idx}].qty=+this.value;updateTotal()"></div>
+            <input id="ei-qty-${idx}" type="number" min="0" value="${item.qty}"></div>
           <div><label>単価（円）</label>
-            <input type="number" min="0" value="${item.price}" data-field="price" oninput="extItems[${idx}].price=+this.value;updateTotal()"></div>
+            <input id="ei-price-${idx}" type="number" min="0" value="${item.price||0}"></div>
         </div>
-        <div style="margin-top:8px;font-size:11px;color:var(--muted);text-align:right">小計 ¥<span id="sub-${idx}">${((item.qty||0)*(item.price||0)).toLocaleString()}</span></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--muted);text-align:right">
+          小計 ¥${((item.qty||0)*(item.price||0)).toLocaleString()}
+        </div>
       </div>`;
     }).join('')}
     <button class="btn bg sm" onclick="addItem()" style="margin-bottom:12px">＋ 行を追加</button>
     <div style="border-top:1px solid var(--bdr);padding-top:10px;display:flex;justify-content:space-between;font-size:12px">
       <span style="color:var(--muted)">合計</span>
-      <span style="color:var(--gold)">¥<span id="edit-total">${total.toLocaleString()}</span></span>
+      <span style="color:var(--gold)">¥${total.toLocaleString()}</span>
     </div>`;
 }
+
+function collectEditItems() {
+  // 登録前にフォームから最新値を収集
+  extItems.forEach((item,idx)=>{
+    const name   = document.getElementById('ei-name-'+idx);
+    const detail = document.getElementById('ei-detail-'+idx);
+    const cat    = document.getElementById('ei-cat-'+idx);
+    const unit   = document.getElementById('ei-unit-'+idx);
+    const qty    = document.getElementById('ei-qty-'+idx);
+    const price  = document.getElementById('ei-price-'+idx);
+    const linked = document.getElementById('ei-linked-'+idx);
+    if(name)   item.name     = name.value.trim();
+    if(detail) item.detail   = detail.value.trim();
+    if(cat)    item.category = cat.value;
+    if(unit)   item.unit     = unit.value;
+    if(qty)    item.qty      = parseFloat(qty.value)||0;
+    if(price)  item.price    = parseFloat(price.value)||0;
+    if(linked) item.linkedId = linked.value;
+  });
+}
+
 function updateTotal() {
-  const t=extItems.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
-  const el=document.getElementById('edit-total');if(el)el.textContent=t.toLocaleString();
-  extItems.forEach((_,i)=>{const e=document.getElementById('sub-'+i);if(e)e.textContent=((extItems[i].qty||0)*(extItems[i].price||0)).toLocaleString();});
+  // 小計はrenderEditItemsで再描画するだけでOK（シンプル化）
 }
-function removeItem(idx){
+
+function removeItem(idx) {
+  collectEditItems();
   extItems.splice(idx,1);
-  if(extItems.length===0){document.getElementById('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品がありません</div>';document.getElementById('reg-wrap').style.display='none';}
-  else renderEditItems();
+  if(extItems.length===0){
+    document.getElementById('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品がありません</div>';
+    document.getElementById('reg-wrap').style.display='none';
+  } else {
+    renderEditItems();
+  }
 }
-function addItem(){extItems.push({name:'',detail:'',category:cats[0]||'消耗品',qty:0,unit:'本',price:0,linkedId:''});renderEditItems();document.getElementById('reg-wrap').style.display='block';}
+
+function addItem() {
+  collectEditItems();
+  extItems.push({name:'',detail:'',category:cats[0]||'消耗品',qty:0,unit:'本',price:0,linkedId:''});
+  renderEditItems();
+  document.getElementById('reg-wrap').style.display='block';
+}
 
 function registerDelivery() {
   const supplier = document.getElementById('del-sup').value||'不明';
   const date     = document.getElementById('del-date').value||new Date().toISOString().slice(0,10);
   if(extItems.length===0){ toast('登録する商品がありません','e'); return; }
 
-  // 登録直前にDOMから最新の入力値を収集
-  const blocks = document.querySelectorAll('#ana-result [data-item-idx]');
-  blocks.forEach(block => {
-    const idx = parseInt(block.dataset.itemIdx);
-    if(isNaN(idx)||!extItems[idx]) return;
-    const name   = block.querySelector('[data-field="name"]');
-    const detail = block.querySelector('[data-field="detail"]');
-    const cat    = block.querySelector('[data-field="category"]');
-    const unit   = block.querySelector('[data-field="unit"]');
-    const qty    = block.querySelector('[data-field="qty"]');
-    const price  = block.querySelector('[data-field="price"]');
-    const linked = block.querySelector('[data-field="linkedId"]');
-    if(name)   extItems[idx].name     = name.value;
-    if(detail) extItems[idx].detail   = detail.value;
-    if(cat)    extItems[idx].category = cat.value;
-    if(unit)   extItems[idx].unit     = unit.value;
-    if(qty)    extItems[idx].qty      = +qty.value||0;
-    if(price)  extItems[idx].price    = +price.value||0;
-    if(linked) extItems[idx].linkedId = linked.value;
-  });
+  // フォームから最新値を収集
+  collectEditItems();
 
   const itemsToSave = extItems.map(i=>({...i}));
   dels.push({id:Date.now().toString(), date, supplier, items:itemsToSave});
   sv('nz_dels', dels);
 
   // 在庫更新：linkedId優先 → 名前マッチでフォールバック
-  let stockUpdated = 0;
+  let stockUpdated=0;
   itemsToSave.forEach(item=>{
     let p = item.linkedId ? prods.find(p=>p.id===item.linkedId) : null;
     if(!p) p = prods.find(p=>p.name===item.name && (p.detail||'')===(item.detail||''));
     if(!p) p = prods.find(p=>p.name===item.name);
     if(p){
-      p.stock = (p.stock||0) + (item.qty||0);
-      if(item.price && item.price>0) p.price = item.price;
+      p.stock=(p.stock||0)+(item.qty||0);
+      if(item.price>0) p.price=item.price;
       stockUpdated++;
     }
   });
   sv('nz_prods', prods);
-
   gasSync({type:'delivery', date, supplier, items:itemsToSave});
 
-  const msg = stockUpdated>0
+  toast(stockUpdated>0
     ? `入庫を記録しました（在庫更新: ${stockUpdated}商品）`
-    : '入庫を記録しました（在庫未更新 — 商品マスタに登録されていない商品があります）';
-  toast(msg);
+    : '入庫を記録しました（在庫未更新 — 商品マスタに登録してください）');
 
   document.getElementById('reg-wrap').style.display='none';
-  extItems = [];
+  extItems=[];
   renderDelLog();
   renderDash();
 }
