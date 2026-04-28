@@ -855,6 +855,7 @@ function registerDelivery() {
   document.getElementById('reg-wrap').style.display='none';
   extItems=[];
   renderDelLog();
+  renderDash();
 }
 
 // ── Stocktake ──────────────────────────────────────────────────────
@@ -920,6 +921,7 @@ function saveStocktake() {
   gasSync({type:'stocktake',items:updated});
   toast(`${updated.length}件を更新しました`);
   renderStk();
+  renderDash();
 }
 
 // ── History ────────────────────────────────────────────────────────
@@ -1133,11 +1135,13 @@ function saveProd() {
   sv('nz_prods',prods);
   closeProd();renderProducts();
   toast(eid?'商品を更新しました':'商品を追加しました');
+  renderDash();
 }
 
 function delProd(id){
   if(!confirm('この商品を削除しますか？'))return;
   prods=prods.filter(p=>p.id!==id);sv('nz_prods',prods);renderProducts();toast('削除しました');
+  renderDash();
 }
 
 // ── Report ─────────────────────────────────────────────────────────
