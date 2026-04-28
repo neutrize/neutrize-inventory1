@@ -792,21 +792,42 @@ function removeItem(idx){
 function addItem(){extItems.push({name:'',detail:'',category:cats[0]||'消耗品',qty:0,unit:'本',price:0,linkedId:''});renderEditItems();document.getElementById('reg-wrap').style.display='block';}
 
 function registerDelivery() {
-  const supplier=document.getElementById('del-sup').value||'不明';
-  const date=document.getElementById('del-date').value||new Date().toISOString().slice(0,10);
-  if(extItems.length===0)return;
-  dels.push({id:Date.now().toString(),date,supplier,items:extItems});
-  sv('nz_dels',dels);
-  extItems.forEach(item=>{
-    const p=item.linkedId?prods.find(p=>p.id===item.linkedId):null;
-    if(p){p.stock=(p.stock||0)+(item.qty||0);if(item.price)p.price=item.price;}
+  const supplier = document.getElementById('del-sup').value||'不明';
+  const date     = document.getElementById('del-date').value||new Date().toISOString().slice(0,10);
+  if(extItems.length===0){ toast('登録する商品がありません','e'); return; }
+
+  // 保存用にディープコピー
+  const itemsToSave = extItems.map(i=>({...i}));
+  dels.push({id:Date.now().toString(), date, supplier, items:itemsToSave});
+  sv('nz_dels', dels);
+
+  // 在庫更新：linkedId優先 → 名前マッチでフォールバック
+  let stockUpdated = 0;
+  itemsToSave.forEach(item=>{
+    let p = item.linkedId ? prods.find(p=>p.id===item.linkedId) : null;
+    if(!p) p = prods.find(p=>p.name===item.name && (p.detail||'')===(item.detail||''));
+    if(!p) p = prods.find(p=>p.name===item.name);
+    if(p){
+      p.stock = (p.stock||0) + (item.qty||0);
+      if(item.price && item.price>0) p.price = item.price;
+      stockUpdated++;
+    }
   });
-  sv('nz_prods',prods);
-  gasSync({type:'delivery',date,supplier,items:extItems});
-  toast('入庫データを記録しました');
+  sv('nz_prods', prods);
+
+  gasSync({type:'delivery', date, supplier, items:itemsToSave});
+
+  const msg = stockUpdated>0
+    ? `入庫を記録しました（在庫更新: ${stockUpdated}商品）`
+    : '入庫を記録しました（在庫未更新 — 商品マスタに登録されていない商品があります）';
+  toast(msg);
+
   document.getElementById('reg-wrap').style.display='none';
-  extItems=[];
-  renderDelLog();renderDash();
+  extItems = [];
+
+  // 全画面を再描画
+  renderDelLog();
+  renderDash();
 }
 
 // ── Stocktake ──────────────────────────────────────────────────────
