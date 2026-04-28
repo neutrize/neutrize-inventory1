@@ -738,37 +738,37 @@ function renderEditItems() {
     <div style="font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:12px">解析結果 — 編集してから登録（${extItems.length}点）</div>
     ${extItems.map((item,idx)=>{
       const matched=prods.find(p=>p.id===item.linkedId);
-      return `<div style="border:1px solid var(--bdr);padding:12px;margin-bottom:8px">
+      return `<div style="border:1px solid var(--bdr);padding:12px;margin-bottom:8px" data-item-idx="${idx}">
         <div style="font-size:10px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between">
           <span># ${idx+1}</span><span style="cursor:pointer;color:var(--red)" onclick="removeItem(${idx})">✕ 削除</span>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div style="grid-column:1/-1"><label>商品名（納品書の表記）</label>
-            <input type="text" value="${item.name}" oninput="extItems[${idx}].name=this.value"></div>
+            <input type="text" value="${item.name}" data-field="name" oninput="extItems[${idx}].name=this.value"></div>
           <div style="grid-column:1/-1"><label>詳細（サイズ・仕様）</label>
-            <input type="text" value="${item.detail||''}" oninput="extItems[${idx}].detail=this.value"></div>
+            <input type="text" value="${item.detail||''}" data-field="detail" oninput="extItems[${idx}].detail=this.value"></div>
           <div style="grid-column:1/-1">
             <label style="display:flex;justify-content:space-between">
               <span>登録商品との紐付け</span>
               <span style="font-size:10px;color:${matched?'var(--green)':'var(--muted)'}">${matched?'✓ '+matched.name+(matched.detail?' / '+matched.detail:''):'未紐付け'}</span>
             </label>
-            <select onchange="extItems[${idx}].linkedId=this.value;renderEditItems()">
+            <select data-field="linkedId" onchange="extItems[${idx}].linkedId=this.value;renderEditItems()">
               <option value="">— 紐付けなし</option>
               ${prods.map(p=>`<option value="${p.id}" ${p.id===item.linkedId?'selected':''}>${p.name}${p.detail?' / '+p.detail:''} [現在: ${p.stock}${p.unit||'本'}]</option>`).join('')}
             </select>
           </div>
           <div><label>カテゴリ</label>
-            <select onchange="extItems[${idx}].category=this.value">
+            <select data-field="category" onchange="extItems[${idx}].category=this.value">
               ${cats.map(c=>`<option ${c===item.category?'selected':''}>${c}</option>`).join('')}
             </select></div>
           <div><label>単位</label>
-            <select onchange="extItems[${idx}].unit=this.value">
+            <select data-field="unit" onchange="extItems[${idx}].unit=this.value">
               ${['本','袋','箱','個','缶','kg'].map(u=>`<option ${u===(item.unit||'本')?'selected':''}>${u}</option>`).join('')}
             </select></div>
           <div><label>数量</label>
-            <input type="number" min="0" value="${item.qty}" oninput="extItems[${idx}].qty=+this.value;updateTotal()"></div>
+            <input type="number" min="0" value="${item.qty}" data-field="qty" oninput="extItems[${idx}].qty=+this.value;updateTotal()"></div>
           <div><label>単価（円）</label>
-            <input type="number" min="0" value="${item.price}" oninput="extItems[${idx}].price=+this.value;updateTotal()"></div>
+            <input type="number" min="0" value="${item.price}" data-field="price" oninput="extItems[${idx}].price=+this.value;updateTotal()"></div>
         </div>
         <div style="margin-top:8px;font-size:11px;color:var(--muted);text-align:right">小計 ¥<span id="sub-${idx}">${((item.qty||0)*(item.price||0)).toLocaleString()}</span></div>
       </div>`;
@@ -796,7 +796,27 @@ function registerDelivery() {
   const date     = document.getElementById('del-date').value||new Date().toISOString().slice(0,10);
   if(extItems.length===0){ toast('登録する商品がありません','e'); return; }
 
-  // 保存用にディープコピー
+  // 登録直前にDOMから最新の入力値を収集
+  const blocks = document.querySelectorAll('#ana-result [data-item-idx]');
+  blocks.forEach(block => {
+    const idx = parseInt(block.dataset.itemIdx);
+    if(isNaN(idx)||!extItems[idx]) return;
+    const name   = block.querySelector('[data-field="name"]');
+    const detail = block.querySelector('[data-field="detail"]');
+    const cat    = block.querySelector('[data-field="category"]');
+    const unit   = block.querySelector('[data-field="unit"]');
+    const qty    = block.querySelector('[data-field="qty"]');
+    const price  = block.querySelector('[data-field="price"]');
+    const linked = block.querySelector('[data-field="linkedId"]');
+    if(name)   extItems[idx].name     = name.value;
+    if(detail) extItems[idx].detail   = detail.value;
+    if(cat)    extItems[idx].category = cat.value;
+    if(unit)   extItems[idx].unit     = unit.value;
+    if(qty)    extItems[idx].qty      = +qty.value||0;
+    if(price)  extItems[idx].price    = +price.value||0;
+    if(linked) extItems[idx].linkedId = linked.value;
+  });
+
   const itemsToSave = extItems.map(i=>({...i}));
   dels.push({id:Date.now().toString(), date, supplier, items:itemsToSave});
   sv('nz_dels', dels);
@@ -824,8 +844,6 @@ function registerDelivery() {
 
   document.getElementById('reg-wrap').style.display='none';
   extItems = [];
-
-  // 全画面を再描画
   renderDelLog();
   renderDash();
 }
