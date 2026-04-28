@@ -18,51 +18,38 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--txt);font-family:'Noto Sans JP',sans-serif;font-size:13px;display:flex;min-height:100vh}
-
-/* Sidebar */
 #sidebar{width:200px;min-height:100vh;background:var(--sur);border-right:1px solid var(--bdr);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100}
 .logo{padding:24px 20px 18px;border-bottom:1px solid var(--bdr)}
 .logo-en{font-family:'Cormorant Garamond',serif;font-size:19px;letter-spacing:.2em;color:var(--gold)}
 .logo-ja{font-size:10px;color:var(--muted);letter-spacing:.12em;margin-top:3px}
 #nav{flex:1;padding:10px 0}
-.nl{display:flex;align-items:center;gap:10px;padding:10px 20px;color:var(--muted);text-decoration:none;font-size:12px;letter-spacing:.04em;cursor:pointer;transition:all .15s;user-select:none}
+.nl{display:flex;align-items:center;gap:10px;padding:10px 20px;color:var(--muted);font-size:12px;letter-spacing:.04em;cursor:pointer;transition:all .15s;user-select:none}
 .nl:hover{color:var(--txt);background:rgba(201,169,110,.05)}
 .nl.active{color:var(--gold);background:rgba(201,169,110,.08);border-right:2px solid var(--gold)}
 .nl .ic{width:15px;text-align:center;font-size:14px}
-
-/* Main */
 #main{margin-left:200px;flex:1;padding:32px;min-height:100vh}
 .sec{display:none}.sec.active{display:block}
 .ph{margin-bottom:28px}
 .pt{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--gold);letter-spacing:.1em}
 .ps{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.08em;text-transform:uppercase}
-
-/* Card */
 .card{background:var(--sur);border:1px solid var(--bdr);padding:20px;margin-bottom:20px}
 .ct{font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--bdr)}
-
-/* Stats */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bdr);margin-bottom:20px}
 .stat{background:var(--sur);padding:20px;text-align:center}
 .sl{font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
 .sv{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--gold)}
 .su{font-size:11px;color:var(--muted);margin-top:3px}
-
-/* Table */
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{text-align:left;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--bdr);font-weight:400}
 td{padding:10px 12px;border-bottom:1px solid rgba(42,42,42,.5)}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(201,169,110,.02)}
 .tr{text-align:right}
-
-/* Badge */
 .badge{display:inline-block;padding:2px 8px;font-size:10px;letter-spacing:.04em}
 .ok{background:rgba(82,160,112,.15);color:#52a070;border:1px solid rgba(82,160,112,.3)}
 .low{background:rgba(196,138,64,.15);color:#c48a40;border:1px solid rgba(196,138,64,.3)}
 .out{background:rgba(196,82,82,.15);color:#c45252;border:1px solid rgba(196,82,82,.3)}
 .over{background:rgba(80,120,196,.15);color:#5080c4;border:1px solid rgba(80,120,196,.3)}
-/* Category colors — index-based */
 .cc-0{background:rgba(80,120,196,.15);color:#6090d4;border:1px solid rgba(80,120,196,.25)}
 .cc-1{background:rgba(140,80,196,.15);color:#a060d4;border:1px solid rgba(140,80,196,.25)}
 .cc-2{background:rgba(196,120,40,.15);color:#d48030;border:1px solid rgba(196,120,40,.25)}
@@ -71,8 +58,6 @@ tr:hover td{background:rgba(201,169,110,.02)}
 .cc-5{background:rgba(120,120,120,.15);color:#888;border:1px solid rgba(120,120,120,.25)}
 .cc-6{background:rgba(196,169,80,.15);color:#c4a040;border:1px solid rgba(196,169,80,.25)}
 .cc-7{background:rgba(80,160,180,.15);color:#50a0b4;border:1px solid rgba(80,160,180,.25)}
-
-/* Button */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;font-size:11px;letter-spacing:.08em;cursor:pointer;border:none;font-family:'Noto Sans JP',sans-serif;transition:all .15s}
 .btn:disabled{opacity:.5;cursor:default}
 .bp{background:var(--gold);color:#0e0e0e}.bp:hover:not(:disabled){background:#e2c99a}
@@ -80,66 +65,40 @@ tr:hover td{background:rgba(201,169,110,.02)}
 .bg{background:transparent;color:var(--muted);border:1px solid var(--bdr)}.bg:hover{color:var(--txt);border-color:#444}
 .bd{background:rgba(196,82,82,.12);color:#c45252;border:1px solid rgba(196,82,82,.3)}
 .sm{padding:5px 10px;font-size:10px}
-
-/* Form */
 input,select,textarea{background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);padding:8px 12px;font-size:12px;font-family:'Noto Sans JP',sans-serif;outline:none;width:100%;transition:border-color .15s}
 input:focus,select:focus,textarea:focus{border-color:var(--gold2)}
 select option{background:var(--sur2)}
 label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margin-bottom:5px}
 .fr{margin-bottom:14px}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-
-/* Drop zone */
 .dz{border:1px dashed var(--bdr);padding:36px;text-align:center;cursor:pointer;transition:all .2s}
 .dz:hover,.dz.drag{border-color:var(--gold2);background:rgba(201,169,110,.03)}
 #prev{max-width:100%;max-height:260px;margin-top:12px;display:none}
-
-/* Product tree */
-.cat-group{margin-bottom:20px}
 .cat-header{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(201,169,110,.05);border-left:2px solid var(--gold2);margin-bottom:2px;cursor:pointer;user-select:none}
 .cat-header:hover{background:rgba(201,169,110,.08)}
-.cat-toggle{font-size:10px;color:var(--muted);transition:transform .2s}
+.cat-toggle{font-size:10px;color:var(--muted);transition:transform .2s;display:inline-block}
 .cat-toggle.open{transform:rotate(90deg)}
 .prod-row{display:grid;grid-template-columns:20px 1fr 90px 70px 80px 90px 90px;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid rgba(42,42,42,.4);font-size:12px}
-.prod-row:last-child{border-bottom:none}
 .prod-row:hover{background:rgba(201,169,110,.02)}
 .detail-badge{font-size:10px;color:var(--muted);background:var(--sur2);border:1px solid var(--bdr);padding:1px 6px;display:inline-block}
-
-/* Stocktake */
-.ski{display:grid;grid-template-columns:1fr 60px 60px 90px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)}
+.ski{display:grid;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)}
 .ski:last-child{border-bottom:none}
-
-/* Alert */
 .ali{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(196,138,64,.05);border-left:2px solid var(--orange);margin-bottom:8px;font-size:12px}
-
-/* Chart */
 .cw{position:relative;height:200px}
-
-/* Modal */
 .mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center}
 .mo.open{display:flex}
 .mb{background:var(--sur);border:1px solid var(--bdr);padding:28px;width:500px;max-width:92vw;max-height:90vh;overflow-y:auto}
 .mt2{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold);margin-bottom:20px}
 .ma{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
-
-/* Sort handle */
 .sort-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr)}
-.sort-handle{color:var(--muted);cursor:grab;padding:0 4px;font-size:14px;user-select:none}
-.sort-handle:active{cursor:grabbing}
-
-/* Toast */
 #toast{position:fixed;bottom:24px;right:24px;padding:11px 18px;font-size:12px;letter-spacing:.04em;z-index:9999;display:none}
 #toast.show{display:block;animation:fi .2s}
 .ts{background:rgba(82,160,112,.92);color:#fff;border:1px solid #52a070}
 .te{background:rgba(196,82,82,.92);color:#fff;border:1px solid #c45252}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-
-/* Util */
 .fb{display:flex;justify-content:space-between;align-items:center}
 .mt12{margin-top:12px}.mt20{margin-top:20px}
 .g20{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-
-/* Mobile */
 @media(max-width:768px){
   #sidebar{width:52px}
   .logo-en,.logo-ja,.nl span:not(.ic){display:none}
@@ -149,8 +108,6 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
   .fg,.g20{grid-template-columns:1fr}
   .prod-row{grid-template-columns:20px 1fr 70px 70px}
 }
-
-/* Print */
 @media print{
   #sidebar,.np{display:none!important}
   #main{margin-left:0;padding:0}
@@ -183,12 +140,13 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
 <section id="p-dashboard" class="sec active">
   <div class="ph"><div class="pt">Dashboard</div><div class="ps">在庫概況</div></div>
   <div class="stats">
-    <div class="stat"><div class="sl">Today's Stock</div><div class="sv" id="s-items">—</div><div class="su">管理商品数</div></div>
+    <div class="stat"><div class="sl">Products</div><div class="sv" id="s-items">—</div><div class="su">管理商品数</div></div>
     <div class="stat"><div class="sl">Reorder Alerts</div><div class="sv" id="s-alerts">—</div><div class="su">要発注</div></div>
-    <div class="stat"><div class="sl">This Month</div><div class="sv" id="s-month">—</div><div class="su">今月の仕入れ（円）</div></div>
+    <div class="stat"><div class="sl">This Month</div><div class="sv" id="s-month">—</div><div class="su">今月仕入れ（円）</div></div>
     <div class="stat"><div class="sl">Stock Value</div><div class="sv" id="s-val">—</div><div class="su">現在庫総額（円）</div></div>
   </div>
-  <div class="card" style="margin-bottom:20px">
+  <!-- 在庫総額 -->
+  <div class="card">
     <div class="ct">Stock Value — カテゴリ別在庫総額</div>
     <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:14px">
       <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold)" id="dash-val-total">—</div>
@@ -197,6 +155,7 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     <table><thead><tr><th>カテゴリ</th><th class="tr">在庫総額</th><th class="tr">比率</th><th>グラフ</th></tr></thead>
     <tbody id="tb-val-cat"></tbody></table>
   </div>
+  <!-- 仕入先別・カテゴリ別 -->
   <div class="g20">
     <div class="card">
       <div class="ct">Supplier Cost — 仕入先別金額（今月）</div>
@@ -209,10 +168,12 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
       <tbody id="tb-dash-cat"></tbody></table>
     </div>
   </div>
+  <!-- トレンド・アラート -->
   <div class="g20">
     <div class="card"><div class="ct">Monthly Purchase Trend</div><div class="cw"><canvas id="c-trend"></canvas></div></div>
     <div class="card"><div class="ct">Reorder Alerts — 要発注</div><div id="alert-list"></div></div>
   </div>
+  <!-- 現在庫一覧 -->
   <div class="card">
     <div class="ct">Current Stock — 現在庫一覧</div>
     <table><thead><tr><th>カテゴリ</th><th>商品名</th><th>詳細</th><th>現在庫</th><th>適正量</th><th>充足率</th><th>状態</th></tr></thead>
@@ -235,7 +196,7 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
         <img id="prev" alt="preview">
       </div>
       <div class="mt12" style="display:flex;gap:8px">
-        <select id="del-sup" style="flex:1"><option value="">仕入先を選択</option></select>
+        <select id="del-sup" style="flex:1"></select>
         <input type="date" id="del-date" style="width:140px">
       </div>
       <div class="mt12">
@@ -260,8 +221,8 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
 <!-- Stocktake -->
 <section id="p-stocktake" class="sec">
   <div class="ph"><div class="pt">週次棚卸し</div><div class="ps">実際の在庫数を入力して更新</div></div>
-  <div class="card" style="margin-bottom:20px">
-    <div class="ct">Stock Value — 棚卸し後の在庫総額</div>
+  <div class="card">
+    <div class="ct">Stock Value — 現在庫総額</div>
     <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:14px">
       <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold)" id="stk-val-total">—</div>
       <div style="font-size:11px;color:var(--muted)">現在庫総額（登録単価 × 在庫数）</div>
@@ -270,18 +231,18 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     <tbody id="tb-stk-val"></tbody></table>
   </div>
   <div class="card">
-    <div class="ct">Manual Input — 手入力で更新</div>
-    <div style="display:grid;grid-template-columns:1fr 100px 60px 60px 90px 90px;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--bdr);margin-bottom:4px">
+    <div class="ct">Manual Input — 在庫数と適正量を更新</div>
+    <div style="display:grid;grid-template-columns:1fr 90px 60px 60px 90px 90px;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--bdr);margin-bottom:4px">
       <div style="font-size:10px;color:var(--muted)">商品名</div>
       <div style="font-size:10px;color:var(--muted)">詳細</div>
       <div style="font-size:10px;color:var(--muted);text-align:center">現在庫</div>
       <div style="font-size:10px;color:var(--muted);text-align:center">適正量</div>
       <div style="font-size:10px;color:var(--muted);text-align:center">実数入力</div>
-      <div style="font-size:10px;color:var(--gold);text-align:center">適正量を変更</div>
+      <div style="font-size:10px;color:var(--gold);text-align:center">適正量変更</div>
     </div>
     <div id="stk-list"></div>
     <div class="mt20 fb">
-      <span style="font-size:11px;color:var(--muted)">空欄の商品は更新されません</span>
+      <span style="font-size:11px;color:var(--muted)">空欄の項目は更新されません</span>
       <button class="btn bp" onclick="saveStocktake()">在庫を更新する</button>
     </div>
   </div>
@@ -310,10 +271,10 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     <tbody id="tb-over"></tbody></table>
   </div>
   <div class="card">
-    <div class="ct">All Delivery Log — 全入庫履歴（削除可）</div>
-    <div style="display:flex;gap:8px;margin-bottom:12px">
+    <div class="ct">All Delivery Log — 全入庫履歴</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
       <select id="hist-ym" onchange="renderHistLog()" style="width:160px"></select>
-      <span style="font-size:11px;color:var(--muted);align-self:center">削除すると在庫数は自動で戻りません</span>
+      <span style="font-size:11px;color:var(--muted)">削除しても在庫数は自動で戻りません</span>
     </div>
     <table><thead><tr><th>日付</th><th>仕入先</th><th>商品名</th><th>詳細</th><th>カテゴリ</th><th>数量</th><th>単価</th><th class="tr">小計</th><th></th></tr></thead>
     <tbody id="tb-hist-log"></tbody></table>
@@ -328,7 +289,7 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
   </div>
   <div class="card">
     <div style="display:flex;gap:10px;margin-bottom:14px">
-      <select id="flt-cat" onchange="renderProducts()" style="width:160px"><option value="">全カテゴリ</option></select>
+      <select id="flt-cat" onchange="renderProducts()" style="width:160px"></select>
       <input type="text" id="flt-name" placeholder="商品名・詳細で検索..." oninput="renderProducts()" style="flex:1">
     </div>
     <div id="prod-tree"></div>
@@ -386,7 +347,24 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     </details>
   </div>
   <div class="card">
-    <div class="ct">Categories — カテゴリ管理（ドラッグで並び替え）</div>
+    <div class="ct">Auto Deduction — 自動消費減算</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.9">過去3ヶ月の発注量をもとに1日あたりの推定消費量を計算し、毎日自動で在庫を減算します。発注履歴がない商品は減算されません。</p>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px;background:var(--sur2);border:1px solid var(--bdr)">
+      <input type="checkbox" id="auto-deduct-toggle" onchange="toggleAutoDeduct(this)" style="width:16px;height:16px;cursor:pointer">
+      <div>
+        <div style="font-size:12px">自動減算を有効にする</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px" id="deduct-last-run">最終実行: 未実行</div>
+      </div>
+    </div>
+    <table><thead><tr><th>商品名</th><th>詳細</th><th>カテゴリ</th><th class="tr">月平均</th><th class="tr">日次推定</th><th class="tr">今日の減算予定</th></tr></thead>
+    <tbody id="tb-deduct-rates"></tbody></table>
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn bo" onclick="runAutoDeduct(true)">▶ 今すぐ実行</button>
+      <button class="btn bg" onclick="resetAutoDeduct()">リセット</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">Categories — カテゴリ管理（▲▼で並び替え）</div>
     <div id="cat-list" style="margin-bottom:10px"></div>
     <div style="display:flex;gap:8px">
       <input type="text" id="inp-cat" placeholder="新しいカテゴリ名" style="flex:1">
@@ -402,26 +380,7 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     </div>
   </div>
   <div class="card">
-    <div class="ct">Auto Deduction — 自動消費減算</div>
-    <p style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.9">
-      過去3ヶ月の発注量をもとに1日あたりの推定消費量を計算し、毎日自動で在庫を減算します。<br>
-      発注履歴がない商品・推定消費が0の商品は減算されません。棚卸しで実数に補正してください。
-    </p>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px;background:var(--sur2);border:1px solid var(--bdr)">
-      <input type="checkbox" id="auto-deduct-toggle" onchange="toggleAutoDeduct(this)" style="width:auto;width:16px;height:16px;cursor:pointer">
-      <div>
-        <div style="font-size:12px">自動減算を有効にする</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px" id="deduct-last-run">最終実行: 未実行</div>
-      </div>
-    </div>
-    <div class="ct">推定消費レート — 商品別</div>
-    <table><thead><tr><th>商品名</th><th>詳細</th><th>カテゴリ</th><th class="tr">月平均</th><th class="tr">日次推定</th><th class="tr">今日の減算</th></tr></thead>
-    <tbody id="tb-deduct-rates"></tbody></table>
-    <div style="margin-top:14px;display:flex;gap:8px">
-      <button class="btn bo" onclick="runAutoDeduct(true)">▶ 今すぐ実行</button>
-      <button class="btn bg" onclick="resetAutoDeduct()">リセット（最終実行日をクリア）</button>
-    </div>
-  </div>
+    <div class="ct">Data Management — データ管理</div>
     <p style="font-size:11px;color:var(--muted);margin-bottom:14px">全データはブラウザに保存されています。</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn bo" onclick="exportData()">📥 JSONエクスポート</button>
@@ -490,7 +449,7 @@ function doGet() {
   return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);
 }`;
 
-// ── Default ────────────────────────────────────────────────────────
+// ── Defaults ───────────────────────────────────────────────────────
 const DEF_CATS = ['シャンプー','トリートメント','カラー剤','薬剤','消耗品','備品'];
 const DEF_SUPS = ['共栄社','美薬株式会社','オッジィオット','その他'];
 
@@ -505,26 +464,26 @@ let cats  = ld('nz_cats',  DEF_CATS);
 let sups  = ld('nz_sups',  DEF_SUPS);
 let cfg   = ld('nz_cfg',   { apiKey:'', gasUrl:'' });
 
-let curImg = null, extItems = [], charts = {};
+let curImg=null, extItems=[], charts={};
 
 // ── Navigation ─────────────────────────────────────────────────────
 document.querySelectorAll('.nl').forEach(el => {
   el.addEventListener('click', () => {
-    document.querySelectorAll('.nl').forEach(x => x.classList.remove('active'));
-    document.querySelectorAll('.sec').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.nl').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.sec').forEach(x=>x.classList.remove('active'));
     el.classList.add('active');
     document.getElementById('p-'+el.dataset.p).classList.add('active');
     render(el.dataset.p);
   });
 });
 function render(p) {
-  if (p==='dashboard') renderDash();
-  if (p==='delivery')  renderDel();
-  if (p==='stocktake') renderStk();
-  if (p==='history')   renderHist();
-  if (p==='products')  renderProducts();
-  if (p==='report')    renderReport();
-  if (p==='settings')  renderSettings();
+  if(p==='dashboard') renderDash();
+  if(p==='delivery')  renderDel();
+  if(p==='stocktake') renderStk();
+  if(p==='history')   renderHist();
+  if(p==='products')  renderProducts();
+  if(p==='report')    renderReport();
+  if(p==='settings')  renderSettings();
 }
 
 // ── Helpers ────────────────────────────────────────────────────────
@@ -533,54 +492,97 @@ function catBadge(cat) {
   return `<span class="badge cc-${idx>=0?idx%8:5}">${cat||'—'}</span>`;
 }
 function stockBadge(p) {
-  if (p.stock===0) return '<span class="badge out">欠品</span>';
-  if (p.stock<=p.target) return '<span class="badge low">要発注</span>';
-  const r = p.target>0?p.stock/p.target:2;
-  return r>2 ? '<span class="badge over">過多</span>' : '<span class="badge ok">適正</span>';
+  if(p.stock===0) return '<span class="badge out">欠品</span>';
+  if(p.stock<=p.target) return '<span class="badge low">要発注</span>';
+  return p.target>0&&p.stock>p.target*2 ? '<span class="badge over">過多</span>' : '<span class="badge ok">適正</span>';
 }
 function ym(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+
+function calcStockValue() {
+  const byCat = {};
+  cats.forEach(c=>{ byCat[c]={val:0,cnt:0}; });
+  prods.forEach(p=>{
+    const v=(p.stock||0)*(p.price||0);
+    if(!byCat[p.category]) byCat[p.category]={val:0,cnt:0};
+    byCat[p.category].val+=v;
+    byCat[p.category].cnt+=(p.stock||0);
+  });
+  const total = Object.values(byCat).reduce((s,v)=>s+v.val,0);
+  return {byCat, total};
+}
+
+function renderStockValueTable(tbodyId, totalId) {
+  const {byCat, total} = calcStockValue();
+  const el = document.getElementById(totalId);
+  if(el) el.textContent = '¥'+total.toLocaleString();
+  const sEl = document.getElementById('s-val');
+  if(sEl) sEl.textContent = total.toLocaleString();
+  const rows = cats.filter(c=>byCat[c]&&byCat[c].val>0).map(c=>{
+    const {val,cnt}=byCat[c];
+    const pct=total>0?Math.round(val/total*100):0;
+    return `<tr><td>${catBadge(c)}</td><td class="tr" style="color:var(--gold)">¥${val.toLocaleString()}</td><td class="tr" style="color:var(--muted)">${cnt}点</td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:4px;background:var(--bdr);max-width:120px"><div style="height:100%;width:${pct}%;background:var(--gold)"></div></div><span style="font-size:10px">${pct}%</span></div></td></tr>`;
+  });
+  const tbody = document.getElementById(tbodyId);
+  if(tbody) tbody.innerHTML = rows.join('') || '<tr><td colspan="4" style="color:var(--muted);padding:14px">商品マスタに単価を登録してください</td></tr>';
+}
 
 // ── Dashboard ──────────────────────────────────────────────────────
 function renderDash() {
   const now = new Date(), cur = ym(now);
+
+  // Stats
   document.getElementById('s-items').textContent = prods.length;
-  const alertP = prods.filter(p => p.stock <= p.target);
-  document.getElementById('s-alerts').textContent = alertP.length;
+  document.getElementById('s-alerts').textContent = prods.filter(p=>p.stock<=p.target).length;
   const mTotal = dels.filter(d=>d.date.startsWith(cur)).reduce((s,d)=>s+d.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0);
   document.getElementById('s-month').textContent = mTotal.toLocaleString();
+
   // 在庫総額
-  const valByCat = {};
-  cats.forEach(c=>{ valByCat[c]={val:0,cnt:0}; });
-  prods.forEach(p=>{
-    const v = (p.stock||0)*(p.price||0);
-    if(!valByCat[p.category]) valByCat[p.category]={val:0,cnt:0};
-    valByCat[p.category].val += v;
-    valByCat[p.category].cnt += (p.stock||0);
+  renderStockValueTable('tb-val-cat','dash-val-total');
+
+  // 仕入先別・カテゴリ別（今月）
+  const mDels = dels.filter(d=>d.date.startsWith(cur));
+  const supT={}, catT={};
+  mDels.forEach(d=>d.items.forEach(i=>{
+    supT[d.supplier]=(supT[d.supplier]||0)+(i.qty||0)*(i.price||0);
+    catT[i.category]=(catT[i.category]||0)+(i.qty||0)*(i.price||0);
+  }));
+  const supGrand=Object.values(supT).reduce((s,v)=>s+v,0);
+  const catGrand=Object.values(catT).reduce((s,v)=>s+v,0);
+
+  document.getElementById('tb-dash-sup').innerHTML = Object.keys(supT).length===0
+    ? '<tr><td colspan="3" style="color:var(--muted);padding:16px;text-align:center">今月の仕入れデータがありません</td></tr>'
+    : Object.entries(supT).sort((a,b)=>b[1]-a[1]).map(([s,a])=>`<tr>
+        <td>${s}</td><td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td>
+        <td class="tr"><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+          <div style="width:50px;height:3px;background:var(--bdr)"><div style="height:100%;width:${supGrand>0?Math.round(a/supGrand*100):0}%;background:var(--gold)"></div></div>
+          <span style="font-size:10px">${supGrand>0?Math.round(a/supGrand*100):0}%</span></div></td>
+      </tr>`).join('');
+
+  document.getElementById('tb-dash-cat').innerHTML = Object.keys(catT).length===0
+    ? '<tr><td colspan="3" style="color:var(--muted);padding:16px;text-align:center">今月の仕入れデータがありません</td></tr>'
+    : Object.entries(catT).sort((a,b)=>b[1]-a[1]).map(([c,a])=>`<tr>
+        <td>${catBadge(c)}</td><td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td>
+        <td class="tr"><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+          <div style="width:50px;height:3px;background:var(--bdr)"><div style="height:100%;width:${catGrand>0?Math.round(a/catGrand*100):0}%;background:var(--gold)"></div></div>
+          <span style="font-size:10px">${catGrand>0?Math.round(a/catGrand*100):0}%</span></div></td>
+      </tr>`).join('');
+
+  // Trend chart
+  const months=[], amounts=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    months.push(`${d.getMonth()+1}月`);
+    amounts.push(dels.filter(dl=>dl.date.startsWith(ym(d))).reduce((s,dl)=>s+dl.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0));
+  }
+  if(charts.trend) charts.trend.destroy();
+  charts.trend = new Chart(document.getElementById('c-trend'),{
+    type:'bar',
+    data:{labels:months,datasets:[{data:amounts,backgroundColor:'rgba(201,169,110,.35)',borderColor:'#c9a96e',borderWidth:1}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{grid:{color:'#222'},ticks:{color:'#555',font:{size:10}}},y:{grid:{color:'#222'},ticks:{color:'#555',font:{size:10},callback:v=>v.toLocaleString()}}}}
   });
-  const totalVal = Object.values(valByCat).reduce((s,v)=>s+v.val,0);
-  document.getElementById('s-val').textContent = totalVal.toLocaleString();
-  document.getElementById('dash-val-total').textContent = '¥'+totalVal.toLocaleString();
-  document.getElementById('tb-val-cat').innerHTML = cats.filter(c=>valByCat[c]&&valByCat[c].val>0).map(c=>{
-    const {val,cnt}=valByCat[c];
-    const pct=totalVal>0?Math.round(val/totalVal*100):0;
-    return `<tr>
-      <td>${catBadge(c)}</td>
-      <td class="tr" style="color:var(--gold)">¥${val.toLocaleString()}</td>
-      <td class="tr" style="color:var(--muted)">${cnt}点</td>
-      <td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:4px;background:var(--bdr);max-width:120px"><div style="height:100%;width:${pct}%;background:var(--gold)"></div></div><span style="font-size:10px">${pct}%</span></div></td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="4" style="color:var(--muted);padding:14px">データがありません（商品マスタに単価を登録してください）</td></tr>';
 
-  renderDeductStat();
-
-  document.getElementById('s-items').textContent = prods.length;
-  const alertP = prods.filter(p => p.stock <= p.target);
-  document.getElementById('s-alerts').textContent = alertP.length;
-  const mTotal = dels.filter(d=>d.date.startsWith(cur)).reduce((s,d)=>s+d.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0);
-  document.getElementById('s-month').textContent = mTotal.toLocaleString();
-  const last = stks[stks.length-1];
-  if (last) { document.getElementById('s-stk').textContent=last.date.slice(5).replace('-','/'); document.getElementById('s-stk2').textContent=last.date.slice(0,4); }
-
+  // Alerts
+  const alertP = prods.filter(p=>p.stock<=p.target);
   document.getElementById('alert-list').innerHTML = alertP.length===0
     ? '<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px 0">要発注商品はありません</div>'
     : alertP.map(p=>`<div class="ali">
@@ -588,145 +590,86 @@ function renderDash() {
         <div style="text-align:right"><div style="color:var(--orange)">${p.stock}${p.unit||'本'}</div><div style="font-size:10px;color:var(--muted)">適正: ${p.target}</div></div>
       </div>`).join('');
 
-  // 仕入先別・カテゴリ別（今月）
-  const supT={}, catT2={};
-  dels.filter(d=>d.date.startsWith(cur)).forEach(d=>d.items.forEach(i=>{
-    supT[d.supplier]=(supT[d.supplier]||0)+(i.qty||0)*(i.price||0);
-    catT2[i.category]=(catT2[i.category]||0)+(i.qty||0)*(i.price||0);
-  }));
-  const supGrand=Object.values(supT).reduce((s,v)=>s+v,0);
-  const catGrand=Object.values(catT2).reduce((s,v)=>s+v,0);
-
-  document.getElementById('tb-dash-sup').innerHTML = Object.keys(supT).length===0
-    ? '<tr><td colspan="3" style="color:var(--muted);padding:16px;text-align:center">今月の仕入れデータがありません</td></tr>'
-    : Object.entries(supT).sort((a,b)=>b[1]-a[1]).map(([s,a])=>`
-        <tr>
-          <td>${s}</td>
-          <td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td>
-          <td class="tr">
-            <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
-              <div style="width:50px;height:3px;background:var(--bdr)"><div style="height:100%;width:${supGrand>0?Math.round(a/supGrand*100):0}%;background:var(--gold)"></div></div>
-              <span style="font-size:10px">${supGrand>0?Math.round(a/supGrand*100):0}%</span>
-            </div>
-          </td>
-        </tr>`).join('');
-
-  document.getElementById('tb-dash-cat').innerHTML = Object.keys(catT2).length===0
-    ? '<tr><td colspan="3" style="color:var(--muted);padding:16px;text-align:center">今月の仕入れデータがありません</td></tr>'
-    : Object.entries(catT2).sort((a,b)=>b[1]-a[1]).map(([c,a])=>`
-        <tr>
-          <td>${catBadge(c)}</td>
-          <td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td>
-          <td class="tr">
-            <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
-              <div style="width:50px;height:3px;background:var(--bdr)"><div style="height:100%;width:${catGrand>0?Math.round(a/catGrand*100):0}%;background:var(--gold)"></div></div>
-              <span style="font-size:10px">${catGrand>0?Math.round(a/catGrand*100):0}%</span>
-            </div>
-          </td>
-        </tr>`).join('');
-
-  document.getElementById('tb-stock').innerHTML = prods.map(p => {
-    const r = p.target>0 ? Math.round(p.stock/p.target*100) : 100;
-    const barColor = r<50?'var(--red)':r<100?'var(--orange)':'var(--green)';
+  // Stock table
+  document.getElementById('tb-stock').innerHTML = prods.map(p=>{
+    const r=p.target>0?Math.round(p.stock/p.target*100):100;
+    const barColor=r<50?'var(--red)':r<100?'var(--orange)':'var(--green)';
     return `<tr>
-      <td>${catBadge(p.category)}</td>
-      <td>${p.name}</td>
+      <td>${catBadge(p.category)}</td><td>${p.name}</td>
       <td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td>
-      <td>${p.stock}${p.unit||'本'}</td>
-      <td>${p.target}${p.unit||'本'}</td>
+      <td>${p.stock}${p.unit||'本'}</td><td>${p.target}${p.unit||'本'}</td>
       <td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:3px;background:var(--bdr);max-width:60px"><div style="height:100%;width:${Math.min(r,100)}%;background:${barColor}"></div></div><span style="font-size:11px">${r}%</span></div></td>
       <td>${stockBadge(p)}</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">商品マスタに商品を登録してください</td></tr>';
-
-  const months=[], amounts=[];
-  for(let i=5;i>=0;i--){
-    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
-    const k=ym(d);
-    months.push(`${d.getMonth()+1}月`);
-    amounts.push(dels.filter(dl=>dl.date.startsWith(k)).reduce((s,dl)=>s+dl.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0));
-  }
-  if (charts.trend) charts.trend.destroy();
-  charts.trend = new Chart(document.getElementById('c-trend'),{
-    type:'bar',
-    data:{labels:months,datasets:[{data:amounts,backgroundColor:'rgba(201,169,110,.35)',borderColor:'#c9a96e',borderWidth:1}]},
-    options:{plugins:{legend:{display:false}},scales:{x:{grid:{color:'#222'},ticks:{color:'#555',font:{size:10}}},y:{grid:{color:'#222'},ticks:{color:'#555',font:{size:10},callback:v=>v.toLocaleString()}}}}
-  });
+  }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">商品マスタに商品を登録してください</td></tr>';
 }
 
 // ── Delivery ───────────────────────────────────────────────────────
 function renderDel() {
-  const sel = document.getElementById('del-sup');
-  sel.innerHTML = '<option value="">仕入先を選択</option>' + sups.map(s=>`<option>${s}</option>`).join('');
-  document.getElementById('del-date').value = new Date().toISOString().slice(0,10);
+  const sel=document.getElementById('del-sup');
+  sel.innerHTML='<option value="">仕入先を選択</option>'+sups.map(s=>`<option>${s}</option>`).join('');
+  document.getElementById('del-date').value=new Date().toISOString().slice(0,10);
   renderDelLog();
 }
-
 function renderDelLog() {
-  const cur = ym(new Date());
-  const rows = [];
+  const cur=ym(new Date());
+  const rows=[];
   dels.filter(d=>d.date.startsWith(cur)).forEach(d=>d.items.forEach(i=>{
     rows.push(`<tr>
       <td>${d.date}</td><td style="font-size:11px">${d.supplier}</td><td>${i.name}</td>
       <td style="font-size:10px;color:var(--muted)">${i.detail||'—'}</td>
-      <td>${catBadge(i.category)}</td>
-      <td>${i.qty}${i.unit||''}</td>
+      <td>${catBadge(i.category)}</td><td>${i.qty}${i.unit||''}</td>
       <td>¥${(i.price||0).toLocaleString()}</td>
       <td class="tr">¥${((i.qty||0)*(i.price||0)).toLocaleString()}</td>
       <td><button class="btn bd sm" onclick="deleteDel('${d.id}')">削除</button></td>
     </tr>`);
   }));
-  document.getElementById('tb-dellog').innerHTML = rows.join('') || '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">今月の入庫データはありません</td></tr>';
+  document.getElementById('tb-dellog').innerHTML=rows.join('')||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">今月の入庫データはありません</td></tr>';
 }
-
 function deleteDel(id) {
-  if (!confirm('この入庫データを削除しますか？\n（在庫数は自動で戻りません）')) return;
-  dels = dels.filter(d=>d.id!==id); sv('nz_dels',dels);
-  renderDelLog(); renderDash(); toast('削除しました');
+  if(!confirm('この入庫データを削除しますか？\n（在庫数は自動で戻りません）'))return;
+  dels=dels.filter(d=>d.id!==id);sv('nz_dels',dels);
+  renderDelLog();renderDash();toast('削除しました');
 }
 
-// Drag & drop
-const dz = document.getElementById('dz');
-dz.addEventListener('dragover', e=>{e.preventDefault();dz.classList.add('drag')});
-dz.addEventListener('dragleave', ()=>dz.classList.remove('drag'));
-dz.addEventListener('drop', e=>{e.preventDefault();dz.classList.remove('drag');if(e.dataTransfer.files[0])loadImg(e.dataTransfer.files[0])});
-function onFile(inp) { if(inp.files[0]) loadImg(inp.files[0]); }
-function loadImg(file) {
-  const r = new FileReader();
-  r.onload = e => {
-    curImg = { data: e.target.result.split(',')[1], mediaType: file.type||'image/jpeg' };
-    const img = document.getElementById('prev');
-    img.src = e.target.result; img.style.display = 'block';
-    document.getElementById('dz-inner').style.display = 'none';
+const dz=document.getElementById('dz');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');if(e.dataTransfer.files[0])loadImg(e.dataTransfer.files[0])});
+function onFile(inp){if(inp.files[0])loadImg(inp.files[0]);}
+function loadImg(file){
+  const r=new FileReader();
+  r.onload=e=>{
+    curImg={data:e.target.result.split(',')[1],mediaType:file.type||'image/jpeg'};
+    const img=document.getElementById('prev');
+    img.src=e.target.result;img.style.display='block';
+    document.getElementById('dz-inner').style.display='none';
   };
   r.readAsDataURL(file);
 }
 
 async function runAnalysis() {
-  if (!curImg) { toast('納品書の写真を選択してください','e'); return; }
-  if (!cfg.apiKey) { toast('設定画面でAPIキーを入力してください','e'); return; }
-  const btn = document.getElementById('btn-ana');
-  btn.textContent = '解析中...'; btn.disabled = true;
-  document.getElementById('ana-result').innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">AIが解析中...</div>';
-  document.getElementById('reg-wrap').style.display = 'none';
+  if(!curImg){toast('納品書の写真を選択してください','e');return;}
+  if(!cfg.apiKey){toast('設定画面でAPIキーを入力してください','e');return;}
+  const btn=document.getElementById('btn-ana');
+  btn.textContent='解析中...';btn.disabled=true;
+  document.getElementById('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">AIが解析中...</div>';
+  document.getElementById('reg-wrap').style.display='none';
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{
-        'x-api-key': cfg.apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-        'anthropic-dangerous-direct-browser-access': 'true'
+        'x-api-key':cfg.apiKey,
+        'anthropic-version':'2023-06-01',
+        'content-type':'application/json',
+        'anthropic-dangerous-direct-browser-access':'true'
       },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        messages:[{
-          role:'user',
-          content:[
-            {type:'image',source:{type:'base64',media_type:curImg.mediaType,data:curImg.data}},
-            {type:'text',text:
-`あなたは日本の美容サロン向け納品書・請求書の読み取り専門AIです。
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:2000,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:curImg.mediaType,data:curImg.data}},
+          {type:'text',text:`あなたは日本の美容サロン向け納品書・請求書の読み取り専門AIです。
 画像を注意深く読み取り、以下のJSON形式のみで返答してください。
 説明文・コードブロック・バッククォートは一切不要です。
 
@@ -741,58 +684,56 @@ async function runAnalysis() {
 ・1行1商品として全行を漏れなく抽出
 ・日付はYYYY-MM-DD形式（不明なら今日の日付）
 ・カテゴリは次のいずれか：${cats.join('/')}`}
-          ]
-        }]
+        ]}]
       })
     });
-    if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error?.message||`HTTP ${res.status}`); }
-    const data = await res.json();
-    const text = data.content[0].text;
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${res.status}`);}
+    const data=await res.json();
+    const text=data.content[0].text;
     let parsed;
-    try { const m=text.match(/\{[\s\S]*\}/); parsed=JSON.parse(m?m[0]:text); } catch { throw new Error('解析結果の読み取りに失敗しました'); }
+    try{const m=text.match(/\{[\s\S]*\}/);parsed=JSON.parse(m?m[0]:text);}catch{throw new Error('解析結果の読み取りに失敗しました');}
 
-    extItems = (parsed.items||[]).map(i=>({...i, linkedId:undefined}));
+    extItems=(parsed.items||[]).map(i=>({...i,linkedId:undefined}));
 
-    if (parsed.supplier) {
-      const sel = document.getElementById('del-sup');
-      const exists = [...sel.options].some(o=>o.value===parsed.supplier);
-      if (!exists) { const opt=document.createElement('option'); opt.value=opt.textContent=parsed.supplier+'（解析）'; sel.appendChild(opt); sel.value=opt.value; }
-      else sel.value = parsed.supplier;
+    if(parsed.supplier){
+      const sel=document.getElementById('del-sup');
+      const exists=[...sel.options].some(o=>o.value===parsed.supplier);
+      if(!exists){const opt=document.createElement('option');opt.value=opt.textContent=parsed.supplier+'（解析）';sel.appendChild(opt);sel.value=opt.value;}
+      else sel.value=parsed.supplier;
     }
-    if (parsed.date) document.getElementById('del-date').value = parsed.date;
+    if(parsed.date) document.getElementById('del-date').value=parsed.date;
 
-    if (extItems.length===0) {
-      document.getElementById('ana-result').innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品が検出できませんでした</div>';
+    if(extItems.length===0){
+      document.getElementById('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品が検出できませんでした</div>';
     } else {
       renderEditItems();
-      document.getElementById('reg-wrap').style.display = 'block';
+      document.getElementById('reg-wrap').style.display='block';
     }
   } catch(e) {
-    document.getElementById('ana-result').innerHTML = `<div style="color:var(--red);font-size:12px;padding:14px;background:rgba(196,82,82,.05);border:1px solid rgba(196,82,82,.2)">エラー: ${e.message}</div>`;
+    document.getElementById('ana-result').innerHTML=`<div style="color:var(--red);font-size:12px;padding:14px;background:rgba(196,82,82,.05);border:1px solid rgba(196,82,82,.2)">エラー: ${e.message}</div>`;
   } finally {
-    btn.textContent = '✦ AI解析を実行'; btn.disabled = false;
+    btn.textContent='✦ AI解析を実行';btn.disabled=false;
   }
 }
 
-function autoMatch(name, detail) {
-  const n = (name+(detail||'')).toLowerCase().replace(/\s/g,'');
-  return prods.find(p=>p.name===name && (p.detail||'')===(detail||''))
-    || prods.find(p=>p.name===name)
-    || prods.find(p=>{const pn=(p.name+(p.detail||'')).toLowerCase().replace(/\s/g,''); return pn===n||pn.includes(n)||n.includes(pn);})
-    || null;
+function autoMatch(name,detail) {
+  const n=(name+(detail||'')).toLowerCase().replace(/\s/g,'');
+  return prods.find(p=>p.name===name&&(p.detail||'')===(detail||''))
+    ||prods.find(p=>p.name===name)
+    ||prods.find(p=>{const pn=(p.name+(p.detail||'')).toLowerCase().replace(/\s/g,'');return pn===n||pn.includes(n)||n.includes(pn);})
+    ||null;
 }
 
 function renderEditItems() {
-  extItems.forEach(item=>{ if(item.linkedId===undefined){const m=autoMatch(item.name,item.detail); item.linkedId=m?m.id:'';} });
-  const total = extItems.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
-  document.getElementById('ana-result').innerHTML = `
+  extItems.forEach(item=>{if(item.linkedId===undefined){const m=autoMatch(item.name,item.detail);item.linkedId=m?m.id:'';}});
+  const total=extItems.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
+  document.getElementById('ana-result').innerHTML=`
     <div style="font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:12px">解析結果 — 編集してから登録（${extItems.length}点）</div>
     ${extItems.map((item,idx)=>{
-      const matched = prods.find(p=>p.id===item.linkedId);
+      const matched=prods.find(p=>p.id===item.linkedId);
       return `<div style="border:1px solid var(--bdr);padding:12px;margin-bottom:8px">
         <div style="font-size:10px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between">
-          <span># ${idx+1}</span>
-          <span style="cursor:pointer;color:var(--red)" onclick="removeItem(${idx})">✕ 削除</span>
+          <span># ${idx+1}</span><span style="cursor:pointer;color:var(--red)" onclick="removeItem(${idx})">✕ 削除</span>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div style="grid-column:1/-1"><label>商品名（納品書の表記）</label>
@@ -806,7 +747,7 @@ function renderEditItems() {
             </label>
             <select onchange="extItems[${idx}].linkedId=this.value;renderEditItems()">
               <option value="">— 紐付けなし</option>
-              ${prods.map(p=>`<option value="${p.id}" ${p.id===item.linkedId?'selected':''}>${p.name}${p.detail?' / '+p.detail:''} [${p.stock}${p.unit||'本'}]</option>`).join('')}
+              ${prods.map(p=>`<option value="${p.id}" ${p.id===item.linkedId?'selected':''}>${p.name}${p.detail?' / '+p.detail:''} [現在: ${p.stock}${p.unit||'本'}]</option>`).join('')}
             </select>
           </div>
           <div><label>カテゴリ</label>
@@ -831,27 +772,26 @@ function renderEditItems() {
       <span style="color:var(--gold)">¥<span id="edit-total">${total.toLocaleString()}</span></span>
     </div>`;
 }
-
 function updateTotal() {
-  const t = extItems.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
-  const el = document.getElementById('edit-total'); if(el) el.textContent=t.toLocaleString();
-  extItems.forEach((_,i)=>{ const e=document.getElementById('sub-'+i); if(e) e.textContent=((extItems[i].qty||0)*(extItems[i].price||0)).toLocaleString(); });
+  const t=extItems.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
+  const el=document.getElementById('edit-total');if(el)el.textContent=t.toLocaleString();
+  extItems.forEach((_,i)=>{const e=document.getElementById('sub-'+i);if(e)e.textContent=((extItems[i].qty||0)*(extItems[i].price||0)).toLocaleString();});
 }
-function removeItem(idx) {
+function removeItem(idx){
   extItems.splice(idx,1);
   if(extItems.length===0){document.getElementById('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品がありません</div>';document.getElementById('reg-wrap').style.display='none';}
   else renderEditItems();
 }
-function addItem() { extItems.push({name:'',detail:'',category:cats[0]||'消耗品',qty:0,unit:'本',price:0,linkedId:''}); renderEditItems(); document.getElementById('reg-wrap').style.display='block'; }
+function addItem(){extItems.push({name:'',detail:'',category:cats[0]||'消耗品',qty:0,unit:'本',price:0,linkedId:''});renderEditItems();document.getElementById('reg-wrap').style.display='block';}
 
 function registerDelivery() {
-  const supplier = document.getElementById('del-sup').value||'不明';
-  const date     = document.getElementById('del-date').value||new Date().toISOString().slice(0,10);
+  const supplier=document.getElementById('del-sup').value||'不明';
+  const date=document.getElementById('del-date').value||new Date().toISOString().slice(0,10);
   if(extItems.length===0)return;
   dels.push({id:Date.now().toString(),date,supplier,items:extItems});
   sv('nz_dels',dels);
   extItems.forEach(item=>{
-    const p = item.linkedId?prods.find(p=>p.id===item.linkedId):null;
+    const p=item.linkedId?prods.find(p=>p.id===item.linkedId):null;
     if(p){p.stock=(p.stock||0)+(item.qty||0);if(item.price)p.price=item.price;}
   });
   sv('nz_prods',prods);
@@ -859,63 +799,43 @@ function registerDelivery() {
   toast('入庫データを記録しました');
   document.getElementById('reg-wrap').style.display='none';
   extItems=[];
-  renderDelLog();
-  renderDash();
+  renderDelLog();renderDash();
 }
 
 // ── Stocktake ──────────────────────────────────────────────────────
 function renderStk() {
-  // 在庫総額（棚卸しページ用）
-  const valByCat2 = {};
-  cats.forEach(c=>{valByCat2[c]={val:0,cnt:0};});
-  prods.forEach(p=>{
-    const v=(p.stock||0)*(p.price||0);
-    if(!valByCat2[p.category])valByCat2[p.category]={val:0,cnt:0};
-    valByCat2[p.category].val+=v;
-    valByCat2[p.category].cnt+=(p.stock||0);
-  });
-  const tv=Object.values(valByCat2).reduce((s,v)=>s+v.val,0);
-  document.getElementById('stk-val-total').textContent='¥'+tv.toLocaleString();
-  document.getElementById('tb-stk-val').innerHTML=cats.filter(c=>valByCat2[c]&&valByCat2[c].val>0).map(c=>{
-    const {val,cnt}=valByCat2[c];
-    const pct=tv>0?Math.round(val/tv*100):0;
-    return`<tr><td>${catBadge(c)}</td><td class="tr" style="color:var(--gold)">¥${val.toLocaleString()}</td><td class="tr" style="color:var(--muted)">${cnt}点</td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:4px;background:var(--bdr);max-width:120px"><div style="height:100%;width:${pct}%;background:var(--gold)"></div></div><span style="font-size:10px">${pct}%</span></div></td></tr>`;
-  }).join('')||'<tr><td colspan="4" style="color:var(--muted);padding:14px">商品マスタに単価を登録してください</td></tr>';
-
-  const list = document.getElementById('stk-list');
+  renderStockValueTable('tb-stk-val','stk-val-total');
+  const list=document.getElementById('stk-list');
   if(prods.length===0){list.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:24px">商品マスタに商品を登録してください</div>';return;}
-  // Group by category in cats order
-  const grouped = {};
+  const grouped={};
   cats.forEach(c=>{grouped[c]=[];});
   prods.forEach(p=>{if(!grouped[p.category])grouped[p.category]=[];grouped[p.category].push(p);});
-  list.innerHTML = cats.filter(c=>grouped[c]&&grouped[c].length>0).map(c=>`
+  list.innerHTML=cats.filter(c=>grouped[c]&&grouped[c].length>0).map(c=>`
     <div style="font-size:10px;letter-spacing:.1em;color:var(--muted);padding:10px 0 4px;border-bottom:1px solid var(--bdr);margin-bottom:4px">${c}</div>
     ${grouped[c].map(p=>`
-      <div class="ski" style="grid-template-columns:1fr 100px 60px 60px 90px">
+      <div class="ski" style="grid-template-columns:1fr 90px 60px 60px 90px 90px">
         <div><div style="font-size:12px">${p.name}</div></div>
         <div style="font-size:10px;color:var(--muted)">${p.detail||'—'}</div>
         <div style="font-size:11px;color:var(--muted);text-align:center">${p.stock}</div>
-        <div style="font-size:11px;color:var(--muted);text-align:center">${p.target}</div>
-        <input type="number" min="0" placeholder="${p.stock}" data-id="${p.id}" style="text-align:center">
+        <div style="font-size:11px;text-align:center;color:${p.stock<=p.target?'var(--orange)':'var(--muted)'}">${p.target}</div>
+        <input type="number" min="0" placeholder="実数" data-id="${p.id}" data-type="stock" style="text-align:center">
+        <input type="number" min="0" placeholder="${p.target}" data-id="${p.id}" data-type="target" style="text-align:center;border-color:rgba(201,169,110,.3)">
       </div>`).join('')}`).join('');
 }
-
 function saveStocktake() {
-  const updated = [];
-  // 在庫数の更新
+  const updated=[];
   document.querySelectorAll('#stk-list input[data-type="stock"]').forEach(inp=>{
-    if(inp.value==='') return;
-    const p = prods.find(x=>x.id===inp.dataset.id);
-    if(p){ p.stock=parseInt(inp.value); updated.push({productId:p.id,name:p.name,detail:p.detail||'',cat:p.category,stock:p.stock,target:p.target}); }
+    if(inp.value==='')return;
+    const p=prods.find(x=>x.id===inp.dataset.id);
+    if(p){p.stock=parseInt(inp.value);updated.push({productId:p.id,name:p.name,detail:p.detail||'',cat:p.category,stock:p.stock,target:p.target});}
   });
-  // 適正量の更新
   document.querySelectorAll('#stk-list input[data-type="target"]').forEach(inp=>{
-    if(inp.value==='') return;
-    const p = prods.find(x=>x.id===inp.dataset.id);
+    if(inp.value==='')return;
+    const p=prods.find(x=>x.id===inp.dataset.id);
     if(p){
       p.target=parseInt(inp.value);
-      const existing = updated.find(u=>u.productId===p.id);
-      if(existing) existing.target=p.target;
+      const ex=updated.find(u=>u.productId===p.id);
+      if(ex)ex.target=p.target;
       else updated.push({productId:p.id,name:p.name,detail:p.detail||'',cat:p.category,stock:p.stock,target:p.target});
     }
   });
@@ -925,8 +845,7 @@ function saveStocktake() {
   sv('nz_stks',stks);
   gasSync({type:'stocktake',items:updated});
   toast(`${updated.length}件を更新しました`);
-  renderStk();
-  renderDash();
+  renderStk();renderDash();
 }
 
 // ── History ────────────────────────────────────────────────────────
@@ -942,7 +861,6 @@ function renderHist() {
     if(!supCat[d.supplier])supCat[d.supplier]={};
     supCat[d.supplier][i.category]=(supCat[d.supplier][i.category]||0)+(i.qty||0)*(i.price||0);
   }));
-
   ['cat','sup'].forEach(k=>{
     const data=k==='cat'?catT:supT;
     if(charts[k])charts[k].destroy();
@@ -952,92 +870,99 @@ function renderHist() {
       options:{plugins:{legend:{position:'bottom',labels:{color:'#888',font:{size:10},padding:10}}}}
     });
   });
-
   const sup3={};
   for(let m=1;m<=3;m++){const d=new Date(now.getFullYear(),now.getMonth()-m,1);const k=ym(d);dels.filter(dl=>dl.date.startsWith(k)).forEach(dl=>{const t=dl.items.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);sup3[dl.supplier]=(sup3[dl.supplier]||0)+t;});}
-
-  document.getElementById('tb-sup-sum').innerHTML = Object.keys(supT).length===0
-    ? '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">データがありません</td></tr>'
-    : Object.entries(supT).sort((a,b)=>b[1]-a[1]).map(([s,a])=>{
-        const topCat=Object.entries(supCat[s]||{}).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([c])=>catBadge(c)).join(' ');
-        return `<tr><td>${s}</td><td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td><td class="tr">${supC[s]}件</td><td class="tr" style="color:var(--muted)">¥${(sup3[s]||0).toLocaleString()}</td><td>${topCat}</td></tr>`;
-      }).join('');
+  document.getElementById('tb-sup-sum').innerHTML=Object.keys(supT).length===0
+    ?'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">データがありません</td></tr>'
+    :Object.entries(supT).sort((a,b)=>b[1]-a[1]).map(([s,a])=>{
+      const topCat=Object.entries(supCat[s]||{}).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([c])=>catBadge(c)).join(' ');
+      return`<tr><td>${s}</td><td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td><td class="tr">${supC[s]}件</td><td class="tr" style="color:var(--muted)">¥${(sup3[s]||0).toLocaleString()}</td><td>${topCat}</td></tr>`;
+    }).join('');
 
   // 発注量ランキング
-  const itemMap = {};
+  const itemMap={};
   mDels.forEach(d=>d.items.forEach(i=>{
-    const key = i.name + '|' + (i.detail||'');
-    if (!itemMap[key]) itemMap[key] = {name:i.name,detail:i.detail||'',category:i.category,qty:0,amt:0};
-    itemMap[key].qty += (i.qty||0);
-    itemMap[key].amt += (i.qty||0)*(i.price||0);
+    const key=i.name+'|'+(i.detail||'');
+    if(!itemMap[key])itemMap[key]={name:i.name,detail:i.detail||'',category:i.category,qty:0,amt:0};
+    itemMap[key].qty+=(i.qty||0);itemMap[key].amt+=(i.qty||0)*(i.price||0);
   }));
-  const ranked = Object.values(itemMap).sort((a,b)=>b.qty-a.qty);
-  document.getElementById('tb-top').innerHTML = ranked.length===0
-    ? '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">今月のデータがありません</td></tr>'
-    : ranked.slice(0,10).map((r,i)=>`<tr>
-        <td style="color:var(--muted);font-size:11px">${i+1}</td>
-        <td>${r.name}</td>
+  const ranked=Object.values(itemMap).sort((a,b)=>b.qty-a.qty);
+  document.getElementById('tb-top').innerHTML=ranked.length===0
+    ?'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">今月のデータがありません</td></tr>'
+    :ranked.slice(0,10).map((r,i)=>`<tr>
+        <td style="color:var(--muted);font-size:11px">${i+1}</td><td>${r.name}</td>
         <td style="font-size:10px;color:var(--muted)">${r.detail||'—'}</td>
         <td>${catBadge(r.category)}</td>
         <td class="tr" style="color:var(--gold)">${r.qty}本</td>
         <td class="tr">¥${r.amt.toLocaleString()}</td>
       </tr>`).join('');
 
-  document.getElementById('tb-over').innerHTML = prods.map(p=>{
+  document.getElementById('tb-over').innerHTML=prods.map(p=>{
     const tm=mDels.reduce((s,d)=>s+d.items.filter(i=>i.name===p.name).reduce((t,i)=>t+(i.qty||0),0),0);
     let avg3=0;
     for(let m=1;m<=3;m++){const d=new Date(now.getFullYear(),now.getMonth()-m,1);const k=ym(d);avg3+=dels.filter(dl=>dl.date.startsWith(k)).reduce((s,dl)=>s+dl.items.filter(i=>i.name===p.name).reduce((t,i)=>t+(i.qty||0),0),0);}
-    const avg=Math.round(avg3/3);
-    const isO=avg>0&&tm>avg*1.5;
-    const stay=avg>0?Math.round(p.stock/(avg/30))+'日':'—';
-    return `<tr><td>${p.name}</td><td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td><td>${tm}${p.unit||'本'}</td><td>${avg}${p.unit||'本'}</td><td>${isO?'<span class="badge low">過多</span>':'<span class="badge ok">適正</span>'}</td><td>${stay}</td></tr>`;
+    const avg=Math.round(avg3/3),isO=avg>0&&tm>avg*1.5,stay=avg>0?Math.round(p.stock/(avg/30))+'日':'—';
+    return`<tr><td>${p.name}</td><td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td><td>${tm}${p.unit||'本'}</td><td>${avg}${p.unit||'本'}</td><td>${isO?'<span class="badge low">過多</span>':'<span class="badge ok">適正</span>'}</td><td>${stay}</td></tr>`;
   }).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">データがありません</td></tr>';
 
-  // 全履歴ログのセレクタ初期化
-  renderHistLogSelector();
-  renderHistLog();
+  renderHistLogSelector();renderHistLog();
 }
-
 function renderHistLogSelector() {
-  const sel = document.getElementById('hist-ym');
-  if (!sel) return;
-  const now = new Date(), months = [];
+  const sel=document.getElementById('hist-ym');if(!sel)return;
+  const now=new Date(),months=[];
   for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({val:ym(d),lbl:`${d.getFullYear()}年${d.getMonth()+1}月`});}
-  const cur = sel.value || months[0].val;
-  sel.innerHTML = months.map(m=>`<option value="${m.val}" ${m.val===cur?'selected':''}>${m.lbl}</option>`).join('');
+  const cur=sel.value||months[0].val;
+  sel.innerHTML=months.map(m=>`<option value="${m.val}" ${m.val===cur?'selected':''}>${m.lbl}</option>`).join('');
 }
-
 function renderHistLog() {
-  const sel = document.getElementById('hist-ym');
-  if (!sel) return;
-  const target = sel.value;
-  const filtered = dels.filter(d=>d.date.startsWith(target));
-  const rows = [];
-  filtered.forEach(d=>d.items.forEach(i=>{
-    rows.push(`<tr>
-      <td>${d.date}</td>
-      <td style="font-size:11px">${d.supplier}</td>
-      <td>${i.name}</td>
-      <td style="font-size:10px;color:var(--muted)">${i.detail||'—'}</td>
-      <td>${catBadge(i.category)}</td>
-      <td>${i.qty}${i.unit||''}</td>
-      <td>¥${(i.price||0).toLocaleString()}</td>
-      <td class="tr">¥${((i.qty||0)*(i.price||0)).toLocaleString()}</td>
-      <td><button class="btn bd sm" onclick="deleteDelHist('${d.id}')">削除</button></td>
-    </tr>`);
-  }));
-  const total = filtered.reduce((s,d)=>s+d.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0);
-  document.getElementById('tb-hist-log').innerHTML = rows.join('')
-    + (rows.length>0 ? `<tr style="background:rgba(201,169,110,.04)"><td colspan="7" style="text-align:right;font-size:11px;color:var(--muted)">合計</td><td class="tr" style="color:var(--gold)">¥${total.toLocaleString()}</td><td></td></tr>` : '')
-    || '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">この月のデータはありません</td></tr>';
+  const sel=document.getElementById('hist-ym');if(!sel)return;
+  const target=sel.value;
+  const filtered=dels.filter(d=>d.date.startsWith(target));
+  const rows=[];
+  filtered.forEach(d=>{
+    d.items.forEach((item,iIdx)=>{
+      const sub=(item.qty||0)*(item.price||0);
+      rows.push(`<tr style="cursor:pointer" onclick="toggleHistDetail(this)" data-del-id="${d.id}" data-item-idx="${iIdx}">
+        <td>${d.date}</td><td style="font-size:11px">${d.supplier}</td><td>${item.name}</td>
+        <td style="font-size:10px;color:var(--muted)">${item.detail||'—'}</td>
+        <td>${catBadge(item.category)}</td><td>${item.qty}${item.unit||''}</td>
+        <td>¥${(item.price||0).toLocaleString()}</td>
+        <td class="tr">¥${sub.toLocaleString()}</td>
+        <td><button class="btn bd sm" onclick="event.stopPropagation();deleteDelItem('${d.id}',${iIdx})">削除</button></td>
+      </tr>
+      <tr class="detail-expand" style="display:none" id="detail-${d.id}-${iIdx}">
+        <td colspan="9" style="background:rgba(201,169,110,.04);padding:12px 20px">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;font-size:11px">
+            <div><div style="color:var(--muted);margin-bottom:3px">仕入先</div>${d.supplier}</div>
+            <div><div style="color:var(--muted);margin-bottom:3px">日付</div>${d.date}</div>
+            <div><div style="color:var(--muted);margin-bottom:3px">商品名</div>${item.name}</div>
+            <div><div style="color:var(--muted);margin-bottom:3px">詳細</div>${item.detail||'—'}</div>
+            <div><div style="color:var(--muted);margin-bottom:3px">カテゴリ</div>${catBadge(item.category)}</div>
+            <div><div style="color:var(--muted);margin-bottom:3px">数量</div><span style="color:var(--gold)">${item.qty}${item.unit||'本'}</span></div>
+            <div><div style="color:var(--muted);margin-bottom:3px">単価</div>¥${(item.price||0).toLocaleString()}</div>
+            <div><div style="color:var(--muted);margin-bottom:3px">小計</div><span style="color:var(--gold)">¥${sub.toLocaleString()}</span></div>
+          </div>
+        </td>
+      </tr>`);
+    });
+  });
+  const total=filtered.reduce((s,d)=>s+d.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0);
+  document.getElementById('tb-hist-log').innerHTML=rows.join('')
+    +(rows.length>0?`<tr style="background:rgba(201,169,110,.04)"><td colspan="7" style="text-align:right;font-size:11px;color:var(--muted)">合計</td><td class="tr" style="color:var(--gold)">¥${total.toLocaleString()}</td><td></td></tr>`:'')
+    ||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">この月のデータはありません</td></tr>';
 }
-
-function deleteDelHist(id) {
-  if (!confirm('この入庫データを削除しますか？\n（在庫数は自動で戻りません）')) return;
-  dels = dels.filter(d=>d.id!==id); sv('nz_dels',dels);
-  renderHistLog();
-  renderDelLog();
-  toast('削除しました');
+function toggleHistDetail(row) {
+  const id=row.dataset.delId,idx=row.dataset.itemIdx;
+  const det=document.getElementById(`detail-${id}-${idx}`);
+  if(det)det.style.display=det.style.display==='none'?'table-row':'none';
+}
+function deleteDelItem(delId,itemIdx) {
+  if(!confirm('この行を削除しますか？\n（在庫数は自動で戻りません）'))return;
+  const d=dels.find(x=>x.id===delId);if(!d)return;
+  d.items.splice(itemIdx,1);
+  if(d.items.length===0)dels=dels.filter(x=>x.id!==delId);
+  sv('nz_dels',dels);
+  renderHistLog();renderDelLog();renderDash();toast('削除しました');
 }
 
 // ── Products ───────────────────────────────────────────────────────
@@ -1045,19 +970,14 @@ function renderProducts() {
   const fc=document.getElementById('flt-cat').value;
   const fn=document.getElementById('flt-name').value.toLowerCase();
   document.getElementById('flt-cat').innerHTML='<option value="">全カテゴリ</option>'+cats.map(c=>`<option ${c===fc?'selected':''}>${c}</option>`).join('');
-
   let filtered=prods;
-  if(fc) filtered=filtered.filter(p=>p.category===fc);
-  if(fn) filtered=filtered.filter(p=>p.name.toLowerCase().includes(fn)||(p.detail||'').toLowerCase().includes(fn));
-
-  // Group by category (cats order)
+  if(fc)filtered=filtered.filter(p=>p.category===fc);
+  if(fn)filtered=filtered.filter(p=>p.name.toLowerCase().includes(fn)||(p.detail||'').toLowerCase().includes(fn));
   const grouped={};
   cats.forEach(c=>{grouped[c]=[];});
   filtered.forEach(p=>{if(!grouped[p.category])grouped[p.category]=[];grouped[p.category].push(p);});
-
-  document.getElementById('prod-tree').innerHTML = cats.filter(c=>grouped[c]&&grouped[c].length>0).map(c=>{
-    const cidx=cats.indexOf(c);
-    return `<div class="cat-group">
+  document.getElementById('prod-tree').innerHTML=cats.filter(c=>grouped[c]&&grouped[c].length>0).map(c=>`
+    <div class="cat-group" style="margin-bottom:20px">
       <div class="cat-header" onclick="toggleCat(this)">
         <span class="cat-toggle open">▶</span>
         ${catBadge(c)}
@@ -1066,21 +986,19 @@ function renderProducts() {
       </div>
       <div class="cat-body">
         <div class="prod-row" style="background:rgba(0,0,0,.2)">
-          <div></div>
-          <div style="font-size:10px;color:var(--muted)">商品名</div>
+          <div></div><div style="font-size:10px;color:var(--muted)">商品名</div>
           <div style="font-size:10px;color:var(--muted)">詳細</div>
           <div style="font-size:10px;color:var(--muted)">現在庫</div>
           <div style="font-size:10px;color:var(--muted)">適正量</div>
-          <div style="font-size:10px;color:var(--muted)">仕入先</div>
-          <div></div>
+          <div style="font-size:10px;color:var(--muted)">仕入先</div><div></div>
         </div>
         ${grouped[c].map(p=>`
           <div class="prod-row">
-            <div style="font-size:10px;color:var(--muted);text-align:center">${stockDot(p)}</div>
+            <div>${stockDot(p)}</div>
             <div><div style="font-size:12px">${p.name}</div></div>
             <div><span class="detail-badge">${p.detail||'—'}</span></div>
-            <div style="font-size:12px">${p.stock}${p.unit||'本'}</div>
-            <div style="font-size:12px">${p.target}${p.unit||'本'}</div>
+            <div>${p.stock}${p.unit||'本'}</div>
+            <div>${p.target}${p.unit||'本'}</div>
             <div style="font-size:11px;color:var(--muted)">${p.supplier||'—'}</div>
             <div style="display:flex;gap:5px">
               <button class="btn bg sm" onclick="openProd('${p.id}')">編集</button>
@@ -1088,24 +1006,18 @@ function renderProducts() {
             </div>
           </div>`).join('')}
       </div>
-    </div>`;
-  }).join('') || '<div style="text-align:center;color:var(--muted);padding:30px">商品が登録されていません</div>';
+    </div>`).join('')||'<div style="text-align:center;color:var(--muted);padding:30px">商品が登録されていません</div>';
 }
-
-function stockDot(p) {
+function stockDot(p){
   if(p.stock===0)return'<span style="color:var(--red)">●</span>';
   if(p.stock<=p.target)return'<span style="color:var(--orange)">●</span>';
   return'<span style="color:var(--green)">●</span>';
 }
-function toggleCat(el) {
-  const body=el.nextElementSibling;
-  const tog=el.querySelector('.cat-toggle');
-  const open=body.style.display!=='none';
-  body.style.display=open?'none':'block';
-  tog.classList.toggle('open',!open);
+function toggleCat(el){
+  const body=el.nextElementSibling,tog=el.querySelector('.cat-toggle'),open=body.style.display!=='none';
+  body.style.display=open?'none':'block';tog.classList.toggle('open',!open);
 }
-
-function openProd(id) {
+function openProd(id){
   document.getElementById('m-cat').innerHTML=cats.map(c=>`<option>${c}</option>`).join('');
   if(id){
     const p=prods.find(x=>x.id===id);if(!p)return;
@@ -1123,41 +1035,34 @@ function openProd(id) {
     document.getElementById('m-title').textContent='新規商品を追加';
     document.getElementById('m-id').value='';
     ['m-name','m-detail','m-sup','m-price'].forEach(i=>document.getElementById(i).value='');
-    document.getElementById('m-stock').value='0';
-    document.getElementById('m-target').value='';
+    document.getElementById('m-stock').value='0';document.getElementById('m-target').value='';
   }
   document.getElementById('prod-modal').classList.add('open');
 }
 function closeProd(){document.getElementById('prod-modal').classList.remove('open');}
-
-function saveProd() {
+function saveProd(){
   const name=document.getElementById('m-name').value.trim();
   if(!name){toast('商品名を入力してください','e');return;}
   const obj={name,detail:document.getElementById('m-detail').value.trim(),category:document.getElementById('m-cat').value,target:parseInt(document.getElementById('m-target').value)||0,unit:document.getElementById('m-unit').value,supplier:document.getElementById('m-sup').value.trim(),stock:parseInt(document.getElementById('m-stock').value)||0,price:parseInt(document.getElementById('m-price').value)||0};
   const eid=document.getElementById('m-id').value;
   if(eid){const idx=prods.findIndex(p=>p.id===eid);if(idx>=0)prods[idx]={...prods[idx],...obj};}
   else{prods.push({id:Date.now().toString(),...obj});if(obj.supplier&&!sups.includes(obj.supplier)){sups.push(obj.supplier);sv('nz_sups',sups);}}
-  sv('nz_prods',prods);
-  closeProd();renderProducts();
+  sv('nz_prods',prods);closeProd();renderProducts();renderDash();
   toast(eid?'商品を更新しました':'商品を追加しました');
-  renderDash();
 }
-
 function delProd(id){
   if(!confirm('この商品を削除しますか？'))return;
-  prods=prods.filter(p=>p.id!==id);sv('nz_prods',prods);renderProducts();toast('削除しました');
-  renderDash();
+  prods=prods.filter(p=>p.id!==id);sv('nz_prods',prods);renderProducts();renderDash();toast('削除しました');
 }
 
 // ── Report ─────────────────────────────────────────────────────────
-function renderReport() {
+function renderReport(){
   const sel=document.getElementById('rpt-month');
-  const now=new Date();
-  const months=[];
+  const now=new Date(),months=[];
   for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({val:ym(d),lbl:`${d.getFullYear()}年${d.getMonth()+1}月`});}
   const cur=sel.value||months[0].val;
   sel.innerHTML=months.map(m=>`<option value="${m.val}" ${m.val===cur?'selected':''}>${m.lbl}</option>`).join('');
-  const [y,m]=sel.value.split('-');
+  const[y,m]=sel.value.split('-');
   document.getElementById('rpt-period').textContent=`${y}年${parseInt(m)}月 仕入れ・在庫レポート`;
   const mDels=dels.filter(d=>d.date.startsWith(sel.value));
   const catT={},supT={},supC={};
@@ -1170,161 +1075,75 @@ function renderReport() {
   document.getElementById('rpt-det').innerHTML=rows.join('')||'<tr><td colspan="7" style="color:var(--muted)">データなし</td></tr>';
 }
 
-// ── Auto Deduction ─────────────────────────────────────────────────
-function calcDailyRate(p) {
-  const now = new Date();
-  let total = 0;
-  for(let m=1;m<=3;m++){
-    const d = new Date(now.getFullYear(), now.getMonth()-m, 1);
-    const k = ym(d);
-    dels.filter(dl=>dl.date.startsWith(k)).forEach(dl=>{
-      dl.items.forEach(i=>{
-        if(i.name===p.name && (i.detail||'')===(p.detail||'')) total+=(i.qty||0);
-      });
-    });
-  }
-  const monthlyAvg = total / 3;
-  return { monthlyAvg, dailyRate: monthlyAvg / 30 };
-}
-
-function runAutoDeduct(manual=false) {
-  const enabled = ld('nz_auto_deduct', false);
-  if(!enabled && !manual) return;
-
-  const today = new Date().toISOString().slice(0,10);
-  const lastDate = ld('nz_deduct_last', null);
-
-  if(!manual && lastDate === today) return; // 今日すでに実行済み
-
-  const daysElapsed = lastDate
-    ? Math.max(1, Math.floor((new Date(today)-new Date(lastDate))/(1000*60*60*24)))
-    : 1;
-
-  const log = [];
-  prods.forEach(p=>{
-    const {dailyRate} = calcDailyRate(p);
-    if(dailyRate <= 0) return;
-    const deduct = Math.round(dailyRate * daysElapsed * 10) / 10; // 小数1桁
-    const actual = Math.min(p.stock||0, Math.round(deduct));
-    if(actual > 0){
-      p.stock = Math.max(0, (p.stock||0) - actual);
-      log.push({name:p.name, detail:p.detail||'', deducted:actual});
-    }
-  });
-
-  sv('nz_prods', prods);
-  sv('nz_deduct_last', today);
-
-  // 減算ログを保存
-  const logs = ld('nz_deduct_log', []);
-  if(log.length>0) logs.push({date:today, days:daysElapsed, items:log});
-  sv('nz_deduct_log', logs.slice(-90)); // 90日分保持
-
-  if(manual){
-    toast(log.length>0 ? `${log.length}商品の在庫を自動減算しました` : '減算対象の商品がありません（発注履歴を確認してください）');
-    renderSettings();
-    renderDash();
-  } else if(log.length>0){
-    toast(`自動減算: ${log.length}商品 (${daysElapsed}日分)`);
-  }
-}
-
-function toggleAutoDeduct(el) {
-  sv('nz_auto_deduct', el.checked);
-  toast(el.checked ? '自動減算を有効にしました' : '自動減算を無効にしました');
-  renderSettings();
-}
-
-function resetAutoDeduct() {
-  if(!confirm('最終実行日をリセットしますか？\n次回アプリを開いたとき1日分の減算が実行されます。')) return;
-  localStorage.removeItem('nz_deduct_last');
-  toast('リセットしました');
-  renderSettings();
-}
-
-function renderDeductRates() {
-  const today = new Date().toISOString().slice(0,10);
-  const lastDate = ld('nz_deduct_last', null);
-  const daysElapsed = lastDate
-    ? Math.max(0, Math.floor((new Date(today)-new Date(lastDate))/(1000*60*60*24)))
-    : 1;
-
-  const rows = prods.map(p=>{
-    const {monthlyAvg, dailyRate} = calcDailyRate(p);
-    const today_deduct = Math.round(dailyRate * daysElapsed * 10)/10;
-    if(monthlyAvg===0) return null;
-    return `<tr>
-      <td>${p.name}</td>
-      <td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td>
-      <td>${catBadge(p.category)}</td>
-      <td class="tr">${monthlyAvg.toFixed(1)}${p.unit||'本'}/月</td>
-      <td class="tr" style="color:var(--gold)">${dailyRate.toFixed(2)}${p.unit||'本'}/日</td>
-      <td class="tr" style="color:${today_deduct>0?'var(--orange)':'var(--muted)'}">${today_deduct>0?'-'+today_deduct:'—'}</td>
-    </tr>`;
-  }).filter(Boolean);
-
-  document.getElementById('tb-deduct-rates').innerHTML = rows.join('')
-    || '<tr><td colspan="6" style="color:var(--muted);padding:16px;text-align:center">発注履歴がないと消費レートを計算できません</td></tr>';
-}
-
-  // ── Settings ───────────────────────────────────────────────────────
-function renderSettings() {
+// ── Settings ───────────────────────────────────────────────────────
+function renderSettings(){
   if(cfg.apiKey){document.getElementById('inp-api').value=cfg.apiKey;document.getElementById('api-st').textContent='✓ APIキーが設定されています';document.getElementById('api-st').style.color='var(--green)';}
-  if(cfg.gasUrl) document.getElementById('inp-gas').value=cfg.gasUrl;
-
-  // Auto deduction settings
-  const enabled = ld('nz_auto_deduct', false);
-  document.getElementById('auto-deduct-toggle').checked = enabled;
-  const lastRun = ld('nz_deduct_last', null);
-  document.getElementById('deduct-last-run').textContent = lastRun ? `最終実行: ${lastRun}` : '最終実行: 未実行';
+  if(cfg.gasUrl)document.getElementById('inp-gas').value=cfg.gasUrl;
+  const enabled=ld('nz_auto_deduct',false);
+  document.getElementById('auto-deduct-toggle').checked=enabled;
+  const lastRun=ld('nz_deduct_last',null);
+  document.getElementById('deduct-last-run').textContent=lastRun?`最終実行: ${lastRun}`:'最終実行: 未実行';
   renderDeductRates();
-
-  renderCatList();
-  renderSupList();
+  renderCatList();renderSupList();
 }
 
-// Dashboard deduction stat
-function renderDeductStat() {
-  const lastRun = ld('nz_deduct_last', null);
-  const enabled = ld('nz_auto_deduct', false);
-  const logs = ld('nz_deduct_log', []);
-  const last = logs[logs.length-1];
-  document.getElementById('s-deduct').textContent = enabled ? (lastRun ? lastRun.slice(5).replace('-','/') : '未実行') : 'OFF';
-  document.getElementById('s-deduct2').textContent = enabled
-    ? (last ? `前回 ${last.items.length}商品減算` : '自動減算 有効')
-    : '自動減算 無効';
+// ── Auto Deduction ─────────────────────────────────────────────────
+function calcDailyRate(p){
+  const now=new Date();let total=0;
+  for(let m=1;m<=3;m++){const d=new Date(now.getFullYear(),now.getMonth()-m,1);const k=ym(d);dels.filter(dl=>dl.date.startsWith(k)).forEach(dl=>dl.items.forEach(i=>{if(i.name===p.name&&(i.detail||'')===(p.detail||''))total+=(i.qty||0);}));}
+  return{monthlyAvg:total/3,dailyRate:total/3/30};
+}
+function runAutoDeduct(manual=false){
+  const enabled=ld('nz_auto_deduct',false);
+  if(!enabled&&!manual)return;
+  const today=new Date().toISOString().slice(0,10);
+  const lastDate=ld('nz_deduct_last',null);
+  if(!manual&&lastDate===today)return;
+  const daysElapsed=lastDate?Math.max(1,Math.floor((new Date(today)-new Date(lastDate))/(1000*60*60*24))):1;
+  const log=[];
+  prods.forEach(p=>{
+    const{dailyRate}=calcDailyRate(p);
+    if(dailyRate<=0)return;
+    const actual=Math.min(p.stock||0,Math.round(dailyRate*daysElapsed));
+    if(actual>0){p.stock=Math.max(0,(p.stock||0)-actual);log.push({name:p.name,deducted:actual});}
+  });
+  sv('nz_prods',prods);sv('nz_deduct_last',today);
+  const logs=ld('nz_deduct_log',[]);
+  if(log.length>0)logs.push({date:today,days:daysElapsed,items:log});
+  sv('nz_deduct_log',logs.slice(-90));
+  if(manual){toast(log.length>0?`${log.length}商品の在庫を自動減算しました`:'減算対象の商品がありません');renderSettings();renderDash();}
+  else if(log.length>0){toast(`自動減算: ${log.length}商品 (${daysElapsed}日分)`);}
+}
+function toggleAutoDeduct(el){sv('nz_auto_deduct',el.checked);toast(el.checked?'自動減算を有効にしました':'自動減算を無効にしました');renderSettings();}
+function resetAutoDeduct(){if(!confirm('最終実行日をリセットしますか？'))return;localStorage.removeItem('nz_deduct_last');toast('リセットしました');renderSettings();}
+function renderDeductRates(){
+  const today=new Date().toISOString().slice(0,10);
+  const lastDate=ld('nz_deduct_last',null);
+  const daysElapsed=lastDate?Math.max(0,Math.floor((new Date(today)-new Date(lastDate))/(1000*60*60*24))):1;
+  const rows=prods.map(p=>{
+    const{monthlyAvg,dailyRate}=calcDailyRate(p);
+    if(monthlyAvg===0)return null;
+    const td=Math.round(dailyRate*daysElapsed*10)/10;
+    return`<tr><td>${p.name}</td><td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td><td>${catBadge(p.category)}</td><td class="tr">${monthlyAvg.toFixed(1)}${p.unit||'本'}/月</td><td class="tr" style="color:var(--gold)">${dailyRate.toFixed(2)}${p.unit||'本'}/日</td><td class="tr" style="color:${td>0?'var(--orange)':'var(--muted)'}">${td>0?'-'+td:'—'}</td></tr>`;
+  }).filter(Boolean);
+  document.getElementById('tb-deduct-rates').innerHTML=rows.join('')||'<tr><td colspan="6" style="color:var(--muted);padding:16px;text-align:center">発注履歴がないと消費レートを計算できません</td></tr>';
 }
 
-// カテゴリ並び替え（上下ボタン）
-function renderCatList() {
-  document.getElementById('cat-list').innerHTML = cats.map((c,i)=>`
+function renderCatList(){
+  document.getElementById('cat-list').innerHTML=cats.map((c,i)=>`
     <div class="sort-row">
       <div style="display:flex;gap:4px;flex-direction:column">
-        <button class="btn bg sm" style="padding:2px 6px;font-size:10px;line-height:1" onclick="moveCat(${i},-1)" ${i===0?'disabled':''}>▲</button>
-        <button class="btn bg sm" style="padding:2px 6px;font-size:10px;line-height:1" onclick="moveCat(${i},1)" ${i===cats.length-1?'disabled':''}>▼</button>
+        <button class="btn bg sm" style="padding:2px 6px;line-height:1" onclick="moveCat(${i},-1)" ${i===0?'disabled':''}>▲</button>
+        <button class="btn bg sm" style="padding:2px 6px;line-height:1" onclick="moveCat(${i},1)" ${i===cats.length-1?'disabled':''}>▼</button>
       </div>
       <input type="text" value="${c}" oninput="cats[${i}]=this.value;sv('nz_cats',cats)" style="flex:1;padding:5px 8px;font-size:12px">
-      <span style="font-size:10px" class="badge cc-${i%8}">${c}</span>
+      <span class="badge cc-${i%8}">${c}</span>
       <button class="btn bd sm" onclick="removeCat(${i})">削除</button>
     </div>`).join('');
 }
-
-function moveCat(i,dir){
-  const j=i+dir;
-  if(j<0||j>=cats.length)return;
-  [cats[i],cats[j]]=[cats[j],cats[i]];
-  sv('nz_cats',cats);renderCatList();
-}
-function addCat(){
-  const v=document.getElementById('inp-cat').value.trim();
-  if(!v){toast('カテゴリ名を入力してください','e');return;}
-  if(cats.includes(v)){toast('すでに存在します','e');return;}
-  cats.push(v);sv('nz_cats',cats);document.getElementById('inp-cat').value='';renderCatList();toast('カテゴリを追加しました');
-}
-function removeCat(i){
-  if(!confirm(`「${cats[i]}」を削除しますか？`))return;
-  cats.splice(i,1);sv('nz_cats',cats);renderCatList();toast('削除しました');
-}
+function moveCat(i,dir){const j=i+dir;if(j<0||j>=cats.length)return;[cats[i],cats[j]]=[cats[j],cats[i]];sv('nz_cats',cats);renderCatList();}
+function addCat(){const v=document.getElementById('inp-cat').value.trim();if(!v){toast('カテゴリ名を入力してください','e');return;}if(cats.includes(v)){toast('すでに存在します','e');return;}cats.push(v);sv('nz_cats',cats);document.getElementById('inp-cat').value='';renderCatList();toast('カテゴリを追加しました');}
+function removeCat(i){if(!confirm(`「${cats[i]}」を削除しますか？`))return;cats.splice(i,1);sv('nz_cats',cats);renderCatList();toast('削除しました');}
 
 function renderSupList(){
   document.getElementById('sup-list').innerHTML=sups.map((s,i)=>`
@@ -1333,66 +1152,23 @@ function renderSupList(){
       <button class="btn bd sm" onclick="removeSup(${i})">削除</button>
     </div>`).join('');
 }
-function addSup(){
-  const v=document.getElementById('inp-sup2').value.trim();
-  if(!v){toast('仕入先名を入力してください','e');return;}
-  if(sups.includes(v)){toast('すでに存在します','e');return;}
-  sups.push(v);sv('nz_sups',sups);document.getElementById('inp-sup2').value='';renderSupList();toast('仕入先を追加しました');
-}
-function removeSup(i){
-  if(!confirm(`「${sups[i]}」を削除しますか？`))return;
-  sups.splice(i,1);sv('nz_sups',sups);renderSupList();toast('削除しました');
-}
+function addSup(){const v=document.getElementById('inp-sup2').value.trim();if(!v){toast('仕入先名を入力してください','e');return;}if(sups.includes(v)){toast('すでに存在します','e');return;}sups.push(v);sv('nz_sups',sups);document.getElementById('inp-sup2').value='';renderSupList();toast('仕入先を追加しました');}
+function removeSup(i){if(!confirm(`「${sups[i]}」を削除しますか？`))return;sups.splice(i,1);sv('nz_sups',sups);renderSupList();toast('削除しました');}
 
-function saveApiKey(){
-  const k=document.getElementById('inp-api').value.trim();
-  if(!k.startsWith('sk-')){toast('有効なAPIキーを入力してください','e');return;}
-  cfg.apiKey=k;sv('nz_cfg',cfg);document.getElementById('api-st').textContent='✓ 保存しました';document.getElementById('api-st').style.color='var(--green)';toast('APIキーを保存しました');
-}
+function saveApiKey(){const k=document.getElementById('inp-api').value.trim();if(!k.startsWith('sk-')){toast('有効なAPIキーを入力してください','e');return;}cfg.apiKey=k;sv('nz_cfg',cfg);document.getElementById('api-st').textContent='✓ 保存しました';document.getElementById('api-st').style.color='var(--green)';toast('APIキーを保存しました');}
 function saveGas(){cfg.gasUrl=document.getElementById('inp-gas').value.trim();sv('nz_cfg',cfg);toast('GAS URLを保存しました');}
 async function testGas(){if(!cfg.gasUrl){toast('GAS URLを入力してください','e');return;}try{await fetch(cfg.gasUrl);toast('接続成功');}catch{toast('接続に失敗しました','e');}}
 
-function exportData(){
-  const b=new Blob([JSON.stringify({prods,dels,stks,cats,sups},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`neutrize-${new Date().toISOString().slice(0,10)}.json`;a.click();toast('エクスポートしました');
-}
-function importData(inp){
-  const f=inp.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=e=>{
-    try{
-      const d=JSON.parse(e.target.result);
-      if(d.prods){prods=d.prods;sv('nz_prods',prods);}
-      if(d.dels){dels=d.dels;sv('nz_dels',dels);}
-      if(d.stks){stks=d.stks;sv('nz_stks',stks);}
-      if(d.cats){cats=d.cats;sv('nz_cats',cats);}
-      if(d.sups){sups=d.sups;sv('nz_sups',sups);}
-      toast('インポートしました');
-    }catch{toast('読み込みに失敗しました','e');}
-  };
-  r.readAsText(f);
-}
-function clearAll(){
-  if(!confirm('全データを削除しますか？\nこの操作は取り消せません。'))return;
-  ['nz_prods','nz_dels','nz_stks','nz_cats','nz_sups','nz_deduct_last','nz_deduct_log'].forEach(k=>localStorage.removeItem(k));
-  prods=[];dels=[];stks=[];cats=DEF_CATS;sups=DEF_SUPS;
-  toast('全データを削除しました');
-  renderDash();
-}
+function exportData(){const b=new Blob([JSON.stringify({prods,dels,stks,cats,sups},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`neutrize-${new Date().toISOString().slice(0,10)}.json`;a.click();toast('エクスポートしました');}
+function importData(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(d.prods){prods=d.prods;sv('nz_prods',prods);}if(d.dels){dels=d.dels;sv('nz_dels',dels);}if(d.stks){stks=d.stks;sv('nz_stks',stks);}if(d.cats){cats=d.cats;sv('nz_cats',cats);}if(d.sups){sups=d.sups;sv('nz_sups',sups);}toast('インポートしました');}catch{toast('読み込みに失敗しました','e');}};r.readAsText(f);}
+function clearAll(){if(!confirm('全データを削除しますか？\nこの操作は取り消せません。'))return;['nz_prods','nz_dels','nz_stks','nz_cats','nz_sups','nz_deduct_last','nz_deduct_log'].forEach(k=>localStorage.removeItem(k));prods=[];dels=[];stks=[];cats=DEF_CATS;sups=DEF_SUPS;toast('全データを削除しました');renderDash();}
 
-async function gasSync(data){
-  if(!cfg.gasUrl)return;
-  try{await fetch(cfg.gasUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});}catch(e){console.warn('GAS sync failed',e);}
-}
+async function gasSync(data){if(!cfg.gasUrl)return;try{await fetch(cfg.gasUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});}catch(e){console.warn('GAS sync failed',e);}}
 
-function toast(msg,t='s'){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.className=`show t${t}`;
-  setTimeout(()=>el.classList.remove('show'),2800);
-}
+function toast(msg,t='s'){const el=document.getElementById('toast');el.textContent=msg;el.className=`show t${t}`;setTimeout(()=>el.classList.remove('show'),2800);}
 
 // Init
-runAutoDeduct(); // アプリ起動時に自動実行（有効時のみ）
+runAutoDeduct();
 renderDash();
 </script>
 </body>
