@@ -123,6 +123,7 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     <div class="logo-en">NEUTRIZE</div>
     <div class="logo-ja">在庫管理システム</div>
   </div>
+  <div id="sync-status" style="font-size:10px;color:var(--muted);padding:8px 20px;letter-spacing:.06em;border-bottom:1px solid var(--bdr)"></div>
   <div id="nav">
     <div class="nl active" data-p="dashboard"><span class="ic">▣</span><span>ダッシュボード</span></div>
     <div class="nl" data-p="delivery"><span class="ic">📄</span><span>納品書解析</span></div>
@@ -326,6 +327,31 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
 <section id="p-settings" class="sec">
   <div class="ph"><div class="pt">設定</div><div class="ps">API・連携・マスタ管理</div></div>
   <div class="card">
+    <div class="ct">☁ Cloud Sync — JSONBin.io でデータをクラウド保存</div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.9">
+      <a href="https://jsonbin.io" target="_blank" style="color:var(--gold)">jsonbin.io</a> で無料アカウントを作成し、<br>
+      ① Master Keyを取得 → ② 新しいBinを作成（空の <code style="background:var(--sur2);padding:1px 4px">{}</code> で保存） → ③ 下に入力してください。<br>
+      <span style="color:var(--green)">✓ 設定後はどの端末からも同じデータを共有できます。</span>
+    </p>
+    <div class="fr">
+      <label>JSONBin Master Key（X-Master-Key）</label>
+      <div style="display:flex;gap:8px">
+        <input type="password" id="inp-jbkey" placeholder="$2b$10$..." style="flex:1">
+      </div>
+    </div>
+    <div class="fr">
+      <label>Bin ID</label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="inp-jbid" placeholder="64a1b2c3d4e5f6..." style="flex:1">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn bp" onclick="saveJsonbin()">保存</button>
+      <button class="btn bo" onclick="cloudLoad().then(ok=>{if(ok){renderDash();toast('クラウドからデータを読み込みました');}else{toast('読み込み失敗','e');}})">☁ 今すぐ同期</button>
+    </div>
+    <div id="jb-st" style="font-size:11px;margin-top:8px;color:var(--muted)"></div>
+  </div>
+  <div class="card">
     <div class="ct">Anthropic API Key — 納品書AI解析用</div>
     <p style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.9"><a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gold)">console.anthropic.com</a> でキーを取得してください。</p>
     <div style="display:flex;gap:8px">
@@ -381,7 +407,7 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
   </div>
   <div class="card">
     <div class="ct">Data Management — データ管理</div>
-    <p style="font-size:11px;color:var(--muted);margin-bottom:14px">全データはブラウザに保存されています。</p>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:14px">JSONエクスポートでバックアップ、インポートで復元できます。クラウド同期を設定すると全端末で自動共有されます。</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn bo" onclick="exportData()">📥 JSONエクスポート</button>
       <button class="btn bg" onclick="document.getElementById('imp-file').click()">📤 JSONインポート</button>
@@ -392,6 +418,19 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
 </section>
 
 </main>
+
+
+<!-- Confirm Modal -->
+<div class="mo" id="confirm-modal" onclick="">
+  <div class="mb" style="width:360px">
+    <div class="mt2" id="confirm-title" style="font-size:16px">確認</div>
+    <div id="confirm-msg" style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.8"></div>
+    <div class="ma">
+      <button class="btn bg" onclick="confirmResolve(false)">キャンセル</button>
+      <button class="btn bd" id="confirm-ok" onclick="confirmResolve(true)">削除する</button>
+    </div>
+  </div>
+</div>
 
 <!-- Product Modal -->
 <div class="mo" id="prod-modal" onclick="if(event.target===this)closeProd()">
@@ -462,9 +501,100 @@ let dels  = ld('nz_dels',  []);
 let stks  = ld('nz_stks',  []);
 let cats  = ld('nz_cats',  DEF_CATS);
 let sups  = ld('nz_sups',  DEF_SUPS);
-let cfg   = ld('nz_cfg',   { apiKey:'', gasUrl:'' });
+let cfg   = ld('nz_cfg',   { apiKey:'', gasUrl:'', jsonbinKey:'', jsonbinBinId:'', model:'claude-sonnet-4-5-20250514' });
 
 let curImg=null, extItems=[], charts={};
+
+
+
+// ── Custom Confirm Dialog ──────────────────────────────────────────
+let _confirmResolve = null;
+function showConfirm(msg, okLabel='削除する') {
+  return new Promise(resolve => {
+    _confirmResolve = resolve;
+    document.getElementById('confirm-msg').textContent = msg;
+    document.getElementById('confirm-ok').textContent = okLabel;
+    document.getElementById('confirm-modal').classList.add('open');
+  });
+}
+function confirmResolve(result) {
+  document.getElementById('confirm-modal').classList.remove('open');
+  if (_confirmResolve) { _confirmResolve(result); _confirmResolve = null; }
+}
+
+// ── Cloud Sync (JSONBin.io) ────────────────────────────────────────
+let _syncTimer = null;
+
+function showSyncStatus(state) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  const map = {
+    ok:      { text: '☁ 同期済み',   color: 'var(--green)' },
+    saving:  { text: '☁ 保存中...',  color: 'var(--gold)' },
+    loading: { text: '☁ 読込中...',  color: 'var(--gold)' },
+    error:   { text: '☁ 同期エラー', color: 'var(--red)' },
+    none:    { text: '☁ オフライン', color: 'var(--muted)' }
+  };
+  const s = map[state] || map.none;
+  el.textContent = s.text;
+  el.style.color = s.color;
+}
+
+async function cloudLoad() {
+  if (!cfg.jsonbinKey || !cfg.jsonbinBinId) return false;
+  showSyncStatus('loading');
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${cfg.jsonbinBinId}/latest`, {
+      headers: { 'X-Master-Key': cfg.jsonbinKey, 'X-Bin-Meta': 'false' }
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    let changed = false;
+    if (Array.isArray(data.prods)) { prods = data.prods; sv('nz_prods', prods); changed=true; }
+    if (Array.isArray(data.dels))  { dels  = data.dels;  sv('nz_dels',  dels);  changed=true; }
+    if (Array.isArray(data.stks))  { stks  = data.stks;  sv('nz_stks',  stks);  changed=true; }
+    if (Array.isArray(data.cats))  { cats  = data.cats;  sv('nz_cats',  cats);  changed=true; }
+    if (Array.isArray(data.sups))  { sups  = data.sups;  sv('nz_sups',  sups);  changed=true; }
+    showSyncStatus('ok');
+    return changed;
+  } catch(e) {
+    console.warn('Cloud load failed:', e);
+    showSyncStatus('error');
+    return false;
+  }
+}
+
+async function cloudSave() {
+  if (!cfg.jsonbinKey || !cfg.jsonbinBinId) return;
+  showSyncStatus('saving');
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${cfg.jsonbinBinId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': cfg.jsonbinKey },
+      body: JSON.stringify({ prods, dels, stks, cats, sups, _saved: new Date().toISOString() })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    showSyncStatus('ok');
+  } catch(e) {
+    console.warn('Cloud save failed:', e);
+    showSyncStatus('error');
+    toast('クラウド同期エラー: ' + e.message, 'e');
+  }
+}
+
+function scheduleCloudSave() {
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(cloudSave, 1500);
+}
+
+// データ保存 + クラウド同期をまとめる
+function svSync(k, v) {
+  sv(k, v);
+  // cfg は同期しない（APIキーを保護）
+  if (k !== 'nz_cfg' && k !== 'nz_auto_deduct' && k !== 'nz_deduct_last' && k !== 'nz_deduct_log') {
+    scheduleCloudSave();
+  }
+}
 
 // ── Navigation ─────────────────────────────────────────────────────
 document.querySelectorAll('.nl').forEach(el => {
@@ -633,9 +763,10 @@ function renderDelLog() {
   }));
   document.getElementById('tb-dellog').innerHTML=rows.join('')||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">今月の入庫データはありません</td></tr>';
 }
-function deleteDel(id) {
-  if(!confirm('この入庫データを削除しますか？\n（在庫数は自動で戻りません）'))return;
-  dels=dels.filter(d=>d.id!==id);sv('nz_dels',dels);
+async function deleteDel(id) {
+  const ok = await showConfirm('この入庫データを削除します。\n在庫数は自動で戻りません。');
+  if(!ok) return;
+  dels=dels.filter(d=>d.id!==id);svSync('nz_dels',dels);
   renderDelLog();renderDash();toast('削除しました');
 }
 
@@ -672,7 +803,7 @@ async function runAnalysis() {
         'anthropic-dangerous-direct-browser-access':'true'
       },
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
+        model: cfg.model || 'claude-sonnet-4-5-20250514',
         max_tokens:2000,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:curImg.mediaType,data:curImg.data}},
@@ -840,7 +971,7 @@ function registerDelivery() {
 
   const itemsToSave = extItems.map(i=>({...i}));
   dels.push({id:Date.now().toString(), date, supplier, items:itemsToSave});
-  sv('nz_dels', dels);
+  svSync('nz_dels', dels);
 
   // 在庫更新：linkedId優先 → 名前マッチでフォールバック
   let stockUpdated=0;
@@ -854,7 +985,7 @@ function registerDelivery() {
       stockUpdated++;
     }
   });
-  sv('nz_prods', prods);
+  svSync('nz_prods', prods);
   gasSync({type:'delivery', date, supplier, items:itemsToSave});
 
   toast(stockUpdated>0
@@ -905,9 +1036,9 @@ function saveStocktake() {
     }
   });
   if(updated.length===0){toast('変更がありません','e');return;}
-  sv('nz_prods',prods);
+  svSync('nz_prods',prods);
   stks.push({id:Date.now().toString(),date:new Date().toISOString().slice(0,10),items:updated});
-  sv('nz_stks',stks);
+  svSync('nz_stks',stks);
   gasSync({type:'stocktake',items:updated});
   toast(`${updated.length}件を更新しました`);
   renderStk();renderDash();
@@ -980,7 +1111,8 @@ function renderHistLogSelector() {
   const now=new Date(),months=[];
   for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({val:ym(d),lbl:`${d.getFullYear()}年${d.getMonth()+1}月`});}
   const cur=sel.value||months[0].val;
-  sel.innerHTML=months.map(m=>`<option value="${m.val}" ${m.val===cur?'selected':''}>${m.lbl}</option>`).join('');
+  sel.innerHTML=months.map(mo=>`<option value="${mo.val}" ${mo.val===cur?'selected':''}>${mo.lbl}</option>`).join('');
+  sel.value=cur;
 }
 function renderHistLog() {
   const sel=document.getElementById('hist-ym');if(!sel)return;
@@ -1024,20 +1156,23 @@ function toggleHistDetail(row) {
   const det=document.getElementById(`detail-${id}-${idx}`);
   if(det)det.style.display=det.style.display==='none'?'table-row':'none';
 }
-function deleteDelItem(delId,itemIdx) {
-  if(!confirm('この行を削除しますか？\n（在庫数は自動で戻りません）'))return;
+async function deleteDelItem(delId,itemIdx) {
+  const ok = await showConfirm('この行を削除します。\n在庫数は自動で戻りません。');
+  if(!ok) return;
   const d=dels.find(x=>x.id===delId);if(!d)return;
   d.items.splice(itemIdx,1);
   if(d.items.length===0)dels=dels.filter(x=>x.id!==delId);
-  sv('nz_dels',dels);
+  svSync('nz_dels',dels);
   renderHistLog();renderDelLog();renderDash();toast('削除しました');
 }
 
 // ── Products ───────────────────────────────────────────────────────
 function renderProducts() {
-  const fc=document.getElementById('flt-cat').value;
-  const fn=document.getElementById('flt-name').value.toLowerCase();
-  document.getElementById('flt-cat').innerHTML='<option value="">全カテゴリ</option>'+cats.map(c=>`<option ${c===fc?'selected':''}>${c}</option>`).join('');
+  const fltCatEl=document.getElementById('flt-cat');
+  const fc=fltCatEl?fltCatEl.value:'';
+  const fltNameEl=document.getElementById('flt-name');
+  const fn=fltNameEl?fltNameEl.value.toLowerCase():'';
+  if(fltCatEl)fltCatEl.innerHTML='<option value="">全カテゴリ</option>'+cats.map(c=>`<option ${c===fc?'selected':''}>${c}</option>`).join('');
   let filtered=prods;
   if(fc)filtered=filtered.filter(p=>p.category===fc);
   if(fn)filtered=filtered.filter(p=>p.name.toLowerCase().includes(fn)||(p.detail||'').toLowerCase().includes(fn));
@@ -1114,13 +1249,14 @@ function saveProd(){
   const obj={name,detail:document.getElementById('m-detail').value.trim(),category:document.getElementById('m-cat').value,target:parseInt(document.getElementById('m-target').value)||0,unit:document.getElementById('m-unit').value,supplier:document.getElementById('m-sup').value.trim(),stock:parseInt(document.getElementById('m-stock').value)||0,price:parseInt(document.getElementById('m-price').value)||0};
   const eid=document.getElementById('m-id').value;
   if(eid){const idx=prods.findIndex(p=>p.id===eid);if(idx>=0)prods[idx]={...prods[idx],...obj};}
-  else{prods.push({id:Date.now().toString(),...obj});if(obj.supplier&&!sups.includes(obj.supplier)){sups.push(obj.supplier);sv('nz_sups',sups);}}
-  sv('nz_prods',prods);closeProd();renderProducts();renderDash();
+  else{prods.push({id:Date.now().toString(),...obj});if(obj.supplier&&!sups.includes(obj.supplier)){sups.push(obj.supplier);svSync('nz_sups',sups);}}
+  svSync('nz_prods',prods);closeProd();renderProducts();renderDash();
   toast(eid?'商品を更新しました':'商品を追加しました');
 }
-function delProd(id){
-  if(!confirm('この商品を削除しますか？'))return;
-  prods=prods.filter(p=>p.id!==id);sv('nz_prods',prods);renderProducts();renderDash();toast('削除しました');
+async function delProd(id){
+  const ok = await showConfirm('この商品を削除します。', '削除する');
+  if(!ok) return;
+  prods=prods.filter(p=>p.id!==id);svSync('nz_prods',prods);renderProducts();renderDash();toast('削除しました');
 }
 
 // ── Report ─────────────────────────────────────────────────────────
@@ -1129,7 +1265,8 @@ function renderReport(){
   const now=new Date(),months=[];
   for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({val:ym(d),lbl:`${d.getFullYear()}年${d.getMonth()+1}月`});}
   const cur=sel.value||months[0].val;
-  sel.innerHTML=months.map(m=>`<option value="${m.val}" ${m.val===cur?'selected':''}>${m.lbl}</option>`).join('');
+  sel.innerHTML=months.map(mo=>`<option value="${mo.val}" ${mo.val===cur?'selected':''}>${mo.lbl}</option>`).join('');
+  sel.value=cur;
   const[y,m]=sel.value.split('-');
   document.getElementById('rpt-period').textContent=`${y}年${parseInt(m)}月 仕入れ・在庫レポート`;
   const mDels=dels.filter(d=>d.date.startsWith(sel.value));
@@ -1145,6 +1282,8 @@ function renderReport(){
 
 // ── Settings ───────────────────────────────────────────────────────
 function renderSettings(){
+  if(cfg.jsonbinKey){document.getElementById('inp-jbkey').value=cfg.jsonbinKey;}
+  if(cfg.jsonbinBinId){document.getElementById('inp-jbid').value=cfg.jsonbinBinId;document.getElementById('jb-st').textContent='✓ クラウド同期が設定されています';document.getElementById('jb-st').style.color='var(--green)';}
   if(cfg.apiKey){document.getElementById('inp-api').value=cfg.apiKey;document.getElementById('api-st').textContent='✓ APIキーが設定されています';document.getElementById('api-st').style.color='var(--green)';}
   if(cfg.gasUrl)document.getElementById('inp-gas').value=cfg.gasUrl;
   const enabled=ld('nz_auto_deduct',false);
@@ -1175,7 +1314,7 @@ function runAutoDeduct(manual=false){
     const actual=Math.min(p.stock||0,Math.round(dailyRate*daysElapsed));
     if(actual>0){p.stock=Math.max(0,(p.stock||0)-actual);log.push({name:p.name,deducted:actual});}
   });
-  sv('nz_prods',prods);sv('nz_deduct_last',today);
+  svSync('nz_prods',prods);sv('nz_deduct_last',today);
   const logs=ld('nz_deduct_log',[]);
   if(log.length>0)logs.push({date:today,days:daysElapsed,items:log});
   sv('nz_deduct_log',logs.slice(-90));
@@ -1183,7 +1322,7 @@ function runAutoDeduct(manual=false){
   else if(log.length>0){toast(`自動減算: ${log.length}商品 (${daysElapsed}日分)`);}
 }
 function toggleAutoDeduct(el){sv('nz_auto_deduct',el.checked);toast(el.checked?'自動減算を有効にしました':'自動減算を無効にしました');renderSettings();}
-function resetAutoDeduct(){if(!confirm('最終実行日をリセットしますか？'))return;localStorage.removeItem('nz_deduct_last');toast('リセットしました');renderSettings();}
+async function resetAutoDeduct(){const ok=await showConfirm('最終実行日をリセットします。','リセット');if(!ok)return;localStorage.removeItem('nz_deduct_last');toast('リセットしました');renderSettings();}
 function renderDeductRates(){
   const today=new Date().toISOString().slice(0,10);
   const lastDate=ld('nz_deduct_last',null);
@@ -1204,40 +1343,62 @@ function renderCatList(){
         <button class="btn bg sm" style="padding:2px 6px;line-height:1" onclick="moveCat(${i},-1)" ${i===0?'disabled':''}>▲</button>
         <button class="btn bg sm" style="padding:2px 6px;line-height:1" onclick="moveCat(${i},1)" ${i===cats.length-1?'disabled':''}>▼</button>
       </div>
-      <input type="text" value="${c}" oninput="cats[${i}]=this.value;sv('nz_cats',cats)" style="flex:1;padding:5px 8px;font-size:12px">
+      <input type="text" value="${c}" oninput="cats[${i}]=this.value;svSync('nz_cats',cats)" style="flex:1;padding:5px 8px;font-size:12px">
       <span class="badge cc-${i%8}">${c}</span>
       <button class="btn bd sm" onclick="removeCat(${i})">削除</button>
     </div>`).join('');
 }
-function moveCat(i,dir){const j=i+dir;if(j<0||j>=cats.length)return;[cats[i],cats[j]]=[cats[j],cats[i]];sv('nz_cats',cats);renderCatList();}
-function addCat(){const v=document.getElementById('inp-cat').value.trim();if(!v){toast('カテゴリ名を入力してください','e');return;}if(cats.includes(v)){toast('すでに存在します','e');return;}cats.push(v);sv('nz_cats',cats);document.getElementById('inp-cat').value='';renderCatList();toast('カテゴリを追加しました');}
-function removeCat(i){if(!confirm(`「${cats[i]}」を削除しますか？`))return;cats.splice(i,1);sv('nz_cats',cats);renderCatList();toast('削除しました');}
+function moveCat(i,dir){const j=i+dir;if(j<0||j>=cats.length)return;[cats[i],cats[j]]=[cats[j],cats[i]];svSync('nz_cats',cats);renderCatList();}
+function addCat(){const v=document.getElementById('inp-cat').value.trim();if(!v){toast('カテゴリ名を入力してください','e');return;}if(cats.includes(v)){toast('すでに存在します','e');return;}cats.push(v);svSync('nz_cats',cats);document.getElementById('inp-cat').value='';renderCatList();toast('カテゴリを追加しました');}
+async function removeCat(i){const ok=await showConfirm(`カテゴリ「${cats[i]}」を削除します。`);if(!ok)return;cats.splice(i,1);svSync('nz_cats',cats);renderCatList();toast('削除しました');}
 
 function renderSupList(){
   document.getElementById('sup-list').innerHTML=sups.map((s,i)=>`
     <div class="sort-row">
-      <input type="text" value="${s}" oninput="sups[${i}]=this.value;sv('nz_sups',sups)" style="flex:1;padding:5px 8px;font-size:12px">
+      <input type="text" value="${s}" oninput="sups[${i}]=this.value;svSync('nz_sups',sups)" style="flex:1;padding:5px 8px;font-size:12px">
       <button class="btn bd sm" onclick="removeSup(${i})">削除</button>
     </div>`).join('');
 }
-function addSup(){const v=document.getElementById('inp-sup2').value.trim();if(!v){toast('仕入先名を入力してください','e');return;}if(sups.includes(v)){toast('すでに存在します','e');return;}sups.push(v);sv('nz_sups',sups);document.getElementById('inp-sup2').value='';renderSupList();toast('仕入先を追加しました');}
-function removeSup(i){if(!confirm(`「${sups[i]}」を削除しますか？`))return;sups.splice(i,1);sv('nz_sups',sups);renderSupList();toast('削除しました');}
+function addSup(){const v=document.getElementById('inp-sup2').value.trim();if(!v){toast('仕入先名を入力してください','e');return;}if(sups.includes(v)){toast('すでに存在します','e');return;}sups.push(v);svSync('nz_sups',sups);document.getElementById('inp-sup2').value='';renderSupList();toast('仕入先を追加しました');}
+async function removeSup(i){const ok=await showConfirm(`仕入先「${sups[i]}」を削除します。`);if(!ok)return;sups.splice(i,1);svSync('nz_sups',sups);renderSupList();toast('削除しました');}
+
+
+function saveJsonbin() {
+  const key = document.getElementById('inp-jbkey').value.trim();
+  const bid = document.getElementById('inp-jbid').value.trim();
+  if (!key || !bid) { toast('Master KeyとBin IDを両方入力してください', 'e'); return; }
+  cfg.jsonbinKey = key;
+  cfg.jsonbinBinId = bid;
+  sv('nz_cfg', cfg);
+  document.getElementById('jb-st').textContent = '✓ 保存しました';
+  document.getElementById('jb-st').style.color = 'var(--green)';
+  toast('クラウド設定を保存しました');
+  cloudSave();
+}
 
 function saveApiKey(){const k=document.getElementById('inp-api').value.trim();if(!k.startsWith('sk-')){toast('有効なAPIキーを入力してください','e');return;}cfg.apiKey=k;sv('nz_cfg',cfg);document.getElementById('api-st').textContent='✓ 保存しました';document.getElementById('api-st').style.color='var(--green)';toast('APIキーを保存しました');}
 function saveGas(){cfg.gasUrl=document.getElementById('inp-gas').value.trim();sv('nz_cfg',cfg);toast('GAS URLを保存しました');}
 async function testGas(){if(!cfg.gasUrl){toast('GAS URLを入力してください','e');return;}try{await fetch(cfg.gasUrl);toast('接続成功');}catch{toast('接続に失敗しました','e');}}
 
 function exportData(){const b=new Blob([JSON.stringify({prods,dels,stks,cats,sups},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`neutrize-${new Date().toISOString().slice(0,10)}.json`;a.click();toast('エクスポートしました');}
-function importData(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(d.prods){prods=d.prods;sv('nz_prods',prods);}if(d.dels){dels=d.dels;sv('nz_dels',dels);}if(d.stks){stks=d.stks;sv('nz_stks',stks);}if(d.cats){cats=d.cats;sv('nz_cats',cats);}if(d.sups){sups=d.sups;sv('nz_sups',sups);}toast('インポートしました');}catch{toast('読み込みに失敗しました','e');}};r.readAsText(f);}
-function clearAll(){if(!confirm('全データを削除しますか？\nこの操作は取り消せません。'))return;['nz_prods','nz_dels','nz_stks','nz_cats','nz_sups','nz_deduct_last','nz_deduct_log'].forEach(k=>localStorage.removeItem(k));prods=[];dels=[];stks=[];cats=DEF_CATS;sups=DEF_SUPS;toast('全データを削除しました');renderDash();}
+function importData(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(d.prods){prods=d.prods;sv('nz_prods',prods);}if(d.dels){dels=d.dels;sv('nz_dels',dels);}if(d.stks){stks=d.stks;sv('nz_stks',stks);}if(d.cats){cats=d.cats;sv('nz_cats',cats);}if(d.sups){sups=d.sups;sv('nz_sups',sups);}scheduleCloudSave();toast('インポートしました（クラウドに同期中...）');}catch{toast('読み込みに失敗しました','e');}};r.readAsText(f);}
+async function clearAll(){const ok=await showConfirm('全データを削除します。\nこの操作は取り消せません。','全削除');if(!ok)return;['nz_prods','nz_dels','nz_stks','nz_cats','nz_sups','nz_deduct_last','nz_deduct_log'].forEach(k=>localStorage.removeItem(k));prods=[];dels=[];stks=[];cats=DEF_CATS;sups=DEF_SUPS;sv('nz_prods',prods);sv('nz_dels',dels);sv('nz_stks',stks);sv('nz_cats',cats);sv('nz_sups',sups);scheduleCloudSave();toast('全データを削除しました');renderDash();}
 
 async function gasSync(data){if(!cfg.gasUrl)return;try{await fetch(cfg.gasUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});}catch(e){console.warn('GAS sync failed',e);}}
 
 function toast(msg,t='s'){const el=document.getElementById('toast');el.textContent=msg;el.className=`show t${t}`;setTimeout(()=>el.classList.remove('show'),2800);}
 
 // Init
-try { runAutoDeduct(); } catch(e) { console.error('AutoDeduct init error:', e); }
-try { renderDash(); } catch(e) { console.error('Dashboard init error:', e); }
+async function init() {
+  if (cfg.jsonbinKey && cfg.jsonbinBinId) {
+    showSyncStatus('loading');
+    const loaded = await cloudLoad();
+    if (loaded) { renderDash(); }
+  }
+  try { runAutoDeduct(); } catch(e) { console.error('AutoDeduct init error:', e); }
+  try { renderDash(); } catch(e) { console.error('Dashboard init error:', e); }
+}
+init();
 </script>
 </body>
 </html>
