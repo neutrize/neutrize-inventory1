@@ -9,13 +9,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="NEUTRIZE">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{
-  --bg:#0e0e0e;--sur:#161616;--sur2:#1e1e1e;--bdr:#2a2a2a;
-  --gold:#c9a96e;--gold2:#8a7450;--txt:#e8e8e8;--muted:#666;
-  --red:#c45252;--orange:#c48a40;--green:#52a070;--blue:#5080c4;
-}
+:root{--bg:#0e0e0e;--sur:#161616;--sur2:#1e1e1e;--bdr:#2a2a2a;--gold:#c9a96e;--gold2:#8a7450;--txt:#e8e8e8;--muted:#666;--red:#c45252;--orange:#c48a40;--green:#52a070;--blue:#5080c4;}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--txt);font-family:'Noto Sans JP',sans-serif;font-size:13px;display:flex;min-height:100vh}
 #sidebar{width:200px;min-height:100vh;background:var(--sur);border-right:1px solid var(--bdr);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100}
@@ -27,6 +24,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans JP',sans-serif
 .nl:hover{color:var(--txt);background:rgba(201,169,110,.05)}
 .nl.active{color:var(--gold);background:rgba(201,169,110,.08);border-right:2px solid var(--gold)}
 .nl .ic{width:15px;text-align:center;font-size:14px}
+.nl-sync{border-top:1px solid var(--bdr);margin-top:auto}
 #main{margin-left:200px;flex:1;padding:32px;min-height:100vh}
 .sec{display:none}.sec.active{display:block}
 .ph{margin-bottom:28px}
@@ -69,8 +67,7 @@ input,select,textarea{background:var(--sur2);border:1px solid var(--bdr);color:v
 input:focus,select:focus,textarea:focus{border-color:var(--gold2)}
 select option{background:var(--sur2)}
 label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margin-bottom:5px}
-.fr{margin-bottom:14px}
-.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fr{margin-bottom:14px}.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .dz{border:1px dashed var(--bdr);padding:36px;text-align:center;cursor:pointer;transition:all .2s}
 .dz:hover,.dz.drag{border-color:var(--gold2);background:rgba(201,169,110,.03)}
 #prev{max-width:100%;max-height:260px;margin-top:12px;display:none}
@@ -99,6 +96,9 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
 .fb{display:flex;justify-content:space-between;align-items:center}
 .mt12{margin-top:12px}.mt20{margin-top:20px}
 .g20{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+#loading-overlay{position:fixed;inset:0;background:rgba(14,14,14,.95);z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.spin{width:20px;height:20px;border:2px solid var(--bdr);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
 @media(max-width:768px){
   #sidebar{width:52px}
   .logo-en,.logo-ja,.nl span:not(.ic){display:none}
@@ -131,6 +131,7 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     <div class="nl" data-p="products"><span class="ic">☰</span><span>商品マスタ</span></div>
     <div class="nl" data-p="report"><span class="ic">📋</span><span>月次レポート</span></div>
     <div class="nl" data-p="settings"><span class="ic">⚙</span><span>設定</span></div>
+    <div class="nl nl-sync" id="btn-sync"><span class="ic">↻</span><span>同期する</span></div>
   </div>
 </aside>
 
@@ -155,16 +156,10 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     <tbody id="tb-val-cat"></tbody></table>
   </div>
   <div class="g20">
-    <div class="card">
-      <div class="ct">Supplier Cost — 仕入先別金額（今月）</div>
-      <table><thead><tr><th>仕入先</th><th class="tr">金額</th><th class="tr">比率</th></tr></thead>
-      <tbody id="tb-dash-sup"></tbody></table>
-    </div>
-    <div class="card">
-      <div class="ct">Category Cost — カテゴリ別金額（今月）</div>
-      <table><thead><tr><th>カテゴリ</th><th class="tr">金額</th><th class="tr">比率</th></tr></thead>
-      <tbody id="tb-dash-cat"></tbody></table>
-    </div>
+    <div class="card"><div class="ct">Supplier Cost — 仕入先別金額（今月）</div>
+      <table><thead><tr><th>仕入先</th><th class="tr">金額</th><th class="tr">比率</th></tr></thead><tbody id="tb-dash-sup"></tbody></table></div>
+    <div class="card"><div class="ct">Category Cost — カテゴリ別金額（今月）</div>
+      <table><thead><tr><th>カテゴリ</th><th class="tr">金額</th><th class="tr">比率</th></tr></thead><tbody id="tb-dash-cat"></tbody></table></div>
   </div>
   <div class="g20">
     <div class="card"><div class="ct">Monthly Purchase Trend</div><div class="cw"><canvas id="c-trend"></canvas></div></div>
@@ -195,9 +190,7 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
         <select id="del-sup" style="flex:1"></select>
         <input type="date" id="del-date" style="width:140px">
       </div>
-      <div class="mt12">
-        <button class="btn bp" id="btn-ana">✦ AI解析を実行</button>
-      </div>
+      <div class="mt12"><button class="btn bp" id="btn-ana">✦ AI解析を実行</button></div>
     </div>
     <div class="card">
       <div class="ct">Extracted Data — 解析結果</div>
@@ -229,12 +222,9 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
   <div class="card">
     <div class="ct">Manual Input — 在庫数と適正量を更新</div>
     <div style="display:grid;grid-template-columns:1fr 90px 60px 60px 90px 90px;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--bdr);margin-bottom:4px">
-      <div style="font-size:10px;color:var(--muted)">商品名</div>
-      <div style="font-size:10px;color:var(--muted)">詳細</div>
-      <div style="font-size:10px;color:var(--muted);text-align:center">現在庫</div>
-      <div style="font-size:10px;color:var(--muted);text-align:center">適正量</div>
-      <div style="font-size:10px;color:var(--muted);text-align:center">実数入力</div>
-      <div style="font-size:10px;color:var(--gold);text-align:center">適正量変更</div>
+      <div style="font-size:10px;color:var(--muted)">商品名</div><div style="font-size:10px;color:var(--muted)">詳細</div>
+      <div style="font-size:10px;color:var(--muted);text-align:center">現在庫</div><div style="font-size:10px;color:var(--muted);text-align:center">適正量</div>
+      <div style="font-size:10px;color:var(--muted);text-align:center">実数入力</div><div style="font-size:10px;color:var(--gold);text-align:center">適正量変更</div>
     </div>
     <div id="stk-list"></div>
     <div class="mt20 fb">
@@ -251,21 +241,12 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
     <div class="card"><div class="ct">Category Breakdown — カテゴリ別（今月）</div><div class="cw"><canvas id="c-cat"></canvas></div></div>
     <div class="card"><div class="ct">Supplier Breakdown — 仕入先別（今月）</div><div class="cw"><canvas id="c-sup"></canvas></div></div>
   </div>
-  <div class="card">
-    <div class="ct">Supplier Summary — 仕入先別合計</div>
-    <table><thead><tr><th>仕入先</th><th class="tr">今月金額</th><th class="tr">件数</th><th class="tr">3ヶ月累計</th><th>主なカテゴリ</th></tr></thead>
-    <tbody id="tb-sup-sum"></tbody></table>
-  </div>
-  <div class="card">
-    <div class="ct">Top Ordered — 発注量ランキング（今月）</div>
-    <table><thead><tr><th>順位</th><th>商品名</th><th>詳細</th><th>カテゴリ</th><th class="tr">数量</th><th class="tr">金額</th></tr></thead>
-    <tbody id="tb-top"></tbody></table>
-  </div>
-  <div class="card">
-    <div class="ct">Overstock Warning — 仕入れ過多チェック</div>
-    <table><thead><tr><th>商品名</th><th>詳細</th><th>今月仕入</th><th>3ヶ月平均</th><th>過多判定</th><th>推定滞留</th></tr></thead>
-    <tbody id="tb-over"></tbody></table>
-  </div>
+  <div class="card"><div class="ct">Supplier Summary — 仕入先別合計</div>
+    <table><thead><tr><th>仕入先</th><th class="tr">今月金額</th><th class="tr">件数</th><th class="tr">3ヶ月累計</th><th>主なカテゴリ</th></tr></thead><tbody id="tb-sup-sum"></tbody></table></div>
+  <div class="card"><div class="ct">Top Ordered — 発注量ランキング（今月）</div>
+    <table><thead><tr><th>順位</th><th>商品名</th><th>詳細</th><th>カテゴリ</th><th class="tr">数量</th><th class="tr">金額</th></tr></thead><tbody id="tb-top"></tbody></table></div>
+  <div class="card"><div class="ct">Overstock Warning — 仕入れ過多チェック</div>
+    <table><thead><tr><th>商品名</th><th>詳細</th><th>今月仕入</th><th>3ヶ月平均</th><th>過多判定</th><th>推定滞留</th></tr></thead><tbody id="tb-over"></tbody></table></div>
   <div class="card">
     <div class="ct">All Delivery Log — 全入庫履歴</div>
     <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
@@ -337,20 +318,13 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
       <button class="btn bp" id="btn-save-gas">保存</button>
       <button class="btn bg" id="btn-test-gas">接続テスト</button>
     </div>
-    <details>
-      <summary style="font-size:11px;color:var(--muted);cursor:pointer">GASコードを表示</summary>
-      <pre id="gas-code" style="background:var(--sur2);border:1px solid var(--bdr);padding:14px;font-size:10px;overflow-x:auto;margin-top:10px;line-height:1.7;color:#999;white-space:pre-wrap"></pre>
-    </details>
   </div>
   <div class="card">
     <div class="ct">Auto Deduction — 自動消費減算</div>
-    <p style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.9">過去3ヶ月の発注量をもとに1日あたりの推定消費量を計算し、毎日自動で在庫を減算します。発注履歴がない商品は減算されません。</p>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.9">過去3ヶ月の発注量をもとに1日あたりの推定消費量を計算し、毎日自動で在庫を減算します。</p>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px;background:var(--sur2);border:1px solid var(--bdr)">
       <input type="checkbox" id="auto-deduct-toggle" style="width:16px;height:16px;cursor:pointer">
-      <div>
-        <div style="font-size:12px">自動減算を有効にする</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px" id="deduct-last-run">最終実行: 未実行</div>
-      </div>
+      <div><div style="font-size:12px">自動減算を有効にする</div><div style="font-size:10px;color:var(--muted);margin-top:2px" id="deduct-last-run">最終実行: 未実行</div></div>
     </div>
     <table><thead><tr><th>商品名</th><th>詳細</th><th>カテゴリ</th><th class="tr">月平均</th><th class="tr">日次推定</th><th class="tr">今日の減算予定</th></tr></thead>
     <tbody id="tb-deduct-rates"></tbody></table>
@@ -377,7 +351,7 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
   </div>
   <div class="card">
     <div class="ct">Data Management — データ管理</div>
-    <p style="font-size:11px;color:var(--muted);margin-bottom:14px">全データはブラウザに保存されています。</p>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:14px">データはSupabase（クラウド）に保存・共有されています。</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn bo" id="btn-export">📥 JSONエクスポート</button>
       <button class="btn bg" id="btn-import-trigger">📤 JSONインポート</button>
@@ -398,13 +372,8 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
       <div class="fr"><label>カテゴリ *</label><select id="m-cat"></select></div>
       <div class="fr"><label>商品名 *</label><input type="text" id="m-name" placeholder="ミルボン オッジィオット シャンプー"></div>
       <div class="fr" style="grid-column:1/-1"><label>詳細（サイズ・仕様など）</label><input type="text" id="m-detail" placeholder="250ml / 1000ml など"></div>
-      <div class="fr">
-        <label>適正量（発注点）*</label>
-        <div style="display:flex;gap:6px">
-          <input type="number" id="m-target" min="0" placeholder="10" style="flex:1">
-          <select id="m-unit" style="width:70px"><option>本</option><option>袋</option><option>箱</option><option>個</option><option>缶</option><option>kg</option></select>
-        </div>
-      </div>
+      <div class="fr"><label>適正量（発注点）*</label>
+        <div style="display:flex;gap:6px"><input type="number" id="m-target" min="0" placeholder="10" style="flex:1"><select id="m-unit" style="width:70px"><option>本</option><option>袋</option><option>箱</option><option>個</option><option>缶</option><option>kg</option></select></div></div>
       <div class="fr"><label>仕入先</label><input type="text" id="m-sup" placeholder="〇〇商事"></div>
       <div class="fr"><label>現在庫数</label><input type="number" id="m-stock" min="0" placeholder="0"></div>
       <div class="fr"><label>単価（円）</label><input type="number" id="m-price" min="0" placeholder="1000"></div>
@@ -418,72 +387,94 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
 
 <div id="toast"></div>
 
+<!-- Loading Overlay -->
+<div id="loading-overlay">
+  <div style="font-family:'Cormorant Garamond',serif;font-size:24px;letter-spacing:.2em;color:var(--gold)">NEUTRIZE</div>
+  <div class="spin"></div>
+  <div style="font-size:11px;color:var(--muted);letter-spacing:.1em" id="loading-msg">データを読み込んでいます...</div>
+</div>
+
 <script>
 'use strict';
 
-// ── GAS code ───────────────────────────────────────────────────────
-document.getElementById('gas-code').textContent =
-`const SHEET_ID = 'YOUR_SPREADSHEET_ID';
-function doPost(e) {
-  try {
-    const data = JSON.parse(e.postData.contents);
-    const ss = SpreadsheetApp.openById(SHEET_ID);
-    if (data.type === 'delivery') {
-      const sh = ss.getSheetByName('入庫ログ') || ss.insertSheet('入庫ログ');
-      if (sh.getLastRow() === 0) sh.appendRow(['日付','仕入先','商品名','詳細','カテゴリ','数量','単価','小計']);
-      data.items.forEach(i => sh.appendRow([data.date,data.supplier,i.name,i.detail||'',i.category,i.qty,i.price,i.qty*i.price]));
-    }
-    if (data.type === 'stocktake') {
-      const sh = ss.getSheetByName('棚卸しログ') || ss.insertSheet('棚卸しログ');
-      if (sh.getLastRow() === 0) sh.appendRow(['日時','商品名','詳細','カテゴリ','在庫数','適正量']);
-      data.items.forEach(i => sh.appendRow([new Date(),i.name,i.detail||'',i.cat,i.stock,i.target]));
-    }
-    return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);
-  } catch(err) {
-    return ContentService.createTextOutput(JSON.stringify({status:'error',message:err.message})).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-function doGet() { return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON); }`;
+// ── Supabase ────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://phtjfowiblkqkrpvwgbw.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_9-LyOjsxbt2xx2Hmpps6lg_hRQPi6Lf';
+const sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ── Defaults ───────────────────────────────────────────────────────
+const showLoading = (show, msg='データを読み込んでいます...') => {
+  const el = document.getElementById('loading-overlay');
+  const ml = document.getElementById('loading-msg');
+  if(el) el.style.display = show ? 'flex' : 'none';
+  if(ml) ml.textContent = msg;
+};
+
+// ── Defaults ────────────────────────────────────────────────────────
 const DEF_CATS = ['シャンプー','トリートメント','カラー剤','薬剤','消耗品','備品'];
 const DEF_SUPS = ['共栄社','美薬株式会社','オッジィオット','その他'];
 
-// ── Storage ────────────────────────────────────────────────────────
-const ld = (k,d=null) => { try { const v=localStorage.getItem(k); return v?JSON.parse(v):d; } catch { return d; } };
-const sv = (k,v) => localStorage.setItem(k,JSON.stringify(v));
+// ── Storage ─────────────────────────────────────────────────────────
+// localStorage: config/settings のみ（端末ごと）
+const ldLocal = (k,d=null) => { try { const v=localStorage.getItem(k); return v?JSON.parse(v):d; } catch { return d; } };
+const svLocal = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+const ld = ldLocal; // alias
 
-// ── State ──────────────────────────────────────────────────────────
-let prods = ld('nz_prods', []);
-let dels  = ld('nz_dels',  []);
-let stks  = ld('nz_stks',  []);
-let cats  = ld('nz_cats',  DEF_CATS);
-let sups  = ld('nz_sups',  DEF_SUPS);
-let cfg   = ld('nz_cfg',   { apiKey:'', gasUrl:'' });
-let charts = {};
-let curImg = null;
-let extItems = []; // 解析結果（常にここを読む）
+// sv: localStorage + Supabase に保存
+const sv = (k,v) => {
+  svLocal(k, v);
+  sbClient.from('nz_data').upsert({key:k, value:v, updated_at:new Date().toISOString()})
+    .then(({error}) => { if(error) console.warn('Supabase save:', k, error); });
+};
 
-// ── Helpers ────────────────────────────────────────────────────────
+// loadAll: Supabase から全データを取得
+const loadAll = async () => {
+  try {
+    const {data, error} = await sbClient.from('nz_data').select('*');
+    if(error) throw error;
+    const map = {};
+    data.forEach(row => { map[row.key] = row.value; svLocal(row.key, row.value); });
+    prods = map['nz_prods'] !== undefined ? map['nz_prods'] : ldLocal('nz_prods', []);
+    dels  = map['nz_dels']  !== undefined ? map['nz_dels']  : ldLocal('nz_dels',  []);
+    stks  = map['nz_stks']  !== undefined ? map['nz_stks']  : ldLocal('nz_stks',  []);
+    cats  = map['nz_cats']  !== undefined ? map['nz_cats']  : ldLocal('nz_cats',  DEF_CATS);
+    sups  = map['nz_sups']  !== undefined ? map['nz_sups']  : ldLocal('nz_sups',  DEF_SUPS);
+    return true;
+  } catch(e) {
+    console.warn('Supabase load failed, using cache:', e);
+    prods = ldLocal('nz_prods', []);
+    dels  = ldLocal('nz_dels',  []);
+    stks  = ldLocal('nz_stks',  []);
+    cats  = ldLocal('nz_cats',  DEF_CATS);
+    sups  = ldLocal('nz_sups',  DEF_SUPS);
+    return false;
+  }
+};
+
+const syncNow = async () => {
+  showLoading(true, '同期中...');
+  const ok = await loadAll();
+  showLoading(false);
+  toast(ok ? 'データを同期しました' : 'オフライン — キャッシュを使用中', ok?'s':'e');
+  renderDash();
+  const active = document.querySelector('.nl.active');
+  if(active && active.dataset.p) render(active.dataset.p);
+};
+
+// ── State ────────────────────────────────────────────────────────────
+let prods=[], dels=[], stks=[], cats=DEF_CATS, sups=DEF_SUPS;
+let cfg   = ldLocal('nz_cfg', {apiKey:'', gasUrl:''});
+let charts={}, curImg=null, extItems=[];
+
+// ── Helpers ─────────────────────────────────────────────────────────
 const ym = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 const catBadge = cat => { const i=cats.indexOf(cat); return `<span class="badge cc-${i>=0?i%8:5}">${cat||'—'}</span>`; };
-const stockBadge = p => {
-  if(p.stock===0) return '<span class="badge out">欠品</span>';
-  if(p.stock<=p.target) return '<span class="badge low">要発注</span>';
-  return (p.target>0&&p.stock>p.target*2) ? '<span class="badge over">過多</span>' : '<span class="badge ok">適正</span>';
-};
+const stockBadge = p => { if(p.stock===0)return'<span class="badge out">欠品</span>';if(p.stock<=p.target)return'<span class="badge low">要発注</span>';return(p.target>0&&p.stock>p.target*2)?'<span class="badge over">過多</span>':'<span class="badge ok">適正</span>'; };
 const $ = id => document.getElementById(id);
-const toast = (msg,t='s') => {
-  const el=$('toast'); el.textContent=msg; el.className=`show t${t}`;
-  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),3000);
-};
-const gasSync = async data => {
-  if(!cfg.gasUrl) return;
-  try { await fetch(cfg.gasUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}); } catch(e) { console.warn('GAS:',e); }
-};
+const toast = (msg,t='s') => { const el=$('toast');el.textContent=msg;el.className=`show t${t}`;clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3000); };
+const gasSync = async data => { if(!cfg.gasUrl)return;try{await fetch(cfg.gasUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});}catch(e){console.warn('GAS:',e);} };
 
-// ── Navigation ─────────────────────────────────────────────────────
-document.querySelectorAll('.nl').forEach(el => {
+// ── Navigation ───────────────────────────────────────────────────────
+document.querySelectorAll('.nl[data-p]').forEach(el => {
   el.addEventListener('click', () => {
     document.querySelectorAll('.nl').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.sec').forEach(x=>x.classList.remove('active'));
@@ -502,310 +493,192 @@ const render = p => {
   if(p==='settings')  renderSettings();
 };
 
-// ── Stock value ────────────────────────────────────────────────────
-const calcStockValue = () => {
-  const byCat={};
-  cats.forEach(c=>{byCat[c]={val:0,cnt:0};});
-  prods.forEach(p=>{
-    const v=(p.stock||0)*(p.price||0);
-    if(!byCat[p.category])byCat[p.category]={val:0,cnt:0};
-    byCat[p.category].val+=v; byCat[p.category].cnt+=(p.stock||0);
-  });
-  return {byCat, total:Object.values(byCat).reduce((s,v)=>s+v.val,0)};
-};
+// ── Stock Value ──────────────────────────────────────────────────────
+const calcStockValue = () => { const byCat={};cats.forEach(c=>{byCat[c]={val:0,cnt:0};});prods.forEach(p=>{const v=(p.stock||0)*(p.price||0);if(!byCat[p.category])byCat[p.category]={val:0,cnt:0};byCat[p.category].val+=v;byCat[p.category].cnt+=(p.stock||0);});return{byCat,total:Object.values(byCat).reduce((s,v)=>s+v.val,0)}; };
 const renderStockValueTable = (tbodyId,totalId,statId) => {
   const {byCat,total}=calcStockValue();
-  if($(totalId)) $(totalId).textContent='¥'+total.toLocaleString();
-  if(statId&&$(statId)) $(statId).textContent=total.toLocaleString();
-  const rows=cats.filter(c=>byCat[c]&&byCat[c].val>0).map(c=>{
-    const {val,cnt}=byCat[c],pct=total>0?Math.round(val/total*100):0;
-    return `<tr><td>${catBadge(c)}</td><td class="tr" style="color:var(--gold)">¥${val.toLocaleString()}</td><td class="tr" style="color:var(--muted)">${cnt}点</td>
-      <td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:4px;background:var(--bdr);max-width:120px"><div style="height:100%;width:${pct}%;background:var(--gold)"></div></div><span style="font-size:10px">${pct}%</span></div></td></tr>`;
-  });
-  if($(tbodyId)) $(tbodyId).innerHTML=rows.join('')||'<tr><td colspan="4" style="color:var(--muted);padding:14px">商品マスタに単価を登録してください</td></tr>';
+  if($(totalId))$(totalId).textContent='¥'+total.toLocaleString();
+  if(statId&&$(statId))$(statId).textContent=total.toLocaleString();
+  const rows=cats.filter(c=>byCat[c]&&byCat[c].val>0).map(c=>{const{val,cnt}=byCat[c],pct=total>0?Math.round(val/total*100):0;return`<tr><td>${catBadge(c)}</td><td class="tr" style="color:var(--gold)">¥${val.toLocaleString()}</td><td class="tr" style="color:var(--muted)">${cnt}点</td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:4px;background:var(--bdr);max-width:120px"><div style="height:100%;width:${pct}%;background:var(--gold)"></div></div><span style="font-size:10px">${pct}%</span></div></td></tr>`;});
+  if($(tbodyId))$(tbodyId).innerHTML=rows.join('')||'<tr><td colspan="4" style="color:var(--muted);padding:14px">商品マスタに単価を登録してください</td></tr>';
 };
 
-// ── Dashboard ──────────────────────────────────────────────────────
+// ── Dashboard ────────────────────────────────────────────────────────
 const renderDash = () => {
-  const now=new Date(), cur=ym(now);
+  const now=new Date(),cur=ym(now);
   $('s-items').textContent=prods.length;
   $('s-alerts').textContent=prods.filter(p=>p.stock<=p.target).length;
   const mDels=dels.filter(d=>d.date.startsWith(cur));
   $('s-month').textContent=mDels.reduce((s,d)=>s+d.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0).toLocaleString();
   renderStockValueTable('tb-val-cat','dash-val-total','s-val');
-
-  // 仕入先別・カテゴリ別
   const supT={},catT={};
-  mDels.forEach(d=>d.items.forEach(i=>{
-    supT[d.supplier]=(supT[d.supplier]||0)+(i.qty||0)*(i.price||0);
-    catT[i.category]=(catT[i.category]||0)+(i.qty||0)*(i.price||0);
-  }));
-  const supG=Object.values(supT).reduce((s,v)=>s+v,0);
-  const catG=Object.values(catT).reduce((s,v)=>s+v,0);
-  const makeBar=(a,g)=>`<div style="display:flex;align-items:center;gap:6px;justify-content:flex-end"><div style="width:50px;height:3px;background:var(--bdr)"><div style="height:100%;width:${g>0?Math.round(a/g*100):0}%;background:var(--gold)"></div></div><span style="font-size:10px">${g>0?Math.round(a/g*100):0}%</span></div>`;
-  $('tb-dash-sup').innerHTML=Object.keys(supT).length===0?'<tr><td colspan="3" style="color:var(--muted);padding:16px;text-align:center">今月データなし</td></tr>':Object.entries(supT).sort((a,b)=>b[1]-a[1]).map(([s,a])=>`<tr><td>${s}</td><td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td><td class="tr">${makeBar(a,supG)}</td></tr>`).join('');
-  $('tb-dash-cat').innerHTML=Object.keys(catT).length===0?'<tr><td colspan="3" style="color:var(--muted);padding:16px;text-align:center">今月データなし</td></tr>':Object.entries(catT).sort((a,b)=>b[1]-a[1]).map(([c,a])=>`<tr><td>${catBadge(c)}</td><td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td><td class="tr">${makeBar(a,catG)}</td></tr>`).join('');
-
-  // Trend
+  mDels.forEach(d=>d.items.forEach(i=>{supT[d.supplier]=(supT[d.supplier]||0)+(i.qty||0)*(i.price||0);catT[i.category]=(catT[i.category]||0)+(i.qty||0)*(i.price||0);}));
+  const supG=Object.values(supT).reduce((s,v)=>s+v,0),catG=Object.values(catT).reduce((s,v)=>s+v,0);
+  const mkBar=(a,g)=>`<div style="display:flex;align-items:center;gap:6px;justify-content:flex-end"><div style="width:50px;height:3px;background:var(--bdr)"><div style="height:100%;width:${g>0?Math.round(a/g*100):0}%;background:var(--gold)"></div></div><span style="font-size:10px">${g>0?Math.round(a/g*100):0}%</span></div>`;
+  $('tb-dash-sup').innerHTML=Object.keys(supT).length===0?'<tr><td colspan="3" style="color:var(--muted);padding:16px;text-align:center">今月データなし</td></tr>':Object.entries(supT).sort((a,b)=>b[1]-a[1]).map(([s,a])=>`<tr><td>${s}</td><td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td><td class="tr">${mkBar(a,supG)}</td></tr>`).join('');
+  $('tb-dash-cat').innerHTML=Object.keys(catT).length===0?'<tr><td colspan="3" style="color:var(--muted);padding:16px;text-align:center">今月データなし</td></tr>':Object.entries(catT).sort((a,b)=>b[1]-a[1]).map(([c,a])=>`<tr><td>${catBadge(c)}</td><td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td><td class="tr">${mkBar(a,catG)}</td></tr>`).join('');
   const months=[],amounts=[];
   for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push(`${d.getMonth()+1}月`);amounts.push(dels.filter(dl=>dl.date.startsWith(ym(d))).reduce((s,dl)=>s+dl.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0));}
   try{if(charts.trend)charts.trend.destroy();const c=$('c-trend');if(c)charts.trend=new Chart(c,{type:'bar',data:{labels:months,datasets:[{data:amounts,backgroundColor:'rgba(201,169,110,.35)',borderColor:'#c9a96e',borderWidth:1}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{color:'#222'},ticks:{color:'#555',font:{size:10}}},y:{grid:{color:'#222'},ticks:{color:'#555',font:{size:10},callback:v=>v.toLocaleString()}}}}});}catch(e){console.error(e);}
-
-  // Alerts
   const alertP=prods.filter(p=>p.stock<=p.target);
   $('alert-list').innerHTML=alertP.length===0?'<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px 0">要発注商品はありません</div>':alertP.map(p=>`<div class="ali"><div><div>${p.name}${p.detail?` <span class="detail-badge">${p.detail}</span>`:''}</div><div style="font-size:10px;color:var(--muted)">${p.category}</div></div><div style="text-align:right"><div style="color:var(--orange)">${p.stock}${p.unit||'本'}</div><div style="font-size:10px;color:var(--muted)">適正: ${p.target}</div></div></div>`).join('');
-
-  // Stock table
   $('tb-stock').innerHTML=prods.map(p=>{const r=p.target>0?Math.round(p.stock/p.target*100):100,bc=r<50?'var(--red)':r<100?'var(--orange)':'var(--green)';return`<tr><td>${catBadge(p.category)}</td><td>${p.name}</td><td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td><td>${p.stock}${p.unit||'本'}</td><td>${p.target}${p.unit||'本'}</td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:3px;background:var(--bdr);max-width:60px"><div style="height:100%;width:${Math.min(r,100)}%;background:${bc}"></div></div><span style="font-size:11px">${r}%</span></div></td><td>${stockBadge(p)}</td></tr>`;}).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">商品マスタに商品を登録してください</td></tr>';
 };
 
-// ── Delivery ───────────────────────────────────────────────────────
-const renderDel = () => {
-  const sel=$('del-sup');
-  sel.innerHTML='<option value="">仕入先を選択</option>'+sups.map(s=>`<option>${s}</option>`).join('');
-  $('del-date').value=new Date().toISOString().slice(0,10);
-  renderDelLog();
-};
+// ── Delivery ─────────────────────────────────────────────────────────
+const renderDel = () => { const sel=$('del-sup');sel.innerHTML='<option value="">仕入先を選択</option>'+sups.map(s=>`<option>${s}</option>`).join('');$('del-date').value=new Date().toISOString().slice(0,10);renderDelLog(); };
 const renderDelLog = () => {
   const cur=ym(new Date()),rows=[];
-  dels.filter(d=>d.date.startsWith(cur)).forEach(d=>d.items.forEach(i=>{
-    rows.push(`<tr><td>${d.date}</td><td style="font-size:11px">${d.supplier}</td><td>${i.name}</td><td style="font-size:10px;color:var(--muted)">${i.detail||'—'}</td><td>${catBadge(i.category)}</td><td>${i.qty}${i.unit||''}</td><td>¥${(i.price||0).toLocaleString()}</td><td class="tr">¥${((i.qty||0)*(i.price||0)).toLocaleString()}</td><td><button class="btn bd sm" data-del-id="${d.id}">削除</button></td></tr>`);
-  }));
+  dels.filter(d=>d.date.startsWith(cur)).forEach(d=>d.items.forEach(i=>{rows.push(`<tr><td>${d.date}</td><td style="font-size:11px">${d.supplier}</td><td>${i.name}</td><td style="font-size:10px;color:var(--muted)">${i.detail||'—'}</td><td>${catBadge(i.category)}</td><td>${i.qty}${i.unit||''}</td><td>¥${(i.price||0).toLocaleString()}</td><td class="tr">¥${((i.qty||0)*(i.price||0)).toLocaleString()}</td><td><button class="btn bd sm" data-del-id="${d.id}">削除</button></td></tr>`);}));
   $('tb-dellog').innerHTML=rows.join('')||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">今月の入庫データはありません</td></tr>';
 };
+const loadImg = file => { const r=new FileReader();r.onload=e=>{curImg={data:e.target.result.split(',')[1],mediaType:file.type||'image/jpeg'};const img=$('prev');img.src=e.target.result;img.style.display='block';$('dz-inner').style.display='none';};r.readAsDataURL(file); };
 
-// ── Image load ─────────────────────────────────────────────────────
-const loadImg = file => {
-  const r=new FileReader();
-  r.onload=e=>{
-    curImg={data:e.target.result.split(',')[1],mediaType:file.type||'image/jpeg'};
-    const img=$('prev'); img.src=e.target.result; img.style.display='block';
-    $('dz-inner').style.display='none';
-  };
-  r.readAsDataURL(file);
-};
-
-// ── AI Analysis ────────────────────────────────────────────────────
 const runAnalysis = async () => {
   if(!curImg){toast('納品書の写真を選択してください','e');return;}
   if(!cfg.apiKey){toast('設定画面でAPIキーを入力してください','e');return;}
-  const btn=$('btn-ana'); btn.textContent='解析中...'; btn.disabled=true;
+  const btn=$('btn-ana');btn.textContent='解析中...';btn.disabled=true;
   $('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">AIが解析中...</div>';
   $('reg-wrap').style.display='none';
   try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'x-api-key':cfg.apiKey,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:[
-        {type:'image',source:{type:'base64',media_type:curImg.mediaType,data:curImg.data}},
-        {type:'text',text:`あなたは日本の美容サロン向け納品書・請求書の読み取り専門AIです。
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'x-api-key':cfg.apiKey,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:curImg.mediaType,data:curImg.data}},{type:'text',text:`あなたは日本の美容サロン向け納品書・請求書の読み取り専門AIです。
 画像を注意深く読み取り、以下のJSON形式のみで返答してください。説明文・コードブロック不要。
-
 {"supplier":"仕入先名","date":"YYYY-MM-DD","items":[{"name":"商品名","detail":"サイズや仕様","category":"カテゴリ","qty":数量,"unit":"本","price":単価}]}
-
 ・商品名は画像の文字をそのままコピー（省略・翻訳禁止）
-・detailにはサイズ等を入れる。なければ空文字
+・detailにはサイズ等。なければ空文字
 ・仕入先は画像から読む（不明なら空文字）
-・数量は1行ごとの個別の数（合計と混同しない）
+・数量は1行ごとの個別の数
 ・単価は1本あたりの価格（小計・合計と混同しない）
 ・全行を漏れなく抽出
 ・日付はYYYY-MM-DD（不明なら今日）
-・カテゴリ: ${cats.join('/')}`}
-      ]}]})
-    });
+・カテゴリ: ${cats.join('/')}`}]}]})});
     if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${res.status}`);}
     const data=await res.json();
     const text=data.content[0].text;
     let parsed;
     try{const m=text.match(/\{[\s\S]*\}/);parsed=JSON.parse(m?m[0]:text);}catch{throw new Error('JSON解析失敗');}
     extItems=(parsed.items||[]).map(i=>({name:i.name||'',detail:i.detail||'',category:i.category||cats[0],qty:Number(i.qty)||0,unit:i.unit||'本',price:Number(i.price)||0,linkedId:undefined}));
-    if(parsed.supplier){
-      const sel=$('del-sup'),exists=[...sel.options].some(o=>o.value===parsed.supplier);
-      if(!exists){const opt=document.createElement('option');opt.value=opt.textContent=parsed.supplier+'（解析）';sel.appendChild(opt);sel.value=opt.value;}
-      else sel.value=parsed.supplier;
-    }
-    if(parsed.date) $('del-date').value=parsed.date;
+    if(parsed.supplier){const sel=$('del-sup'),exists=[...sel.options].some(o=>o.value===parsed.supplier);if(!exists){const opt=document.createElement('option');opt.value=opt.textContent=parsed.supplier+'（解析）';sel.appendChild(opt);sel.value=opt.value;}else sel.value=parsed.supplier;}
+    if(parsed.date)$('del-date').value=parsed.date;
     if(extItems.length===0){$('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品が検出できませんでした</div>';}
     else{renderEditItems();$('reg-wrap').style.display='block';}
-  }catch(e){
-    $('ana-result').innerHTML=`<div style="color:var(--red);font-size:12px;padding:14px;background:rgba(196,82,82,.05);border:1px solid rgba(196,82,82,.2)">エラー: ${e.message}</div>`;
-  }finally{btn.textContent='✦ AI解析を実行';btn.disabled=false;}
+  }catch(e){$('ana-result').innerHTML=`<div style="color:var(--red);font-size:12px;padding:14px;background:rgba(196,82,82,.05);border:1px solid rgba(196,82,82,.2)">エラー: ${e.message}</div>`;}
+  finally{btn.textContent='✦ AI解析を実行';btn.disabled=false;}
 };
 
-// ── Edit items（解析結果UI）────────────────────────────────────────
-const autoMatch = (name,detail) => {
-  const n=(name+(detail||'')).toLowerCase().replace(/\s/g,'');
-  return prods.find(p=>p.name===name&&(p.detail||'')===(detail||''))
-    ||prods.find(p=>p.name===name)
-    ||prods.find(p=>{const pn=(p.name+(p.detail||'')).toLowerCase().replace(/\s/g,'');return pn===n||pn.includes(n)||n.includes(pn);})
-    ||null;
-};
+const autoMatch = (name,detail) => { const n=(name+(detail||'')).toLowerCase().replace(/\s/g,'');return prods.find(p=>p.name===name&&(p.detail||'')===(detail||''))||prods.find(p=>p.name===name)||prods.find(p=>{const pn=(p.name+(p.detail||'')).toLowerCase().replace(/\s/g,'');return pn===n||pn.includes(n)||n.includes(pn);})||null; };
 
 const renderEditItems = () => {
   extItems.forEach(item=>{if(item.linkedId===undefined){const m=autoMatch(item.name,item.detail);item.linkedId=m?m.id:'';}});
   const total=extItems.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
   $('ana-result').innerHTML=`
     <div style="font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:12px">解析結果 — 編集してから登録（${extItems.length}点）</div>
-    ${extItems.map((item,idx)=>{
-      const matched=prods.find(p=>p.id===item.linkedId);
-      return `<div style="border:1px solid var(--bdr);padding:12px;margin-bottom:8px">
-        <div style="font-size:10px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between">
-          <span># ${idx+1}</span>
-          <button class="btn bd sm" data-remove="${idx}">✕ 削除</button>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div style="grid-column:1/-1"><label>商品名</label>
-            <input type="text" value="${item.name.replace(/"/g,'&quot;')}" data-idx="${idx}" data-field="name"></div>
-          <div style="grid-column:1/-1"><label>詳細</label>
-            <input type="text" value="${(item.detail||'').replace(/"/g,'&quot;')}" data-idx="${idx}" data-field="detail"></div>
-          <div style="grid-column:1/-1">
-            <label style="display:flex;justify-content:space-between">
-              <span>登録商品との紐付け</span>
-              <span style="font-size:10px;color:${matched?'var(--green)':'var(--muted)'}">${matched?'✓ '+matched.name:'未紐付け'}</span>
-            </label>
-            <select data-idx="${idx}" data-field="linkedId" data-rerender="1">
-              <option value="">— 紐付けなし</option>
-              ${prods.map(p=>`<option value="${p.id}" ${p.id===item.linkedId?'selected':''}>${p.name}${p.detail?' / '+p.detail:''} [${p.stock}${p.unit||'本'}]</option>`).join('')}
-            </select>
-          </div>
-          <div><label>カテゴリ</label>
-            <select data-idx="${idx}" data-field="category">
-              ${cats.map(c=>`<option ${c===item.category?'selected':''}>${c}</option>`).join('')}
-            </select></div>
-          <div><label>単位</label>
-            <select data-idx="${idx}" data-field="unit">
-              ${['本','袋','箱','個','缶','kg'].map(u=>`<option ${u===(item.unit||'本')?'selected':''}>${u}</option>`).join('')}
-            </select></div>
-          <div><label>数量</label>
-            <input type="number" min="0" value="${item.qty}" data-idx="${idx}" data-field="qty"></div>
-          <div><label>単価（円）</label>
-            <input type="number" min="0" value="${item.price||0}" data-idx="${idx}" data-field="price"></div>
-        </div>
-        <div style="margin-top:8px;font-size:11px;color:var(--muted);text-align:right">小計 ¥${((item.qty||0)*(item.price||0)).toLocaleString()}</div>
-      </div>`;
-    }).join('')}
+    ${extItems.map((item,idx)=>{const matched=prods.find(p=>p.id===item.linkedId);return`<div style="border:1px solid var(--bdr);padding:12px;margin-bottom:8px">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between"><span># ${idx+1}</span><button class="btn bd sm" data-remove="${idx}">✕ 削除</button></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="grid-column:1/-1"><label>商品名</label><input type="text" value="${item.name.replace(/"/g,'&quot;')}" data-idx="${idx}" data-field="name"></div>
+        <div style="grid-column:1/-1"><label>詳細</label><input type="text" value="${(item.detail||'').replace(/"/g,'&quot;')}" data-idx="${idx}" data-field="detail"></div>
+        <div style="grid-column:1/-1"><label style="display:flex;justify-content:space-between"><span>登録商品との紐付け</span><span style="font-size:10px;color:${matched?'var(--green)':'var(--muted)'}">${matched?'✓ '+matched.name:'未紐付け'}</span></label>
+          <select data-idx="${idx}" data-field="linkedId" data-rerender="1"><option value="">— 紐付けなし</option>${prods.map(p=>`<option value="${p.id}" ${p.id===item.linkedId?'selected':''}>${p.name}${p.detail?' / '+p.detail:''} [${p.stock}${p.unit||'本'}]</option>`).join('')}</select></div>
+        <div><label>カテゴリ</label><select data-idx="${idx}" data-field="category">${cats.map(c=>`<option ${c===item.category?'selected':''}>${c}</option>`).join('')}</select></div>
+        <div><label>単位</label><select data-idx="${idx}" data-field="unit">${['本','袋','箱','個','缶','kg'].map(u=>`<option ${u===(item.unit||'本')?'selected':''}>${u}</option>`).join('')}</select></div>
+        <div><label>数量</label><input type="number" min="0" value="${item.qty}" data-idx="${idx}" data-field="qty"></div>
+        <div><label>単価（円）</label><input type="number" min="0" value="${item.price||0}" data-idx="${idx}" data-field="price"></div>
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted);text-align:right">小計 ¥${((item.qty||0)*(item.price||0)).toLocaleString()}</div>
+    </div>`;}).join('')}
     <button class="btn bg sm" data-add-item="1" style="margin-bottom:12px">＋ 行を追加</button>
     <div style="border-top:1px solid var(--bdr);padding-top:10px;display:flex;justify-content:space-between;font-size:12px">
       <span style="color:var(--muted)">合計</span><span style="color:var(--gold)">¥${total.toLocaleString()}</span>
     </div>`;
 };
 
-// ana-resultのイベントは親要素(card)で委譲 ─ INNERHTMLが変わっても消えない
-document.querySelector('#p-delivery .card:nth-child(2)').addEventListener('input', e => {
-  const el=e.target, idx=el.dataset.idx, field=el.dataset.field;
-  if(idx===undefined||!field) return;
-  const i=parseInt(idx);
-  extItems[i][field]=(field==='qty'||field==='price')?Number(el.value)||0:el.value;
+// 解析結果エリアのイベントは card 親要素で委譲
+document.querySelector('#p-delivery').addEventListener('input', e => {
+  const el=e.target,idx=el.dataset.idx,field=el.dataset.field;
+  if(idx===undefined||!field)return;
+  const i=parseInt(idx);if(!isNaN(i)&&extItems[i])extItems[i][field]=(field==='qty'||field==='price')?Number(el.value)||0:el.value;
 });
-document.querySelector('#p-delivery .card:nth-child(2)').addEventListener('change', e => {
-  const el=e.target, idx=el.dataset.idx, field=el.dataset.field;
-  if(idx===undefined||!field) return;
-  const i=parseInt(idx);
-  extItems[i][field]=(field==='qty'||field==='price')?Number(el.value)||0:el.value;
-  if(el.dataset.rerender) renderEditItems();
+document.querySelector('#p-delivery').addEventListener('change', e => {
+  const el=e.target,idx=el.dataset.idx,field=el.dataset.field;
+  if(idx===undefined||!field)return;
+  const i=parseInt(idx);if(!isNaN(i)&&extItems[i]){extItems[i][field]=(field==='qty'||field==='price')?Number(el.value)||0:el.value;if(el.dataset.rerender)renderEditItems();}
 });
-document.querySelector('#p-delivery .card:nth-child(2)').addEventListener('click', e => {
+document.querySelector('#p-delivery').addEventListener('click', e => {
   const rem=e.target.closest('[data-remove]');
   if(rem){const idx=parseInt(rem.dataset.remove);extItems.splice(idx,1);if(extItems.length===0){$('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品がありません</div>';$('reg-wrap').style.display='none';}else renderEditItems();return;}
   if(e.target.closest('[data-add-item]')){extItems.push({name:'',detail:'',category:cats[0]||'消耗品',qty:0,unit:'本',price:0,linkedId:''});renderEditItems();$('reg-wrap').style.display='block';}
 });
 
 const registerDelivery = () => {
-  const supplier=$('del-sup').value||'不明';
-  const date=$('del-date').value||new Date().toISOString().slice(0,10);
+  const supplier=$('del-sup').value||'不明',date=$('del-date').value||new Date().toISOString().slice(0,10);
   if(extItems.length===0){toast('登録する商品がありません','e');return;}
   const itemsToSave=extItems.map(i=>({...i}));
   dels.push({id:Date.now().toString(),date,supplier,items:itemsToSave});
   sv('nz_dels',dels);
-  let stockUpdated=0;
-  itemsToSave.forEach(item=>{
-    let p=item.linkedId?prods.find(p=>p.id===item.linkedId):null;
-    if(!p) p=prods.find(p=>p.name===item.name&&(p.detail||'')===(item.detail||''));
-    if(!p) p=prods.find(p=>p.name===item.name);
-    if(p){p.stock=(p.stock||0)+(item.qty||0);if(item.price>0)p.price=item.price;stockUpdated++;}
-  });
+  let upd=0;
+  itemsToSave.forEach(item=>{let p=item.linkedId?prods.find(p=>p.id===item.linkedId):null;if(!p)p=prods.find(p=>p.name===item.name&&(p.detail||'')===(item.detail||''));if(!p)p=prods.find(p=>p.name===item.name);if(p){p.stock=(p.stock||0)+(item.qty||0);if(item.price>0)p.price=item.price;upd++;}});
   sv('nz_prods',prods);
   gasSync({type:'delivery',date,supplier,items:itemsToSave});
-  toast(stockUpdated>0?`入庫を記録しました（在庫更新: ${stockUpdated}商品）`:'入庫を記録しました（在庫未更新 — 商品マスタを確認してください）');
+  toast(upd>0?`入庫を記録しました（在庫更新: ${upd}商品）`:'入庫を記録しました（在庫未更新 — 商品マスタを確認してください）');
   extItems=[];curImg=null;
   $('reg-wrap').style.display='none';
   $('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">納品書をアップロードすると<br>ここに解析結果が表示されます</div>';
-  $('prev').style.display='none'; $('dz-inner').style.display='block'; $('fi').value='';
-  renderDelLog(); renderDash();
+  $('prev').style.display='none';$('dz-inner').style.display='block';$('fi').value='';
+  renderDelLog();renderDash();
 };
 
-// ── Stocktake ──────────────────────────────────────────────────────
+// ── Stocktake ────────────────────────────────────────────────────────
 const renderStk = () => {
   renderStockValueTable('tb-stk-val','stk-val-total',null);
   const list=$('stk-list');
   if(prods.length===0){list.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:24px">商品マスタに商品を登録してください</div>';return;}
-  const grouped={};cats.forEach(c=>{grouped[c]=[];});
-  prods.forEach(p=>{if(!grouped[p.category])grouped[p.category]=[];grouped[p.category].push(p);});
+  const grouped={};cats.forEach(c=>{grouped[c]=[];});prods.forEach(p=>{if(!grouped[p.category])grouped[p.category]=[];grouped[p.category].push(p);});
   list.innerHTML=cats.filter(c=>grouped[c]&&grouped[c].length>0).map(c=>`
     <div style="font-size:10px;letter-spacing:.1em;color:var(--muted);padding:10px 0 4px;border-bottom:1px solid var(--bdr);margin-bottom:4px">${c}</div>
-    ${grouped[c].map(p=>`
-      <div class="ski" style="grid-template-columns:1fr 90px 60px 60px 90px 90px">
-        <div><div style="font-size:12px">${p.name}</div></div>
-        <div style="font-size:10px;color:var(--muted)">${p.detail||'—'}</div>
-        <div style="font-size:11px;color:var(--muted);text-align:center">${p.stock}</div>
-        <div style="font-size:11px;text-align:center;color:${p.stock<=p.target?'var(--orange)':'var(--muted)'}">${p.target}</div>
-        <input type="number" min="0" placeholder="実数" data-stk-id="${p.id}" data-stk-type="stock" style="text-align:center">
-        <input type="number" min="0" placeholder="${p.target}" data-stk-id="${p.id}" data-stk-type="target" style="text-align:center;border-color:rgba(201,169,110,.3)">
-      </div>`).join('')}`).join('');
+    ${grouped[c].map(p=>`<div class="ski" style="grid-template-columns:1fr 90px 60px 60px 90px 90px">
+      <div><div style="font-size:12px">${p.name}</div></div>
+      <div style="font-size:10px;color:var(--muted)">${p.detail||'—'}</div>
+      <div style="font-size:11px;color:var(--muted);text-align:center">${p.stock}</div>
+      <div style="font-size:11px;text-align:center;color:${p.stock<=p.target?'var(--orange)':'var(--muted)'}">${p.target}</div>
+      <input type="number" min="0" placeholder="実数" data-stk-id="${p.id}" data-stk-type="stock" style="text-align:center">
+      <input type="number" min="0" placeholder="${p.target}" data-stk-id="${p.id}" data-stk-type="target" style="text-align:center;border-color:rgba(201,169,110,.3)">
+    </div>`).join('')}`).join('');
 };
 const saveStocktake = () => {
   const updated=[];
-  document.querySelectorAll('[data-stk-type="stock"]').forEach(inp=>{
-    if(inp.value==='') return;
-    const p=prods.find(x=>x.id===inp.dataset.stkId);
-    if(p){p.stock=parseInt(inp.value);updated.push({productId:p.id,name:p.name,detail:p.detail||'',cat:p.category,stock:p.stock,target:p.target});}
-  });
-  document.querySelectorAll('[data-stk-type="target"]').forEach(inp=>{
-    if(inp.value==='') return;
-    const p=prods.find(x=>x.id===inp.dataset.stkId);
-    if(p){p.target=parseInt(inp.value);const ex=updated.find(u=>u.productId===p.id);if(ex)ex.target=p.target;else updated.push({productId:p.id,name:p.name,detail:p.detail||'',cat:p.category,stock:p.stock,target:p.target});}
-  });
+  document.querySelectorAll('[data-stk-type="stock"]').forEach(inp=>{if(inp.value==='')return;const p=prods.find(x=>x.id===inp.dataset.stkId);if(p){p.stock=parseInt(inp.value);updated.push({productId:p.id,name:p.name,detail:p.detail||'',cat:p.category,stock:p.stock,target:p.target});}});
+  document.querySelectorAll('[data-stk-type="target"]').forEach(inp=>{if(inp.value==='')return;const p=prods.find(x=>x.id===inp.dataset.stkId);if(p){p.target=parseInt(inp.value);const ex=updated.find(u=>u.productId===p.id);if(ex)ex.target=p.target;else updated.push({productId:p.id,name:p.name,detail:p.detail||'',cat:p.category,stock:p.stock,target:p.target});}});
   if(updated.length===0){toast('変更がありません','e');return;}
   sv('nz_prods',prods);stks.push({id:Date.now().toString(),date:new Date().toISOString().slice(0,10),items:updated});sv('nz_stks',stks);
-  gasSync({type:'stocktake',items:updated});
-  toast(`${updated.length}件を更新しました`);renderStk();renderDash();
+  gasSync({type:'stocktake',items:updated});toast(`${updated.length}件を更新しました`);renderStk();renderDash();
 };
 
-// ── History ────────────────────────────────────────────────────────
+// ── History ──────────────────────────────────────────────────────────
 const renderHist = () => {
   const now=new Date(),cur=ym(now),mDels=dels.filter(d=>d.date.startsWith(cur));
   const golds=['rgba(201,169,110,.7)','rgba(160,130,80,.7)','rgba(120,95,55,.7)','rgba(230,210,150,.7)','rgba(80,60,30,.7)','rgba(175,155,100,.7)'];
   const catT={},supT={},supC={},supCat={};
-  mDels.forEach(d=>d.items.forEach(i=>{
-    catT[i.category]=(catT[i.category]||0)+(i.qty||0)*(i.price||0);
-    supT[d.supplier]=(supT[d.supplier]||0)+(i.qty||0)*(i.price||0);
-    supC[d.supplier]=(supC[d.supplier]||0)+1;
-    if(!supCat[d.supplier])supCat[d.supplier]={};
-    supCat[d.supplier][i.category]=(supCat[d.supplier][i.category]||0)+(i.qty||0)*(i.price||0);
-  }));
+  mDels.forEach(d=>d.items.forEach(i=>{catT[i.category]=(catT[i.category]||0)+(i.qty||0)*(i.price||0);supT[d.supplier]=(supT[d.supplier]||0)+(i.qty||0)*(i.price||0);supC[d.supplier]=(supC[d.supplier]||0)+1;if(!supCat[d.supplier])supCat[d.supplier]={};supCat[d.supplier][i.category]=(supCat[d.supplier][i.category]||0)+(i.qty||0)*(i.price||0);}));
   try{['cat','sup'].forEach(k=>{const data=k==='cat'?catT:supT;if(charts[k])charts[k].destroy();const c=$(k==='cat'?'c-cat':'c-sup');if(c)charts[k]=new Chart(c,{type:'doughnut',data:{labels:Object.keys(data),datasets:[{data:Object.values(data),backgroundColor:golds,borderColor:'#161616',borderWidth:2}]},options:{plugins:{legend:{position:'bottom',labels:{color:'#888',font:{size:10},padding:10}}}}});});}catch(e){console.error(e);}
   const sup3={};for(let m=1;m<=3;m++){const d=new Date(now.getFullYear(),now.getMonth()-m,1);dels.filter(dl=>dl.date.startsWith(ym(d))).forEach(dl=>{const t=dl.items.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);sup3[dl.supplier]=(sup3[dl.supplier]||0)+t;});}
   $('tb-sup-sum').innerHTML=Object.keys(supT).length===0?'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">データがありません</td></tr>':Object.entries(supT).sort((a,b)=>b[1]-a[1]).map(([s,a])=>{const tc=Object.entries(supCat[s]||{}).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([c])=>catBadge(c)).join(' ');return`<tr><td>${s}</td><td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td><td class="tr">${supC[s]}件</td><td class="tr" style="color:var(--muted)">¥${(sup3[s]||0).toLocaleString()}</td><td>${tc}</td></tr>`;}).join('');
   const itemMap={};mDels.forEach(d=>d.items.forEach(i=>{const key=i.name+'|'+(i.detail||'');if(!itemMap[key])itemMap[key]={name:i.name,detail:i.detail||'',category:i.category,qty:0,amt:0};itemMap[key].qty+=(i.qty||0);itemMap[key].amt+=(i.qty||0)*(i.price||0);}));
-  const ranked=Object.values(itemMap).sort((a,b)=>b.qty-a.qty);
-  $('tb-top').innerHTML=ranked.length===0?'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">今月のデータがありません</td></tr>':ranked.slice(0,10).map((r,i)=>`<tr><td style="color:var(--muted);font-size:11px">${i+1}</td><td>${r.name}</td><td style="font-size:10px;color:var(--muted)">${r.detail||'—'}</td><td>${catBadge(r.category)}</td><td class="tr" style="color:var(--gold)">${r.qty}本</td><td class="tr">¥${r.amt.toLocaleString()}</td></tr>`).join('');
-  $('tb-over').innerHTML=prods.map(p=>{let avg3=0;for(let m=1;m<=3;m++){const d=new Date(now.getFullYear(),now.getMonth()-m,1);avg3+=dels.filter(dl=>dl.date.startsWith(ym(d))).reduce((s,dl)=>s+dl.items.filter(i=>i.name===p.name).reduce((t,i)=>t+(i.qty||0),0),0);}const avg=Math.round(avg3/3),tm=mDels.reduce((s,d)=>s+d.items.filter(i=>i.name===p.name).reduce((t,i)=>t+(i.qty||0),0),0),isO=avg>0&&tm>avg*1.5,stay=avg>0?Math.round(p.stock/(avg/30))+'日':'—';return`<tr><td>${p.name}</td><td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td><td>${tm}${p.unit||'本'}</td><td>${avg}${p.unit||'本'}</td><td>${isO?'<span class="badge low">過多</span>':'<span class="badge ok">適正</span>'}</td><td>${stay}</td></tr>`;}).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">データがありません</td></tr>';
-  renderHistLogSelector();renderHistLog();
-};
-const renderHistLogSelector = () => {
-  const sel=$('hist-ym');if(!sel)return;
-  const now=new Date(),months=[];for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({val:ym(d),lbl:`${d.getFullYear()}年${d.getMonth()+1}月`});}
-  const cur=sel.value||months[0].val;sel.innerHTML=months.map(m=>`<option value="${m.val}" ${m.val===cur?'selected':''}>${m.lbl}</option>`).join('');
+  $('tb-top').innerHTML=Object.values(itemMap).sort((a,b)=>b.qty-a.qty).slice(0,10).map((r,i)=>`<tr><td style="color:var(--muted);font-size:11px">${i+1}</td><td>${r.name}</td><td style="font-size:10px;color:var(--muted)">${r.detail||'—'}</td><td>${catBadge(r.category)}</td><td class="tr" style="color:var(--gold)">${r.qty}本</td><td class="tr">¥${r.amt.toLocaleString()}</td></tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">今月のデータがありません</td></tr>';
+  $('tb-over').innerHTML=prods.map(p=>{let avg3=0;for(let m=1;m<=3;m++){const d=new Date(now.getFullYear(),now.getMonth()-m,1);avg3+=dels.filter(dl=>dl.date.startsWith(ym(d))).reduce((s,dl)=>s+dl.items.filter(i=>i.name===p.name).reduce((t,i)=>t+(i.qty||0),0),0);}const avg=Math.round(avg3/3),tm=mDels.reduce((s,d)=>s+d.items.filter(i=>i.name===p.name).reduce((t,i)=>t+(i.qty||0),0),0),stay=avg>0?Math.round(p.stock/(avg/30))+'日':'—';return`<tr><td>${p.name}</td><td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td><td>${tm}${p.unit||'本'}</td><td>${avg}${p.unit||'本'}</td><td>${avg>0&&tm>avg*1.5?'<span class="badge low">過多</span>':'<span class="badge ok">適正</span>'}</td><td>${stay}</td></tr>`;}).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">データがありません</td></tr>';
+  const sel=$('hist-ym'),months=[];for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({val:ym(d),lbl:`${d.getFullYear()}年${d.getMonth()+1}月`});}
+  const cur2=sel.value||months[0].val;sel.innerHTML=months.map(m=>`<option value="${m.val}" ${m.val===cur2?'selected':''}>${m.lbl}</option>`).join('');
+  renderHistLog();
 };
 const renderHistLog = () => {
   const sel=$('hist-ym');if(!sel)return;
   const filtered=dels.filter(d=>d.date.startsWith(sel.value)),rows=[];
   filtered.forEach(d=>d.items.forEach((item,iIdx)=>{const sub=(item.qty||0)*(item.price||0);rows.push(`<tr style="cursor:pointer" data-hist-del="${d.id}" data-hist-idx="${iIdx}"><td>${d.date}</td><td style="font-size:11px">${d.supplier}</td><td>${item.name}</td><td style="font-size:10px;color:var(--muted)">${item.detail||'—'}</td><td>${catBadge(item.category)}</td><td>${item.qty}${item.unit||''}</td><td>¥${(item.price||0).toLocaleString()}</td><td class="tr">¥${sub.toLocaleString()}</td><td><button class="btn bd sm" data-del-item-del="${d.id}" data-del-item-idx="${iIdx}">削除</button></td></tr><tr id="hd-${d.id}-${iIdx}" style="display:none"><td colspan="9" style="background:rgba(201,169,110,.04);padding:12px 20px"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;font-size:11px"><div><div style="color:var(--muted);margin-bottom:3px">仕入先</div>${d.supplier}</div><div><div style="color:var(--muted);margin-bottom:3px">日付</div>${d.date}</div><div><div style="color:var(--muted);margin-bottom:3px">商品名</div>${item.name}</div><div><div style="color:var(--muted);margin-bottom:3px">詳細</div>${item.detail||'—'}</div><div><div style="color:var(--muted);margin-bottom:3px">カテゴリ</div>${catBadge(item.category)}</div><div><div style="color:var(--muted);margin-bottom:3px">数量</div><span style="color:var(--gold)">${item.qty}${item.unit||'本'}</span></div><div><div style="color:var(--muted);margin-bottom:3px">単価</div>¥${(item.price||0).toLocaleString()}</div><div><div style="color:var(--muted);margin-bottom:3px">小計</div><span style="color:var(--gold)">¥${sub.toLocaleString()}</span></div></div></td></tr>`);}));
   const total=filtered.reduce((s,d)=>s+d.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0);
-  $('tb-hist-log').innerHTML=rows.join('')+(rows.length>0?`<tr style="background:rgba(201,169,110,.04)"><td colspan="7" style="text-align:right;font-size:11px;color:var(--muted)">合計</td><td class="tr" style="color:var(--gold)">¥${total.toLocaleString()}</td><td></td></tr>`:'') ||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">この月のデータはありません</td></tr>';
+  $('tb-hist-log').innerHTML=rows.join('')+(rows.length>0?`<tr style="background:rgba(201,169,110,.04)"><td colspan="7" style="text-align:right;font-size:11px;color:var(--muted)">合計</td><td class="tr" style="color:var(--gold)">¥${total.toLocaleString()}</td><td></td></tr>`:'')||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">この月のデータはありません</td></tr>';
 };
 
-// ── Products ───────────────────────────────────────────────────────
+// ── Products ─────────────────────────────────────────────────────────
 const renderProducts = () => {
   const fc=$('flt-cat').value,fn=$('flt-name').value.toLowerCase();
   $('flt-cat').innerHTML='<option value="">全カテゴリ</option>'+cats.map(c=>`<option ${c===fc?'selected':''}>${c}</option>`).join('');
@@ -813,20 +686,10 @@ const renderProducts = () => {
   const grouped={};cats.forEach(c=>{grouped[c]=[];});filtered.forEach(p=>{if(!grouped[p.category])grouped[p.category]=[];grouped[p.category].push(p);});
   $('prod-tree').innerHTML=cats.filter(c=>grouped[c]&&grouped[c].length>0).map(c=>`
     <div style="margin-bottom:20px">
-      <div class="cat-header" data-toggle-cat="1">
-        <span class="cat-toggle open">▶</span>${catBadge(c)}<span style="font-size:12px;font-weight:500">${c}</span>
-        <span style="font-size:10px;color:var(--muted);margin-left:auto">${grouped[c].length}品</span>
-      </div>
+      <div class="cat-header" data-toggle-cat="1"><span class="cat-toggle open">▶</span>${catBadge(c)}<span style="font-size:12px;font-weight:500">${c}</span><span style="font-size:10px;color:var(--muted);margin-left:auto">${grouped[c].length}品</span></div>
       <div>
         <div class="prod-row" style="background:rgba(0,0,0,.2)"><div></div><div style="font-size:10px;color:var(--muted)">商品名</div><div style="font-size:10px;color:var(--muted)">詳細</div><div style="font-size:10px;color:var(--muted)">現在庫</div><div style="font-size:10px;color:var(--muted)">適正量</div><div style="font-size:10px;color:var(--muted)">仕入先</div><div></div></div>
-        ${grouped[c].map(p=>`<div class="prod-row">
-          <div>${p.stock===0?'<span style="color:var(--red)">●</span>':p.stock<=p.target?'<span style="color:var(--orange)">●</span>':'<span style="color:var(--green)">●</span>'}</div>
-          <div>${p.name}</div>
-          <div><span class="detail-badge">${p.detail||'—'}</span></div>
-          <div>${p.stock}${p.unit||'本'}</div><div>${p.target}${p.unit||'本'}</div>
-          <div style="font-size:11px;color:var(--muted)">${p.supplier||'—'}</div>
-          <div style="display:flex;gap:5px"><button class="btn bg sm" data-edit-prod="${p.id}">編集</button><button class="btn bd sm" data-del-prod="${p.id}">削除</button></div>
-        </div>`).join('')}
+        ${grouped[c].map(p=>`<div class="prod-row"><div>${p.stock===0?'<span style="color:var(--red)">●</span>':p.stock<=p.target?'<span style="color:var(--orange)">●</span>':'<span style="color:var(--green)">●</span>'}</div><div>${p.name}</div><div><span class="detail-badge">${p.detail||'—'}</span></div><div>${p.stock}${p.unit||'本'}</div><div>${p.target}${p.unit||'本'}</div><div style="font-size:11px;color:var(--muted)">${p.supplier||'—'}</div><div style="display:flex;gap:5px"><button class="btn bg sm" data-edit-prod="${p.id}">編集</button><button class="btn bd sm" data-del-prod="${p.id}">削除</button></div></div>`).join('')}
       </div>
     </div>`).join('')||'<div style="text-align:center;color:var(--muted);padding:30px">商品が登録されていません</div>';
 };
@@ -847,7 +710,7 @@ const saveProd = () => {
   toast(eid?'商品を更新しました':'商品を追加しました');
 };
 
-// ── Report ─────────────────────────────────────────────────────────
+// ── Report ───────────────────────────────────────────────────────────
 const renderReport = () => {
   const sel=$('rpt-month'),now=new Date(),months=[];for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({val:ym(d),lbl:`${d.getFullYear()}年${d.getMonth()+1}月`});}
   const cur=sel.value||months[0].val;sel.innerHTML=months.map(m=>`<option value="${m.val}" ${m.val===cur?'selected':''}>${m.lbl}</option>`).join('');
@@ -862,112 +725,109 @@ const renderReport = () => {
   $('rpt-det').innerHTML=rows.join('')||'<tr><td colspan="7" style="color:var(--muted)">データなし</td></tr>';
 };
 
-// ── Settings ───────────────────────────────────────────────────────
+// ── Settings ─────────────────────────────────────────────────────────
 const renderSettings = () => {
   if(cfg.apiKey){$('inp-api').value=cfg.apiKey;$('api-st').textContent='✓ APIキーが設定されています';$('api-st').style.color='var(--green)';}
   if(cfg.gasUrl)$('inp-gas').value=cfg.gasUrl;
-  $('auto-deduct-toggle').checked=ld('nz_auto_deduct',false);
-  const lr=ld('nz_deduct_last',null);$('deduct-last-run').textContent=lr?`最終実行: ${lr}`:'最終実行: 未実行';
+  $('auto-deduct-toggle').checked=ldLocal('nz_auto_deduct',false);
+  const lr=ldLocal('nz_deduct_last',null);$('deduct-last-run').textContent=lr?`最終実行: ${lr}`:'最終実行: 未実行';
   renderDeductRates();renderCatList();renderSupList();
 };
 
-// ── Auto Deduction ─────────────────────────────────────────────────
+// ── Auto Deduction ────────────────────────────────────────────────────
 const calcDailyRate = p => {const now=new Date();let total=0;for(let m=1;m<=3;m++){const d=new Date(now.getFullYear(),now.getMonth()-m,1);dels.filter(dl=>dl.date.startsWith(ym(d))).forEach(dl=>dl.items.forEach(i=>{if(i.name===p.name&&(i.detail||'')===(p.detail||''))total+=(i.qty||0);}));}return{monthlyAvg:total/3,dailyRate:total/90};};
 const runAutoDeduct = (manual=false) => {
-  const enabled=ld('nz_auto_deduct',false);if(!enabled&&!manual)return;
-  const today=new Date().toISOString().slice(0,10),lastDate=ld('nz_deduct_last',null);
+  const enabled=ldLocal('nz_auto_deduct',false);if(!enabled&&!manual)return;
+  const today=new Date().toISOString().slice(0,10),lastDate=ldLocal('nz_deduct_last',null);
   if(!manual&&lastDate===today)return;
   const daysElapsed=lastDate?Math.max(1,Math.floor((new Date(today)-new Date(lastDate))/(1000*60*60*24))):1;
   const log=[];
   prods.forEach(p=>{const{dailyRate}=calcDailyRate(p);if(dailyRate<=0)return;const actual=Math.min(p.stock||0,Math.round(dailyRate*daysElapsed));if(actual>0){p.stock=Math.max(0,(p.stock||0)-actual);log.push({name:p.name,deducted:actual});}});
-  sv('nz_prods',prods);sv('nz_deduct_last',today);
-  const logs=ld('nz_deduct_log',[]);if(log.length>0)logs.push({date:today,days:daysElapsed,items:log});sv('nz_deduct_log',logs.slice(-90));
+  sv('nz_prods',prods);svLocal('nz_deduct_last',today);
+  const logs=ldLocal('nz_deduct_log',[]);if(log.length>0)logs.push({date:today,days:daysElapsed,items:log});svLocal('nz_deduct_log',logs.slice(-90));
   if(manual){toast(log.length>0?`${log.length}商品の在庫を自動減算しました`:'減算対象の商品がありません');renderSettings();renderDash();}
 };
 const renderDeductRates = () => {
-  const today=new Date().toISOString().slice(0,10),lastDate=ld('nz_deduct_last',null);
-  const daysElapsed=lastDate?Math.max(0,Math.floor((new Date(today)-new Date(lastDate))/(1000*60*60*24))):1;
+  const today=new Date().toISOString().slice(0,10),lastDate=ldLocal('nz_deduct_last',null),daysElapsed=lastDate?Math.max(0,Math.floor((new Date(today)-new Date(lastDate))/(1000*60*60*24))):1;
   const rows=prods.map(p=>{const{monthlyAvg,dailyRate}=calcDailyRate(p);if(monthlyAvg===0)return null;const td=Math.round(dailyRate*daysElapsed*10)/10;return`<tr><td>${p.name}</td><td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td><td>${catBadge(p.category)}</td><td class="tr">${monthlyAvg.toFixed(1)}${p.unit||'本'}/月</td><td class="tr" style="color:var(--gold)">${dailyRate.toFixed(2)}${p.unit||'本'}/日</td><td class="tr" style="color:${td>0?'var(--orange)':'var(--muted)'}">${td>0?'-'+td:'—'}</td></tr>`;}).filter(Boolean);
   $('tb-deduct-rates').innerHTML=rows.join('')||'<tr><td colspan="6" style="color:var(--muted);padding:16px;text-align:center">発注履歴がないと計算できません</td></tr>';
 };
-const renderCatList = () => {
-  $('cat-list').innerHTML=cats.map((c,i)=>`<div class="sort-row"><div style="display:flex;gap:4px;flex-direction:column"><button class="btn bg sm" style="padding:2px 6px;line-height:1" data-move-cat="${i}" data-dir="-1" ${i===0?'disabled':''}>▲</button><button class="btn bg sm" style="padding:2px 6px;line-height:1" data-move-cat="${i}" data-dir="1" ${i===cats.length-1?'disabled':''}>▼</button></div><input type="text" value="${c}" data-edit-cat="${i}" style="flex:1;padding:5px 8px;font-size:12px"><span class="badge cc-${i%8}">${c}</span><button class="btn bd sm" data-del-cat="${i}">削除</button></div>`).join('');
-};
-const renderSupList = () => {
-  $('sup-list').innerHTML=sups.map((s,i)=>`<div class="sort-row"><input type="text" value="${s}" data-edit-sup="${i}" style="flex:1;padding:5px 8px;font-size:12px"><button class="btn bd sm" data-del-sup="${i}">削除</button></div>`).join('');
-};
-
-// ── Data ───────────────────────────────────────────────────────────
+const renderCatList = () => { $('cat-list').innerHTML=cats.map((c,i)=>`<div class="sort-row"><div style="display:flex;gap:4px;flex-direction:column"><button class="btn bg sm" style="padding:2px 6px;line-height:1" data-move-cat="${i}" data-dir="-1" ${i===0?'disabled':''}>▲</button><button class="btn bg sm" style="padding:2px 6px;line-height:1" data-move-cat="${i}" data-dir="1" ${i===cats.length-1?'disabled':''}>▼</button></div><input type="text" value="${c}" data-edit-cat="${i}" style="flex:1;padding:5px 8px;font-size:12px"><span class="badge cc-${i%8}">${c}</span><button class="btn bd sm" data-del-cat="${i}">削除</button></div>`).join(''); };
+const renderSupList = () => { $('sup-list').innerHTML=sups.map((s,i)=>`<div class="sort-row"><input type="text" value="${s}" data-edit-sup="${i}" style="flex:1;padding:5px 8px;font-size:12px"><button class="btn bd sm" data-del-sup="${i}">削除</button></div>`).join(''); };
 const exportData = () => {const b=new Blob([JSON.stringify({prods,dels,stks,cats,sups},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`neutrize-${new Date().toISOString().slice(0,10)}.json`;a.click();toast('エクスポートしました');};
-const importData = inp => {const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(d.prods){prods=d.prods;sv('nz_prods',prods);}if(d.dels){dels=d.dels;sv('nz_dels',dels);}if(d.stks){stks=d.stks;sv('nz_stks',stks);}if(d.cats){cats=d.cats;sv('nz_cats',cats);}if(d.sups){sups=d.sups;sv('nz_sups',sups);}toast('インポートしました');}catch{toast('読み込みに失敗しました','e');}};r.readAsText(f);};
+const importData = inp => {const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(d.prods){prods=d.prods;sv('nz_prods',prods);}if(d.dels){dels=d.dels;sv('nz_dels',dels);}if(d.stks){stks=d.stks;sv('nz_stks',stks);}if(d.cats){cats=d.cats;sv('nz_cats',cats);}if(d.sups){sups=d.sups;sv('nz_sups',sups);}toast('インポートしました（Supabaseに同期中）');renderDash();}catch{toast('読み込みに失敗しました','e');}};r.readAsText(f);};
 
-// ── 全イベントを document で一元管理 ──────────────────────────────
+// ── 全イベント一元管理 ────────────────────────────────────────────────
 document.addEventListener('click', e => {
-  const t=e.target;
-
-  // Navigation以外のボタン
+  const t = e.target;
+  if(t.id==='btn-sync') syncNow();
   if(t.id==='btn-ana') runAnalysis();
   if(t.id==='btn-reg') registerDelivery();
   if(t.id==='btn-stk') saveStocktake();
   if(t.id==='btn-add-prod') openProd();
   if(t.id==='btn-save-prod') saveProd();
   if(t.id==='btn-cancel-prod') closeProd();
-  if(t.id==='btn-save-api'){const k=$('inp-api').value.trim();if(!k.startsWith('sk-')){toast('有効なAPIキーを入力してください','e');return;}cfg.apiKey=k;sv('nz_cfg',cfg);$('api-st').textContent='✓ 保存しました';$('api-st').style.color='var(--green)';toast('APIキーを保存しました');}
-  if(t.id==='btn-save-gas'){cfg.gasUrl=$('inp-gas').value.trim();sv('nz_cfg',cfg);toast('GAS URLを保存しました');}
+  if(t.id==='prod-modal') closeProd();
+  if(t.id==='btn-save-api'){const k=$('inp-api').value.trim();if(!k.startsWith('sk-')){toast('有効なAPIキーを入力してください','e');return;}cfg.apiKey=k;svLocal('nz_cfg',cfg);$('api-st').textContent='✓ 保存しました';$('api-st').style.color='var(--green)';toast('APIキーを保存しました');}
+  if(t.id==='btn-save-gas'){cfg.gasUrl=$('inp-gas').value.trim();svLocal('nz_cfg',cfg);toast('GAS URLを保存しました');}
   if(t.id==='btn-test-gas'){if(!cfg.gasUrl){toast('GAS URLを入力してください','e');return;}fetch(cfg.gasUrl).then(()=>toast('接続成功')).catch(()=>toast('接続に失敗しました','e'));}
   if(t.id==='btn-run-deduct') runAutoDeduct(true);
-  if(t.id==='btn-reset-deduct'){if(!confirm('最終実行日をリセットしますか？'))return;localStorage.removeItem('nz_deduct_last');toast('リセットしました');renderSettings();}
+  if(t.id==='btn-reset-deduct'){if(!confirm('最終実行日をリセットしますか？'))return;svLocal('nz_deduct_last',null);localStorage.removeItem('nz_deduct_last');toast('リセットしました');renderSettings();}
   if(t.id==='btn-add-cat'){const v=$('inp-cat').value.trim();if(!v){toast('カテゴリ名を入力してください','e');return;}if(cats.includes(v)){toast('すでに存在します','e');return;}cats.push(v);sv('nz_cats',cats);$('inp-cat').value='';renderCatList();toast('カテゴリを追加しました');}
   if(t.id==='btn-add-sup'){const v=$('inp-sup2').value.trim();if(!v){toast('仕入先名を入力してください','e');return;}if(sups.includes(v)){toast('すでに存在します','e');return;}sups.push(v);sv('nz_sups',sups);$('inp-sup2').value='';renderSupList();toast('仕入先を追加しました');}
   if(t.id==='btn-export') exportData();
   if(t.id==='btn-import-trigger') $('imp-file').click();
-  if(t.id==='btn-clear'){if(!confirm('全データを削除しますか？\nこの操作は取り消せません。'))return;['nz_prods','nz_dels','nz_stks','nz_cats','nz_sups','nz_deduct_last','nz_deduct_log'].forEach(k=>localStorage.removeItem(k));prods=[];dels=[];stks=[];cats=DEF_CATS;sups=DEF_SUPS;toast('全データを削除しました');renderDash();}
-  if(t.id==='auto-deduct-toggle'){sv('nz_auto_deduct',t.checked);toast(t.checked?'自動減算を有効にしました':'自動減算を無効にしました');renderSettings();}
-
-  // data属性ボタン
-  if(t.dataset.delId){if(!confirm('この入庫データを削除しますか？\n（在庫数は自動で戻りません）'))return;dels=dels.filter(d=>d.id!==t.dataset.delId);sv('nz_dels',dels);renderDelLog();renderDash();}
+  if(t.id==='btn-clear'){
+    if(!confirm('全データを削除しますか？\nこの操作は取り消せません。'))return;
+    ['nz_prods','nz_dels','nz_stks','nz_cats','nz_sups','nz_deduct_last','nz_deduct_log'].forEach(k=>localStorage.removeItem(k));
+    ['nz_prods','nz_dels','nz_stks','nz_cats','nz_sups'].forEach(k=>sbClient.from('nz_data').delete().eq('key',k).then());
+    prods=[];dels=[];stks=[];cats=DEF_CATS;sups=DEF_SUPS;toast('全データを削除しました');renderDash();
+  }
+  if(t.id==='auto-deduct-toggle'){svLocal('nz_auto_deduct',t.checked);toast(t.checked?'自動減算を有効にしました':'自動減算を無効にしました');renderSettings();}
+  if(t.dataset.delId){if(!confirm('この入庫データを削除しますか？'))return;dels=dels.filter(d=>d.id!==t.dataset.delId);sv('nz_dels',dels);renderDelLog();renderDash();}
   if(t.dataset.delItemDel!==undefined){e.stopPropagation();const delId=t.dataset.delItemDel,idx=parseInt(t.dataset.delItemIdx);if(!confirm('この行を削除しますか？'))return;const d=dels.find(x=>x.id===delId);if(d){d.items.splice(idx,1);if(d.items.length===0)dels=dels.filter(x=>x.id!==delId);}sv('nz_dels',dels);renderHistLog();renderDelLog();renderDash();}
   if(t.dataset.editProd) openProd(t.dataset.editProd);
   if(t.dataset.delProd){if(!confirm('この商品を削除しますか？'))return;prods=prods.filter(p=>p.id!==t.dataset.delProd);sv('nz_prods',prods);renderProducts();renderDash();}
   if(t.dataset.moveCat!==undefined){const i=parseInt(t.dataset.moveCat),j=i+parseInt(t.dataset.dir);if(j>=0&&j<cats.length){[cats[i],cats[j]]=[cats[j],cats[i]];sv('nz_cats',cats);renderCatList();}}
   if(t.dataset.delCat!==undefined){const i=parseInt(t.dataset.delCat);if(!confirm(`「${cats[i]}」を削除しますか？`))return;cats.splice(i,1);sv('nz_cats',cats);renderCatList();toast('削除しました');}
   if(t.dataset.delSup!==undefined){const i=parseInt(t.dataset.delSup);if(!confirm(`「${sups[i]}」を削除しますか？`))return;sups.splice(i,1);sv('nz_sups',sups);renderSupList();toast('削除しました');}
-  if(t.closest&&t.closest('[data-toggle-cat]')){const hd=t.closest('[data-toggle-cat]'),body=hd.nextElementSibling,tog=hd.querySelector('.cat-toggle'),open=body.style.display!=='none';body.style.display=open?'none':'block';tog.classList.toggle('open',!open);}
-  if(t.closest&&t.closest('[data-hist-del]')&&!t.dataset.delItemDel){const row=t.closest('[data-hist-del]');if(row){const det=$(`hd-${row.dataset.histDel}-${row.dataset.histIdx}`);if(det)det.style.display=det.style.display==='none'?'table-row':'none';}}
-  if(t.closest&&t.closest('[data-remove]')){const btn=t.closest('[data-remove]');if(btn){const idx=parseInt(btn.dataset.remove);extItems.splice(idx,1);if(extItems.length===0){$('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品がありません</div>';$('reg-wrap').style.display='none';}else renderEditItems();}}
-  if(t.closest&&t.closest('[data-add-item]')){extItems.push({name:'',detail:'',category:cats[0]||'消耗品',qty:0,unit:'本',price:0,linkedId:''});renderEditItems();$('reg-wrap').style.display='block';}
-
-  // Modal外クリックで閉じる
-  if(t.id==='prod-modal') closeProd();
+  const toggleCat=t.closest('[data-toggle-cat]');if(toggleCat){const body=toggleCat.nextElementSibling,tog=toggleCat.querySelector('.cat-toggle'),open=body.style.display!=='none';body.style.display=open?'none':'block';tog.classList.toggle('open',!open);}
+  const histRow=t.closest('[data-hist-del]');if(histRow&&!t.dataset.delItemDel){const det=$(`hd-${histRow.dataset.histDel}-${histRow.dataset.histIdx}`);if(det)det.style.display=det.style.display==='none'?'table-row':'none';}
+  const remBtn=t.closest('[data-remove]');if(remBtn){const idx=parseInt(remBtn.dataset.remove);extItems.splice(idx,1);if(extItems.length===0){$('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品がありません</div>';$('reg-wrap').style.display='none';}else renderEditItems();}
+  if(t.closest('[data-add-item]')){extItems.push({name:'',detail:'',category:cats[0]||'消耗品',qty:0,unit:'本',price:0,linkedId:''});renderEditItems();$('reg-wrap').style.display='block';}
 });
 
-// input/change はdocumentで委譲
 document.addEventListener('input', e => {
   const t=e.target;
-  if(t.dataset.idx!==undefined&&t.dataset.field){const i=parseInt(t.dataset.idx),f=t.dataset.field;if(!isNaN(i)&&extItems[i]){extItems[i][f]=(f==='qty'||f==='price')?Number(t.value)||0:t.value;}}
+  if(t.dataset.idx!==undefined&&t.dataset.field){const i=parseInt(t.dataset.idx),f=t.dataset.field;if(!isNaN(i)&&extItems[i])extItems[i][f]=(f==='qty'||f==='price')?Number(t.value)||0:t.value;}
   if(t.dataset.editCat!==undefined){cats[parseInt(t.dataset.editCat)]=t.value;sv('nz_cats',cats);}
   if(t.dataset.editSup!==undefined){sups[parseInt(t.dataset.editSup)]=t.value;sv('nz_sups',sups);}
   if(t.id==='flt-name'||t.id==='flt-cat') renderProducts();
-  if(t.id==='rpt-month') renderReport();
 });
 document.addEventListener('change', e => {
   const t=e.target;
   if(t.dataset.idx!==undefined&&t.dataset.field){const i=parseInt(t.dataset.idx),f=t.dataset.field;if(!isNaN(i)&&extItems[i]){extItems[i][f]=(f==='qty'||f==='price')?Number(t.value)||0:t.value;if(t.dataset.rerender)renderEditItems();}}
   if(t.id==='hist-ym') renderHistLog();
   if(t.id==='flt-cat') renderProducts();
+  if(t.id==='rpt-month') renderReport();
   if(t.id==='imp-file') importData(t);
 });
 
-// Drag & drop
 const dz=$('dz');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
 dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
 dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');if(e.dataTransfer.files[0])loadImg(e.dataTransfer.files[0]);});
 $('fi').addEventListener('change',e=>{if(e.target.files[0])loadImg(e.target.files[0]);});
 
-// ── Init ───────────────────────────────────────────────────────────
-try{runAutoDeduct();}catch(e){console.error(e);}
-renderDash();
+// ── Init ─────────────────────────────────────────────────────────────
+(async () => {
+  showLoading(true);
+  const ok = await loadAll();
+  showLoading(false);
+  if(!ok) toast('オフラインモード（キャッシュを使用）','e');
+  try { runAutoDeduct(); } catch(e) { console.error(e); }
+  renderDash();
+})();
 </script>
 </body>
 </html>
