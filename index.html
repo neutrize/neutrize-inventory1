@@ -368,6 +368,14 @@ label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margi
   <div class="mb">
     <div class="mt2" id="m-title">新規商品を追加</div>
     <input type="hidden" id="m-id">
+    <!-- コピー機能 -->
+    <div class="fr" id="m-copy-wrap">
+      <label>既存商品からコピー</label>
+      <select id="m-copy-from">
+        <option value="">— コピーしない</option>
+      </select>
+    </div>
+    <div style="border-top:1px solid var(--bdr);margin-bottom:14px"></div>
     <div class="fg">
       <div class="fr"><label>カテゴリ *</label><select id="m-cat"></select></div>
       <div class="fr"><label>商品名 *</label><input type="text" id="m-name" placeholder="ミルボン オッジィオット シャンプー"></div>
@@ -438,6 +446,7 @@ const loadAll = async () => {
     stks  = map['nz_stks']  !== undefined ? map['nz_stks']  : ldLocal('nz_stks',  []);
     cats  = map['nz_cats']  !== undefined ? map['nz_cats']  : ldLocal('nz_cats',  DEF_CATS);
     sups  = map['nz_sups']  !== undefined ? map['nz_sups']  : ldLocal('nz_sups',  DEF_SUPS);
+    linkMap = map['nz_linkmap'] !== undefined ? map['nz_linkmap'] : ldLocal('nz_linkmap', {});
     return true;
   } catch(e) {
     console.warn('Supabase load failed, using cache:', e);
@@ -446,6 +455,7 @@ const loadAll = async () => {
     stks  = ldLocal('nz_stks',  []);
     cats  = ldLocal('nz_cats',  DEF_CATS);
     sups  = ldLocal('nz_sups',  DEF_SUPS);
+    linkMap = ldLocal('nz_linkmap', {});
     return false;
   }
 };
@@ -461,7 +471,7 @@ const syncNow = async () => {
 };
 
 // ── State ────────────────────────────────────────────────────────────
-let prods=[], dels=[], stks=[], cats=DEF_CATS, sups=DEF_SUPS;
+let prods=[], dels=[], stks=[], cats=DEF_CATS, sups=DEF_SUPS, linkMap={};
 let cfg   = ldLocal('nz_cfg', {apiKey:'', gasUrl:''});
 let charts={}, curImg=null, extItems=[];
 
@@ -566,7 +576,30 @@ const runAnalysis = async () => {
   finally{btn.textContent='✦ AI解析を実行';btn.disabled=false;}
 };
 
-const autoMatch = (name,detail) => { const n=(name+(detail||'')).toLowerCase().replace(/\s/g,'');return prods.find(p=>p.name===name&&(p.detail||'')===(detail||''))||prods.find(p=>p.name===name)||prods.find(p=>{const pn=(p.name+(p.detail||'')).toLowerCase().replace(/\s/g,'');return pn===n||pn.includes(n)||n.includes(pn);})||null; };
+const autoMatch = (name, detail) => {
+  // 1. linkMapに記憶があればそれを優先
+  const normKey = (name+(detail||'')).toLowerCase().replace(/\s/g,'');
+  const nameKey = name.toLowerCase().replace(/\s/g,'');
+  if(linkMap[normKey]) { const p=prods.find(p=>p.id===linkMap[normKey]); if(p) return p; }
+  if(linkMap[nameKey]) { const p=prods.find(p=>p.id===linkMap[nameKey]); if(p) return p; }
+  // 2. 完全一致
+  const exact = prods.find(p=>p.name===name&&(p.detail||'')===(detail||''));
+  if(exact) return exact;
+  const nameOnly = prods.find(p=>p.name===name);
+  if(nameOnly) return nameOnly;
+  // 3. 部分一致
+  return prods.find(p=>{const pn=(p.name+(p.detail||'')).toLowerCase().replace(/\s/g,'');return pn===normKey||pn.includes(normKey)||normKey.includes(pn);})||null;
+};
+
+// 紐付けを記憶
+const saveLinkMap = (invoiceName, invoiceDetail, productId) => {
+  if(!productId) return;
+  const normKey = (invoiceName+(invoiceDetail||'')).toLowerCase().replace(/\s/g,'');
+  const nameKey = invoiceName.toLowerCase().replace(/\s/g,'');
+  linkMap[normKey] = productId;
+  linkMap[nameKey] = productId;
+  sv('nz_linkmap', linkMap);
+};
 
 const renderEditItems = () => {
   extItems.forEach(item=>{if(item.linkedId===undefined){const m=autoMatch(item.name,item.detail);item.linkedId=m?m.id:'';}});
@@ -617,7 +650,18 @@ const registerDelivery = () => {
   dels.push({id:Date.now().toString(),date,supplier,items:itemsToSave});
   sv('nz_dels',dels);
   let upd=0;
-  itemsToSave.forEach(item=>{let p=item.linkedId?prods.find(p=>p.id===item.linkedId):null;if(!p)p=prods.find(p=>p.name===item.name&&(p.detail||'')===(item.detail||''));if(!p)p=prods.find(p=>p.name===item.name);if(p){p.stock=(p.stock||0)+(item.qty||0);if(item.price>0)p.price=item.price;upd++;}});
+  itemsToSave.forEach(item=>{
+    let p=item.linkedId?prods.find(p=>p.id===item.linkedId):null;
+    if(!p)p=prods.find(p=>p.name===item.name&&(p.detail||'')===(item.detail||''));
+    if(!p)p=prods.find(p=>p.name===item.name);
+    if(p){
+      p.stock=(p.stock||0)+(item.qty||0);
+      if(item.price>0)p.price=item.price;
+      upd++;
+      // 紐付けを記憶
+      saveLinkMap(item.name, item.detail, p.id);
+    }
+  });
   sv('nz_prods',prods);
   gasSync({type:'delivery',date,supplier,items:itemsToSave});
   toast(upd>0?`入庫を記録しました（在庫更新: ${upd}商品）`:'入庫を記録しました（在庫未更新 — 商品マスタを確認してください）');
@@ -695,8 +739,23 @@ const renderProducts = () => {
 };
 const openProd = id => {
   $('m-cat').innerHTML=cats.map(c=>`<option>${c}</option>`).join('');
-  if(id){const p=prods.find(x=>x.id===id);if(!p)return;$('m-title').textContent='商品を編集';$('m-id').value=id;$('m-name').value=p.name;$('m-detail').value=p.detail||'';$('m-cat').value=p.category;$('m-target').value=p.target;$('m-unit').value=p.unit||'本';$('m-sup').value=p.supplier||'';$('m-stock').value=p.stock;$('m-price').value=p.price||'';}
-  else{$('m-title').textContent='新規商品を追加';$('m-id').value='';['m-name','m-detail','m-sup','m-price'].forEach(i=>$(i).value='');$('m-stock').value='0';$('m-target').value='';}
+  // コピー元セレクト
+  const copyFrom = $('m-copy-from');
+  copyFrom.innerHTML='<option value="">— コピーしない</option>'+prods.map(p=>`<option value="${p.id}">${p.name}${p.detail?' / '+p.detail:''}</option>`).join('');
+  $('m-copy-wrap').style.display = id ? 'none' : 'block'; // 編集時は非表示
+
+  if(id){
+    const p=prods.find(x=>x.id===id);if(!p)return;
+    $('m-title').textContent='商品を編集';$('m-id').value=id;
+    $('m-name').value=p.name;$('m-detail').value=p.detail||'';$('m-cat').value=p.category;
+    $('m-target').value=p.target;$('m-unit').value=p.unit||'本';
+    $('m-sup').value=p.supplier||'';$('m-stock').value=p.stock;$('m-price').value=p.price||'';
+  } else {
+    $('m-title').textContent='新規商品を追加';$('m-id').value='';
+    ['m-name','m-detail','m-sup','m-price'].forEach(i=>$(i).value='');
+    $('m-stock').value='0';$('m-target').value='';
+    copyFrom.value='';
+  }
   $('prod-modal').classList.add('open');
 };
 const closeProd = () => $('prod-modal').classList.remove('open');
@@ -803,6 +862,22 @@ document.addEventListener('input', e => {
   if(t.dataset.editCat!==undefined){cats[parseInt(t.dataset.editCat)]=t.value;sv('nz_cats',cats);}
   if(t.dataset.editSup!==undefined){sups[parseInt(t.dataset.editSup)]=t.value;sv('nz_sups',sups);}
   if(t.id==='flt-name'||t.id==='flt-cat') renderProducts();
+
+  // 商品マスタ コピー機能
+  if(t.id==='m-copy-from' && t.value) {
+    const p=prods.find(x=>x.id===t.value);
+    if(p){
+      $('m-name').value=p.name;
+      $('m-detail').value=p.detail||'';
+      $('m-cat').value=p.category;
+      $('m-target').value=p.target;
+      $('m-unit').value=p.unit||'本';
+      $('m-sup').value=p.supplier||'';
+      $('m-price').value=p.price||'';
+      $('m-stock').value='0'; // 在庫数は0からスタート
+      toast('コピーしました。内容を編集して保存してください');
+    }
+  }
 });
 document.addEventListener('change', e => {
   const t=e.target;
