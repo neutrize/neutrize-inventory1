@@ -327,9 +327,9 @@ const ST=[
    ti:[{lo:600000,hi:800000,un:5000},{lo:800000,hi:1000000,un:7500},{lo:1000000,hi:Infinity,un:10000}]},
 ];
 const AS=[
-  {id:'akiho',  n:'秋保',fn:'秋保まこ', bg:null,b:0,y:0,tk:0,ju:0,ko:0,ti:null},
-  {id:'kasai',  n:'笠井',fn:'笠井涼花', bg:null,b:0,y:0,tk:0,ju:0,ko:0,ti:null},
-  {id:'okazaki',n:'岡崎',fn:'岡崎颯太', bg:null,b:0,y:0,tk:0,ju:0,ko:0,ti:null},
+  {id:'akiho',  n:'秋保',fn:'秋保まこ', bg:null,b:180000,y:0,tk:0,ju:10400,ko:0,ti:null},
+  {id:'kasai',  n:'笠井',fn:'笠井涼花', bg:null,b:180000,y:0,tk:0,ju:0,ko:13500,ti:null},
+  {id:'okazaki',n:'岡崎',fn:'岡崎颯太', bg:null,b:34100,y:0,tk:0,ju:0,ko:0,ti:null},
 ];
 const ALL=[...ST,...AS],PM={};ALL.forEach(p=>{PM[p.id]=p;});
 const TL={1100000:'110万〜',600000:'60〜80万',800000:'80〜100万',1000000:'100万〜'};
@@ -408,11 +408,11 @@ function tgF(id){
 function sv(){
   const d={};
   ALL.forEach(p=>{d[p.id]={b:document.getElementById('b-'+p.id)?.value||'',y:document.getElementById('y-'+p.id)?.value||'',tk:document.getElementById('tk-'+p.id)?.value||'',ju:document.getElementById('ju-'+p.id)?.value||'',ko:document.getElementById('ko-'+p.id)?.value||''};});
-  try{localStorage.setItem('nr_f3',JSON.stringify(d));}catch(e){}
+  try{localStorage.setItem('nr_f4',JSON.stringify(d));}catch(e){}
 }
 function ld(){
   try{
-    const r=localStorage.getItem('nr_f3');if(!r)return;
+    const r=localStorage.getItem('nr_f4');if(!r)return;
     const d=JSON.parse(r);
     ALL.forEach(p=>{
       if(!d[p.id])return;
