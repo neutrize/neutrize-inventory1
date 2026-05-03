@@ -2,907 +2,751 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>NEUTRIZE 在庫管理</title>
-<meta name="theme-color" content="#0e0e0e">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="NEUTRIZE">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NEUTRIZE 給与計算</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:wght@600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0e0e0e;--sur:#161616;--sur2:#1e1e1e;--bdr:#2a2a2a;--gold:#c9a96e;--gold2:#8a7450;--txt:#e8e8e8;--muted:#666;--red:#c45252;--orange:#c48a40;--green:#52a070;--blue:#5080c4;}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--txt);font-family:'Noto Sans JP',sans-serif;font-size:13px;display:flex;min-height:100vh}
-#sidebar{width:200px;min-height:100vh;background:var(--sur);border-right:1px solid var(--bdr);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100}
-.logo{padding:24px 20px 18px;border-bottom:1px solid var(--bdr)}
-.logo-en{font-family:'Cormorant Garamond',serif;font-size:19px;letter-spacing:.2em;color:var(--gold)}
-.logo-ja{font-size:10px;color:var(--muted);letter-spacing:.12em;margin-top:3px}
-#nav{flex:1;padding:10px 0}
-.nl{display:flex;align-items:center;gap:10px;padding:10px 20px;color:var(--muted);font-size:12px;letter-spacing:.04em;cursor:pointer;transition:all .15s;user-select:none}
-.nl:hover{color:var(--txt);background:rgba(201,169,110,.05)}
-.nl.active{color:var(--gold);background:rgba(201,169,110,.08);border-right:2px solid var(--gold)}
-.nl .ic{width:15px;text-align:center;font-size:14px}
-.nl-sync{border-top:1px solid var(--bdr);margin-top:auto}
-#main{margin-left:200px;flex:1;padding:32px;min-height:100vh}
-.sec{display:none}.sec.active{display:block}
-.ph{margin-bottom:28px}
-.pt{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--gold);letter-spacing:.1em}
-.ps{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.08em;text-transform:uppercase}
-.card{background:var(--sur);border:1px solid var(--bdr);padding:20px;margin-bottom:20px}
-.ct{font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--bdr)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bdr);margin-bottom:20px}
-.stat{background:var(--sur);padding:20px;text-align:center}
-.sl{font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
-.sv{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--gold)}
-.su{font-size:11px;color:var(--muted);margin-top:3px}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{text-align:left;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--bdr);font-weight:400}
-td{padding:10px 12px;border-bottom:1px solid rgba(42,42,42,.5)}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(201,169,110,.02)}
-.tr{text-align:right}
-.badge{display:inline-block;padding:2px 8px;font-size:10px;letter-spacing:.04em}
-.ok{background:rgba(82,160,112,.15);color:#52a070;border:1px solid rgba(82,160,112,.3)}
-.low{background:rgba(196,138,64,.15);color:#c48a40;border:1px solid rgba(196,138,64,.3)}
-.out{background:rgba(196,82,82,.15);color:#c45252;border:1px solid rgba(196,82,82,.3)}
-.over{background:rgba(80,120,196,.15);color:#5080c4;border:1px solid rgba(80,120,196,.3)}
-.cc-0{background:rgba(80,120,196,.15);color:#6090d4;border:1px solid rgba(80,120,196,.25)}
-.cc-1{background:rgba(140,80,196,.15);color:#a060d4;border:1px solid rgba(140,80,196,.25)}
-.cc-2{background:rgba(196,120,40,.15);color:#d48030;border:1px solid rgba(196,120,40,.25)}
-.cc-3{background:rgba(196,72,72,.15);color:#c45252;border:1px solid rgba(196,72,72,.25)}
-.cc-4{background:rgba(60,160,100,.15);color:#40a070;border:1px solid rgba(60,160,100,.25)}
-.cc-5{background:rgba(120,120,120,.15);color:#888;border:1px solid rgba(120,120,120,.25)}
-.cc-6{background:rgba(196,169,80,.15);color:#c4a040;border:1px solid rgba(196,169,80,.25)}
-.cc-7{background:rgba(80,160,180,.15);color:#50a0b4;border:1px solid rgba(80,160,180,.25)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;font-size:11px;letter-spacing:.08em;cursor:pointer;border:none;font-family:'Noto Sans JP',sans-serif;transition:all .15s}
-.btn:disabled{opacity:.5;cursor:default}
-.bp{background:var(--gold);color:#0e0e0e}.bp:hover:not(:disabled){background:#e2c99a}
-.bo{background:transparent;color:var(--gold);border:1px solid var(--gold2)}.bo:hover{background:rgba(201,169,110,.08)}
-.bg{background:transparent;color:var(--muted);border:1px solid var(--bdr)}.bg:hover{color:var(--txt);border-color:#444}
-.bd{background:rgba(196,82,82,.12);color:#c45252;border:1px solid rgba(196,82,82,.3)}
-.sm{padding:5px 10px;font-size:10px}
-input,select,textarea{background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);padding:8px 12px;font-size:12px;font-family:'Noto Sans JP',sans-serif;outline:none;width:100%;transition:border-color .15s}
-input:focus,select:focus,textarea:focus{border-color:var(--gold2)}
-select option{background:var(--sur2)}
-label{font-size:11px;color:var(--muted);letter-spacing:.04em;display:block;margin-bottom:5px}
-.fr{margin-bottom:14px}.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.dz{border:1px dashed var(--bdr);padding:36px;text-align:center;cursor:pointer;transition:all .2s}
-.dz:hover,.dz.drag{border-color:var(--gold2);background:rgba(201,169,110,.03)}
-#prev{max-width:100%;max-height:260px;margin-top:12px;display:none}
-.cat-header{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(201,169,110,.05);border-left:2px solid var(--gold2);margin-bottom:2px;cursor:pointer;user-select:none}
-.cat-header:hover{background:rgba(201,169,110,.08)}
-.cat-toggle{font-size:10px;color:var(--muted);transition:transform .2s;display:inline-block}
-.cat-toggle.open{transform:rotate(90deg)}
-.prod-row{display:grid;grid-template-columns:20px 1fr 90px 70px 80px 90px 90px;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid rgba(42,42,42,.4);font-size:12px}
-.prod-row:hover{background:rgba(201,169,110,.02)}
-.detail-badge{font-size:10px;color:var(--muted);background:var(--sur2);border:1px solid var(--bdr);padding:1px 6px;display:inline-block}
-.ski{display:grid;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)}
-.ski:last-child{border-bottom:none}
-.ali{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(196,138,64,.05);border-left:2px solid var(--orange);margin-bottom:8px;font-size:12px}
-.cw{position:relative;height:200px}
-.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center}
-.mo.open{display:flex}
-.mb{background:var(--sur);border:1px solid var(--bdr);padding:28px;width:500px;max-width:92vw;max-height:90vh;overflow-y:auto}
-.mt2{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold);margin-bottom:20px}
-.ma{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
-.sort-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr)}
-#toast{position:fixed;bottom:24px;right:24px;padding:11px 18px;font-size:12px;letter-spacing:.04em;z-index:9999;display:none}
-#toast.show{display:block;animation:fi .2s}
-.ts{background:rgba(82,160,112,.92);color:#fff;border:1px solid #52a070}
-.te{background:rgba(196,82,82,.92);color:#fff;border:1px solid #c45252}
-@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.fb{display:flex;justify-content:space-between;align-items:center}
-.mt12{margin-top:12px}.mt20{margin-top:20px}
-.g20{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-#loading-overlay{position:fixed;inset:0;background:rgba(14,14,14,.95);z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
-.spin{width:20px;height:20px;border:2px solid var(--bdr);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite}
-@keyframes sp{to{transform:rotate(360deg)}}
-@media(max-width:768px){
-  #sidebar{width:52px}
-  .logo-en,.logo-ja,.nl span:not(.ic){display:none}
-  .nl{padding:14px;justify-content:center}
-  #main{margin-left:52px;padding:16px}
-  .stats{grid-template-columns:1fr 1fr}
-  .fg,.g20{grid-template-columns:1fr}
-  .prod-row{grid-template-columns:20px 1fr 70px 70px}
-}
-@media print{
-  #sidebar,.np{display:none!important}
-  #main{margin-left:0;padding:0}
-  body{background:#fff;color:#000}
-  .card{border:1px solid #ddd;break-inside:avoid}
-}
+:root{--g:#B8965A;--gp:#F5ECD9;--gd:rgba(184,150,90,.12);--dk:#2C2C2A;--g1:#F1EFE8;--g2:#888780;--bd:rgba(0,0,0,.09);--bg:#F4F2EE;--cd:#fff;--tx:#1A1A18;--t2:#5F5E5A;--t3:#999892;--rd:#A32D2D}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);padding:20px 12px 60px}
+.app{max-width:680px;margin:0 auto}
+
+/* header */
+.hdr{background:var(--dk);border-radius:14px 14px 0 0;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--g);letter-spacing:.12em}
+.logo-s{font-size:10px;color:var(--g2);margin-top:2px}
+.pill{font-size:11px;color:var(--g);background:var(--gd);border:0.5px solid rgba(184,150,90,.3);border-radius:20px;padding:4px 12px}
+
+/* panels */
+.pnl{background:var(--cd);border:0.5px solid var(--bd);border-top:none;padding:12px 16px}
+.row{display:flex;align-items:center;gap:8px}
+.lbl{font-size:11px;color:var(--t2);white-space:nowrap;flex-shrink:0}
+.iw{position:relative;flex:1}
+.iw input{width:100%;height:30px;padding:0 28px 0 10px;border:0.5px solid rgba(0,0,0,.13);border-radius:7px;font-size:11px;font-family:monospace;color:var(--tx);background:#FAFAF8}
+.iw input:focus{outline:none;border-color:var(--g)}
+.eye{position:absolute;right:7px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:12px;color:var(--t3)}
+.ast{font-size:10px;white-space:nowrap}.ast.ok{color:var(--g)}.ast.ng{color:var(--rd)}
+
+/* upload */
+.uz{border:0.5px dashed rgba(0,0,0,.18);border-radius:12px;padding:14px;text-align:center;cursor:pointer;position:relative;overflow:hidden;transition:background .15s;margin-bottom:10px}
+.uz:hover{background:var(--g1)}
+.uz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.ut{font-size:12px;font-weight:500;color:var(--tx)}.us{font-size:10px;color:var(--t2)}
+.pw{display:none;flex-direction:column;align-items:center;gap:4px}
+.pw img{max-height:55px;border-radius:7px;object-fit:contain;max-width:100%}
+.pfi{font-size:10px;color:var(--t3)}.pi2{font-size:9px;color:var(--g)}
+
+/* buttons */
+.sbtn,.pbtn{height:38px;border:none;border-radius:9px;font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s}
+.sbtn{width:100%;background:var(--g);color:#fff;margin-bottom:8px}
+.sbtn:disabled{opacity:.32;cursor:not-allowed}.sbtn:hover:not(:disabled){opacity:.85}
+.pbtn{background:var(--dk);color:var(--g);padding:0 20px;border:0.5px solid rgba(184,150,90,.4)}
+.pbtn:hover{opacity:.85}
+.btn-row{display:flex;gap:8px;margin-top:10px}
+
+/* progress */
+.pgw{display:none;margin-bottom:6px}
+.pgb{height:4px;background:var(--g1);border-radius:2px;overflow:hidden}
+.pgf{height:100%;background:var(--g);border-radius:2px;transition:width .4s;width:0}
+.pgl{font-size:10px;color:var(--t3);text-align:center;margin-top:3px}
+.sl{font-size:11px;text-align:center;min-height:14px;color:var(--t2)}
+.sl.err{color:var(--rd)}.sl.ok{color:var(--g)}
+.dbg{display:none;background:var(--g1);border-radius:7px;padding:6px 9px;font-size:10px;color:var(--t2);font-family:monospace;word-break:break-all;line-height:1.5;margin-top:5px;max-height:70px;overflow-y:auto}
+
+/* section */
+.stl{font-size:10px;font-weight:500;color:var(--t3);letter-spacing:.1em;padding:12px 0 5px}
+
+/* staff card */
+.sc{background:var(--cd);border:0.5px solid var(--bd);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.sc .hd{background:var(--dk);padding:10px 16px;display:flex;align-items:center;gap:10px}
+.sc.as .hd{background:#3D3C38}
+.av{width:3px;height:28px;background:var(--g);border-radius:2px;flex-shrink:0;opacity:.7}
+.nk{font-size:13px;font-weight:500;color:#fff}
+.bg{font-size:9px;color:#633806;background:#FAEEDA;border-radius:10px;padding:1px 7px;border:0.5px solid #EF9F27;margin-left:4px}
+.td{margin-left:auto;text-align:right}
+.tl2{font-size:9px;color:var(--g2)}
+.tv{font-size:16px;font-weight:600;color:var(--g);font-family:'Cormorant Garamond',serif;line-height:1.1}
+
+.bd{padding:14px 16px}
+
+/* edit toggle */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sec-name{font-size:13px;font-weight:500;color:var(--tx)}
+.eb{font-size:10px;color:var(--t3);background:none;border:0.5px solid var(--bd);border-radius:5px;padding:3px 10px;cursor:pointer;transition:all .12s}
+.eb:hover,.eb.op{color:var(--g);border-color:var(--g)}.eb.op{background:var(--gd)}
+
+/* fixed panel */
+.fp{display:none;margin-bottom:12px}
+.fp.op{display:block}
+.fp-title{font-size:9px;color:var(--t3);letter-spacing:.08em;margin-bottom:6px;padding-bottom:4px;border-bottom:0.5px solid var(--bd)}
+
+/* grids */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.fi{} 
+.fi label{display:block;font-size:9px;color:var(--t3);letter-spacing:.05em;margin-bottom:3px;font-weight:500}
+.fi.full{grid-column:1/-1}
+
+.nw{position:relative}
+.nw input{width:100%;height:32px;padding:0 8px 0 20px;border:0.5px solid rgba(0,0,0,.12);border-radius:7px;font-size:12px;font-family:inherit;color:var(--tx);background:var(--cd)}
+.nw input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 2px rgba(184,150,90,.12)}
+.nw input.oc{background:var(--gp);border-color:rgba(184,150,90,.3)}
+.nw .yn{position:absolute;left:7px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--t3);pointer-events:none}
+
+/* divider */
+.div{border:none;border-top:0.5px dashed var(--bd);margin:10px 0}
+
+/* breakdown table */
+.bk-title{font-size:10px;font-weight:500;color:var(--t2);margin-bottom:6px;letter-spacing:.06em}
+.bk-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px}
+.bk-table td{padding:4px 6px;border-bottom:0.5px solid var(--bd);color:var(--t2)}
+.bk-table td:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--tx)}
+.bk-table tr.zero td{color:var(--t3)}
+.bk-table tr.bold td{font-weight:700;color:var(--tx);background:var(--g1)}
+.bk-table tr.gold td{font-weight:700;color:var(--g);font-size:12px;border-bottom:none}
+.bk-table .tag{font-size:8px;color:var(--g);background:var(--gd);border-radius:4px;padding:1px 5px;margin-left:4px}
+.bk-table .tag.var{color:#2C6B1F;background:#E8F5E2}
+
+/* commission */
+.hb{display:flex;justify-content:space-between;align-items:center;background:var(--gp);border-radius:8px;padding:8px 12px;margin-bottom:10px}
+.hb-l{font-size:10px;color:#633806}
+.hb-v{font-size:18px;font-weight:600;color:var(--g)}
+.hb-v small{font-size:10px;font-weight:400;margin-left:2px;color:var(--t2)}
+.tier-row{display:flex;justify-content:space-between;font-size:10px;padding:1.5px 0;color:var(--t2)}
+.tier-row.dm{color:var(--t3)}
+.tier-row .tv2{font-variant-numeric:tabular-nums}
+
+/* grand */
+.gb{background:var(--dk);border-radius:0 0 14px 14px;padding:14px 20px}
+.gb-inner{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.gb-lbl{font-size:11px;color:var(--g2)}
+.gb-val{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--g)}
+.gb-val small{font-size:12px;margin-left:2px;color:var(--g2);font-family:inherit;font-weight:400}
+.gb-breakdown{display:flex;gap:16px;flex-wrap:wrap}
+.gb-item{font-size:10px;color:var(--g2)}
+.gb-item span{color:var(--g);font-weight:500}
+
+
+
+/* tabs */
+.tab-nav{display:flex;justify-content:flex-end;gap:4px;padding:10px 16px 0;background:var(--bg)}
+.tab-btn{padding:4px 14px;font-size:10px;font-family:inherit;color:var(--t3);background:var(--cd);border:0.5px solid var(--bd);border-radius:20px;cursor:pointer;transition:all .15s;letter-spacing:.06em}
+.tab-btn.on{color:var(--g);border-color:rgba(184,150,90,.4);background:var(--gp)}
+.tab-pane{display:none}.tab-pane.on{display:block}
+
+/* history */
+.hist-bar{background:var(--cd);border:0.5px solid var(--bd);border-top:none;padding:14px 16px}
+.hist-empty{text-align:center;padding:40px 0;font-size:12px;color:var(--t3)}
+.save-btn{width:100%;height:38px;background:var(--dk);color:var(--g);border:0.5px solid rgba(184,150,90,.3);border-radius:9px;font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:14px;transition:opacity .15s}
+.save-btn:hover{opacity:.85}
+.hist-month{margin-bottom:20px}
+.hist-month-label{font-size:11px;font-weight:500;color:var(--t2);letter-spacing:.08em;margin-bottom:8px;padding-bottom:4px;border-bottom:0.5px solid var(--bd)}
+.hist-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px}
+.hist-table td{padding:5px 8px;border-bottom:0.5px solid var(--bd);color:var(--t2)}
+.hist-table td:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--tx);font-weight:500}
+.hist-table tr.total td{font-weight:700;color:var(--tx);background:var(--g1);font-size:12px}
+.hist-del{font-size:10px;color:var(--t3);background:none;border:none;cursor:pointer;float:right;margin-top:-2px}
+.hist-del:hover{color:var(--rd)}
+.chart-wrap{background:var(--g1);border-radius:10px;padding:12px;margin-bottom:16px}
+.chart-title{font-size:10px;color:var(--t2);letter-spacing:.08em;margin-bottom:10px}
+canvas{width:100%;height:160px;display:block}
+
+/* passcode */
+.pc-overlay{position:fixed;inset:0;background:#2C2C2A;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:0}
+.pc-overlay.hide{display:none}
+.pc-logo{font-family:'Cormorant Garamond',Georgia,serif;font-size:28px;font-weight:600;color:#B8965A;letter-spacing:.14em;margin-bottom:6px}
+.pc-sub{font-size:10px;color:#888780;letter-spacing:.12em;margin-bottom:40px}
+.pc-dots{display:flex;gap:12px;margin-bottom:32px}
+.pc-dot{width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(184,150,90,.4);background:transparent;transition:background .15s}
+.pc-dot.on{background:#B8965A;border-color:#B8965A}
+.pc-pad{display:grid;grid-template-columns:repeat(3,72px);gap:10px}
+.pc-key{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.06);border:0.5px solid rgba(255,255,255,.1);color:#fff;font-size:22px;font-family:inherit;cursor:pointer;transition:background .12s;display:flex;align-items:center;justify-content:center}
+.pc-key:hover{background:rgba(184,150,90,.18)}
+.pc-key:active{background:rgba(184,150,90,.35)}
+.pc-key.del{font-size:16px;color:#888780}
+.pc-key.empty{background:transparent;border:none;cursor:default}
+.pc-err{font-size:11px;color:#A32D2D;margin-top:16px;min-height:16px;letter-spacing:.06em}
 </style>
 </head>
 <body>
+<div class="pc-overlay" id="pcOverlay">
+  <div class="pc-logo">NEUTRIZE</div>
+  <div class="pc-sub">給与計算</div>
+  <div class="pc-dots" id="pcDots">
+    <div class="pc-dot" id="d0"></div>
+    <div class="pc-dot" id="d1"></div>
+    <div class="pc-dot" id="d2"></div>
+    <div class="pc-dot" id="d3"></div>
+  </div>
+  <div class="pc-pad">
+    <button class="pc-key" onclick="pcInput('1')">1</button>
+    <button class="pc-key" onclick="pcInput('2')">2</button>
+    <button class="pc-key" onclick="pcInput('3')">3</button>
+    <button class="pc-key" onclick="pcInput('4')">4</button>
+    <button class="pc-key" onclick="pcInput('5')">5</button>
+    <button class="pc-key" onclick="pcInput('6')">6</button>
+    <button class="pc-key" onclick="pcInput('7')">7</button>
+    <button class="pc-key" onclick="pcInput('8')">8</button>
+    <button class="pc-key" onclick="pcInput('9')">9</button>
+    <button class="pc-key empty"></button>
+    <button class="pc-key" onclick="pcInput('0')">0</button>
+    <button class="pc-key del" onclick="pcDel()">⌫</button>
+  </div>
+  <div class="pc-err" id="pcErr"></div>
+</div>
+<div class="app">
 
-<aside id="sidebar">
-  <div class="logo">
-    <div class="logo-en">NEUTRIZE</div>
-    <div class="logo-ja">在庫管理システム</div>
-  </div>
-  <div id="nav">
-    <div class="nl active" data-p="dashboard"><span class="ic">▣</span><span>ダッシュボード</span></div>
-    <div class="nl" data-p="delivery"><span class="ic">📄</span><span>納品書解析</span></div>
-    <div class="nl" data-p="stocktake"><span class="ic">📦</span><span>週次棚卸し</span></div>
-    <div class="nl" data-p="history"><span class="ic">📊</span><span>仕入れ分析</span></div>
-    <div class="nl" data-p="products"><span class="ic">☰</span><span>商品マスタ</span></div>
-    <div class="nl" data-p="report"><span class="ic">📋</span><span>月次レポート</span></div>
-    <div class="nl" data-p="settings"><span class="ic">⚙</span><span>設定</span></div>
-    <div class="nl nl-sync" id="btn-sync"><span class="ic">↻</span><span>同期する</span></div>
-  </div>
-</aside>
+<!-- TAB NAV -->
+<div class="tab-nav">
+  <button class="tab-btn on" onclick="switchTab('calc')">給与計算</button>
+  <button class="tab-btn" onclick="switchTab('hist')">履歴・グラフ</button>
+</div>
 
-<main id="main">
+<div class="tab-pane on" id="tab-calc">
+<!-- HEADER -->
+<div class="hdr">
+  <div><div class="logo">NEUTRIZE</div><div class="logo-s">給与計算</div></div>
+  <div class="pill" id="mp"></div>
+</div>
 
-<!-- Dashboard -->
-<section id="p-dashboard" class="sec active">
-  <div class="ph"><div class="pt">Dashboard</div><div class="ps">在庫概況</div></div>
-  <div class="stats">
-    <div class="stat"><div class="sl">Products</div><div class="sv" id="s-items">—</div><div class="su">管理商品数</div></div>
-    <div class="stat"><div class="sl">Reorder Alerts</div><div class="sv" id="s-alerts">—</div><div class="su">要発注</div></div>
-    <div class="stat"><div class="sl">This Month</div><div class="sv" id="s-month">—</div><div class="su">今月仕入れ（円）</div></div>
-    <div class="stat"><div class="sl">Stock Value</div><div class="sv" id="s-val">—</div><div class="su">現在庫総額（円）</div></div>
-  </div>
-  <div class="card">
-    <div class="ct">Stock Value — カテゴリ別在庫総額</div>
-    <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:14px">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold)" id="dash-val-total">—</div>
-      <div style="font-size:11px;color:var(--muted)">現在庫総額</div>
-    </div>
-    <table><thead><tr><th>カテゴリ</th><th class="tr">在庫総額</th><th class="tr">点数</th><th>グラフ</th></tr></thead>
-    <tbody id="tb-val-cat"></tbody></table>
-  </div>
-  <div class="g20">
-    <div class="card"><div class="ct">Supplier Cost — 仕入先別金額（今月）</div>
-      <table><thead><tr><th>仕入先</th><th class="tr">金額</th><th class="tr">比率</th></tr></thead><tbody id="tb-dash-sup"></tbody></table></div>
-    <div class="card"><div class="ct">Category Cost — カテゴリ別金額（今月）</div>
-      <table><thead><tr><th>カテゴリ</th><th class="tr">金額</th><th class="tr">比率</th></tr></thead><tbody id="tb-dash-cat"></tbody></table></div>
-  </div>
-  <div class="g20">
-    <div class="card"><div class="ct">Monthly Purchase Trend</div><div class="cw"><canvas id="c-trend"></canvas></div></div>
-    <div class="card"><div class="ct">Reorder Alerts — 要発注</div><div id="alert-list"></div></div>
-  </div>
-  <div class="card">
-    <div class="ct">Current Stock — 現在庫一覧</div>
-    <table><thead><tr><th>カテゴリ</th><th>商品名</th><th>詳細</th><th>現在庫</th><th>適正量</th><th>充足率</th><th>状態</th></tr></thead>
-    <tbody id="tb-stock"></tbody></table>
-  </div>
-</section>
-
-<!-- Delivery -->
-<section id="p-delivery" class="sec">
-  <div class="ph"><div class="pt">納品書 AI解析</div><div class="ps">写真をアップロードするだけで入庫データを自動生成</div></div>
-  <div class="g20">
-    <div class="card">
-      <div class="ct">Upload — 納品書をアップロード</div>
-      <div class="dz" id="dz" onclick="document.getElementById('fi').click()">
-        <input type="file" id="fi" accept="image/*" style="display:none">
-        <div id="dz-inner" style="pointer-events:none">
-          <div style="font-size:30px;margin-bottom:10px">📄</div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.9">納品書・請求書の写真をここにドロップ<br>またはタップして選択<br><span style="font-size:10px;color:#444">JPG / PNG / HEIF 対応</span></div>
-        </div>
-        <img id="prev" alt="preview">
-      </div>
-      <div class="mt12" style="display:flex;gap:8px">
-        <select id="del-sup" style="flex:1"></select>
-        <input type="date" id="del-date" style="width:140px">
-      </div>
-      <div class="mt12"><button class="btn bp" id="btn-ana">✦ AI解析を実行</button></div>
-    </div>
-    <div class="card">
-      <div class="ct">Extracted Data — 解析結果</div>
-      <div id="ana-result"><div style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">納品書をアップロードすると<br>ここに解析結果が表示されます</div></div>
-      <div id="reg-wrap" style="display:none;margin-top:14px">
-        <button class="btn bp" id="btn-reg">✓ 入庫データを記録する</button>
-      </div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="ct">Delivery Log — 今月の入庫履歴</div>
-    <table><thead><tr><th>日付</th><th>仕入先</th><th>商品名</th><th>詳細</th><th>カテゴリ</th><th>数量</th><th>単価</th><th>小計</th><th></th></tr></thead>
-    <tbody id="tb-dellog"></tbody></table>
-  </div>
-</section>
-
-<!-- Stocktake -->
-<section id="p-stocktake" class="sec">
-  <div class="ph"><div class="pt">週次棚卸し</div><div class="ps">実際の在庫数を入力して更新</div></div>
-  <div class="card">
-    <div class="ct">Stock Value — 現在庫総額</div>
-    <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:14px">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold)" id="stk-val-total">—</div>
-      <div style="font-size:11px;color:var(--muted)">現在庫総額（登録単価 × 在庫数）</div>
-    </div>
-    <table><thead><tr><th>カテゴリ</th><th class="tr">在庫総額</th><th class="tr">点数</th><th>グラフ</th></tr></thead>
-    <tbody id="tb-stk-val"></tbody></table>
-  </div>
-  <div class="card">
-    <div class="ct">Manual Input — 在庫数と適正量を更新</div>
-    <div style="display:grid;grid-template-columns:1fr 90px 60px 60px 90px 90px;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--bdr);margin-bottom:4px">
-      <div style="font-size:10px;color:var(--muted)">商品名</div><div style="font-size:10px;color:var(--muted)">詳細</div>
-      <div style="font-size:10px;color:var(--muted);text-align:center">現在庫</div><div style="font-size:10px;color:var(--muted);text-align:center">適正量</div>
-      <div style="font-size:10px;color:var(--muted);text-align:center">実数入力</div><div style="font-size:10px;color:var(--gold);text-align:center">適正量変更</div>
-    </div>
-    <div id="stk-list"></div>
-    <div class="mt20 fb">
-      <span style="font-size:11px;color:var(--muted)">空欄の項目は更新されません</span>
-      <button class="btn bp" id="btn-stk">在庫を更新する</button>
-    </div>
-  </div>
-</section>
-
-<!-- History -->
-<section id="p-history" class="sec">
-  <div class="ph"><div class="pt">仕入れ分析</div><div class="ps">カテゴリ別・仕入先別のコスト推移</div></div>
-  <div class="g20">
-    <div class="card"><div class="ct">Category Breakdown — カテゴリ別（今月）</div><div class="cw"><canvas id="c-cat"></canvas></div></div>
-    <div class="card"><div class="ct">Supplier Breakdown — 仕入先別（今月）</div><div class="cw"><canvas id="c-sup"></canvas></div></div>
-  </div>
-  <div class="card"><div class="ct">Supplier Summary — 仕入先別合計</div>
-    <table><thead><tr><th>仕入先</th><th class="tr">今月金額</th><th class="tr">件数</th><th class="tr">3ヶ月累計</th><th>主なカテゴリ</th></tr></thead><tbody id="tb-sup-sum"></tbody></table></div>
-  <div class="card"><div class="ct">Top Ordered — 発注量ランキング（今月）</div>
-    <table><thead><tr><th>順位</th><th>商品名</th><th>詳細</th><th>カテゴリ</th><th class="tr">数量</th><th class="tr">金額</th></tr></thead><tbody id="tb-top"></tbody></table></div>
-  <div class="card"><div class="ct">Overstock Warning — 仕入れ過多チェック</div>
-    <table><thead><tr><th>商品名</th><th>詳細</th><th>今月仕入</th><th>3ヶ月平均</th><th>過多判定</th><th>推定滞留</th></tr></thead><tbody id="tb-over"></tbody></table></div>
-  <div class="card">
-    <div class="ct">All Delivery Log — 全入庫履歴</div>
-    <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
-      <select id="hist-ym" style="width:160px"></select>
-      <span style="font-size:11px;color:var(--muted)">削除しても在庫数は自動で戻りません</span>
-    </div>
-    <table><thead><tr><th>日付</th><th>仕入先</th><th>商品名</th><th>詳細</th><th>カテゴリ</th><th>数量</th><th>単価</th><th class="tr">小計</th><th></th></tr></thead>
-    <tbody id="tb-hist-log"></tbody></table>
-  </div>
-</section>
-
-<!-- Products -->
-<section id="p-products" class="sec">
-  <div class="ph fb">
-    <div><div class="pt">商品マスタ</div><div class="ps">カテゴリ › 商品名 › 詳細 の3段階管理</div></div>
-    <button class="btn bp" id="btn-add-prod">＋ 商品を追加</button>
-  </div>
-  <div class="card">
-    <div style="display:flex;gap:10px;margin-bottom:14px">
-      <select id="flt-cat" style="width:160px"></select>
-      <input type="text" id="flt-name" placeholder="商品名・詳細で検索..." style="flex:1">
-    </div>
-    <div id="prod-tree"></div>
-  </div>
-</section>
-
-<!-- Report -->
-<section id="p-report" class="sec">
-  <div class="ph fb">
-    <div><div class="pt">月次レポート</div><div class="ps">仕入れ・在庫のトータルをPDF出力</div></div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <select id="rpt-month" style="width:160px"></select>
-      <button class="btn bo np" onclick="window.print()">📄 PDF出力</button>
-    </div>
-  </div>
-  <div class="card" id="rpt-body">
-    <div style="text-align:center;padding:8px 0 20px">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:26px;letter-spacing:.2em;color:var(--gold)">NEUTRIZE</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">北区丸の内1-12-6 ／ 086-238-7758</div>
-      <div style="font-size:12px;margin-top:10px" id="rpt-period">月次 仕入れ・在庫レポート</div>
-    </div>
-    <div style="margin-bottom:24px"><div class="ct">カテゴリ別合計</div>
-      <table><thead><tr><th>カテゴリ</th><th class="tr">金額</th><th class="tr">比率</th><th>グラフ</th></tr></thead><tbody id="rpt-cat"></tbody></table></div>
-    <div style="margin-bottom:24px"><div class="ct">仕入先別合計</div>
-      <table><thead><tr><th>仕入先</th><th class="tr">金額</th><th class="tr">件数</th></tr></thead><tbody id="rpt-sup"></tbody></table></div>
-    <div style="margin-bottom:24px"><div class="ct">現在庫状況</div>
-      <table><thead><tr><th>カテゴリ</th><th>商品名</th><th>詳細</th><th>現在庫</th><th>適正量</th><th>状態</th></tr></thead><tbody id="rpt-stk"></tbody></table></div>
-    <div><div class="ct">入庫明細</div>
-      <table><thead><tr><th>日付</th><th>仕入先</th><th>商品名</th><th>詳細</th><th>カテゴリ</th><th>数量</th><th class="tr">小計</th></tr></thead><tbody id="rpt-det"></tbody></table></div>
-  </div>
-</section>
-
-<!-- Settings -->
-<section id="p-settings" class="sec">
-  <div class="ph"><div class="pt">設定</div><div class="ps">API・連携・マスタ管理</div></div>
-  <div class="card">
-    <div class="ct">Anthropic API Key — 納品書AI解析用</div>
-    <p style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.9"><a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gold)">console.anthropic.com</a> でキーを取得してください。</p>
-    <div style="display:flex;gap:8px">
-      <input type="password" id="inp-api" placeholder="sk-ant-..." style="flex:1">
-      <button class="btn bp" id="btn-save-api">保存</button>
-    </div>
-    <div id="api-st" style="font-size:11px;margin-top:8px;color:var(--muted)"></div>
-  </div>
-  <div class="card">
-    <div class="ct">Google Apps Script — スプレッドシート自動保存</div>
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <input type="url" id="inp-gas" placeholder="https://script.google.com/macros/s/..." style="flex:1">
-      <button class="btn bp" id="btn-save-gas">保存</button>
-      <button class="btn bg" id="btn-test-gas">接続テスト</button>
-    </div>
-  </div>
-  <div class="card">
-    <div class="ct">Auto Deduction — 自動消費減算</div>
-    <p style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.9">過去3ヶ月の発注量をもとに1日あたりの推定消費量を計算し、毎日自動で在庫を減算します。</p>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px;background:var(--sur2);border:1px solid var(--bdr)">
-      <input type="checkbox" id="auto-deduct-toggle" style="width:16px;height:16px;cursor:pointer">
-      <div><div style="font-size:12px">自動減算を有効にする</div><div style="font-size:10px;color:var(--muted);margin-top:2px" id="deduct-last-run">最終実行: 未実行</div></div>
-    </div>
-    <table><thead><tr><th>商品名</th><th>詳細</th><th>カテゴリ</th><th class="tr">月平均</th><th class="tr">日次推定</th><th class="tr">今日の減算予定</th></tr></thead>
-    <tbody id="tb-deduct-rates"></tbody></table>
-    <div style="margin-top:14px;display:flex;gap:8px">
-      <button class="btn bo" id="btn-run-deduct">▶ 今すぐ実行</button>
-      <button class="btn bg" id="btn-reset-deduct">リセット</button>
-    </div>
-  </div>
-  <div class="card">
-    <div class="ct">Categories — カテゴリ管理（▲▼で並び替え）</div>
-    <div id="cat-list" style="margin-bottom:10px"></div>
-    <div style="display:flex;gap:8px">
-      <input type="text" id="inp-cat" placeholder="新しいカテゴリ名" style="flex:1">
-      <button class="btn bp" id="btn-add-cat">追加</button>
-    </div>
-  </div>
-  <div class="card">
-    <div class="ct">Suppliers — 仕入先管理</div>
-    <div id="sup-list" style="margin-bottom:10px"></div>
-    <div style="display:flex;gap:8px">
-      <input type="text" id="inp-sup2" placeholder="新しい仕入先名" style="flex:1">
-      <button class="btn bp" id="btn-add-sup">追加</button>
-    </div>
-  </div>
-  <div class="card">
-    <div class="ct">Data Management — データ管理</div>
-    <p style="font-size:11px;color:var(--muted);margin-bottom:14px">データはSupabase（クラウド）に保存・共有されています。</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn bo" id="btn-export">📥 JSONエクスポート</button>
-      <button class="btn bg" id="btn-import-trigger">📤 JSONインポート</button>
-      <input type="file" id="imp-file" accept=".json" style="display:none">
-      <button class="btn bd" id="btn-clear">⚠ 全データ削除</button>
-    </div>
-  </div>
-</section>
-
-</main>
-
-<!-- Product Modal -->
-<div class="mo" id="prod-modal">
-  <div class="mb">
-    <div class="mt2" id="m-title">新規商品を追加</div>
-    <input type="hidden" id="m-id">
-    <!-- コピー機能 -->
-    <div class="fr" id="m-copy-wrap">
-      <label>既存商品からコピー</label>
-      <select id="m-copy-from">
-        <option value="">— コピーしない</option>
-      </select>
-    </div>
-    <div style="border-top:1px solid var(--bdr);margin-bottom:14px"></div>
-    <div class="fg">
-      <div class="fr"><label>カテゴリ *</label><select id="m-cat"></select></div>
-      <div class="fr"><label>商品名 *</label><input type="text" id="m-name" placeholder="ミルボン オッジィオット シャンプー"></div>
-      <div class="fr" style="grid-column:1/-1"><label>詳細（サイズ・仕様など）</label><input type="text" id="m-detail" placeholder="250ml / 1000ml など"></div>
-      <div class="fr"><label>適正量（発注点）*</label>
-        <div style="display:flex;gap:6px"><input type="number" id="m-target" min="0" placeholder="10" style="flex:1"><select id="m-unit" style="width:70px"><option>本</option><option>袋</option><option>箱</option><option>個</option><option>缶</option><option>kg</option></select></div></div>
-      <div class="fr"><label>仕入先</label><input type="text" id="m-sup" placeholder="〇〇商事"></div>
-      <div class="fr"><label>現在庫数</label><input type="number" id="m-stock" min="0" placeholder="0"></div>
-      <div class="fr"><label>単価（円）</label><input type="number" id="m-price" min="0" placeholder="1000"></div>
-    </div>
-    <div class="ma">
-      <button class="btn bg" id="btn-cancel-prod">キャンセル</button>
-      <button class="btn bp" id="btn-save-prod">保存</button>
-    </div>
+<!-- API KEY -->
+<div class="pnl no-print">
+  <div class="row">
+    <div class="lbl">🔑 APIキー</div>
+    <div class="iw"><input type="password" id="ak" placeholder="sk-ant-api03-..." oninput="onAk()"><button class="eye" onclick="tEye()">👁</button></div>
+    <div class="ast ng" id="aSt">未設定</div>
   </div>
 </div>
 
-<div id="toast"></div>
-
-<!-- Loading Overlay -->
-<div id="loading-overlay">
-  <div style="font-family:'Cormorant Garamond',serif;font-size:24px;letter-spacing:.2em;color:var(--gold)">NEUTRIZE</div>
-  <div class="spin"></div>
-  <div style="font-size:11px;color:var(--muted);letter-spacing:.1em" id="loading-msg">データを読み込んでいます...</div>
+<!-- SCAN -->
+<div class="pnl no-print">
+  <div class="uz" onclick="document.getElementById('fi').click()">
+    <input type="file" id="fi" accept="image/*" onchange="onF(event)">
+    <div id="ud"><div style="font-size:20px;color:var(--g);margin-bottom:4px">⬆</div><div class="ut">HPBスクリーンショットをアップロード</div><div class="us">スタイリスト4名の指名技術売上を一括読み取り</div></div>
+    <div class="pw" id="upP"><img id="uImg" src="" alt=""><div class="pfi" id="uFn"></div><div class="pi2" id="uInfo"></div></div>
+  </div>
+  <button class="sbtn" id="sb" onclick="doOCR()" disabled>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    スタイリスト4名の指名技術売上を一括スキャン
+  </button>
+  <div class="pgw" id="pgw"><div class="pgb"><div class="pgf" id="pgf"></div></div><div class="pgl" id="pgl"></div></div>
+  <div class="sl" id="sl"></div>
+  <div class="dbg" id="dg"></div>
+  <div class="btn-row">
+    <button class="pbtn" onclick="doPDF()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      PDF出力
+    </button>
+  </div>
 </div>
+
+<div class="stl">— スタイリスト</div>
+<div id="ss"></div>
+<div class="stl">— アシスタント</div>
+<div id="as2"></div>
+
+<!-- GRAND TOTAL -->
+<div class="gb">
+  <div class="gb-inner">
+    <div class="gb-lbl">全員合計支給額</div>
+    <div class="gb-val" id="gt">— <small>円</small></div>
+  </div>
+  <div class="gb-breakdown" id="gt-bd"></div>
+</div>
+
+
+</div><!-- /tab-calc -->
+
+<div class="tab-pane" id="tab-hist">
+  <div class="hdr" style="border-radius:0">
+    <div><div class="logo">NEUTRIZE</div><div class="logo-s">履歴・グラフ</div></div>
+    <div class="pill" id="mp2"></div>
+  </div>
+  <div class="hist-bar">
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+    <button class="save-btn" style="margin-bottom:0;flex:1" onclick="saveMonth()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      今月の給与データを履歴に保存
+    </button>
+    <button onclick="clearAllHist()" style="height:38px;padding:0 14px;background:none;border:0.5px solid rgba(163,45,45,.3);border-radius:9px;font-size:11px;color:var(--rd);cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0" title="全履歴を削除">全削除</button>
+  </div>
+    <div class="chart-wrap" id="chartWrap" style="display:none">
+      <div class="chart-title">全員合計歩合 推移</div>
+      <canvas id="myChart"></canvas>
+    </div>
+    <div id="histList"><div class="hist-empty">まだ履歴がありません。<br>給与計算後に「保存」ボタンを押してください。</div></div>
+  </div>
+</div><!-- /tab-hist -->
+
+</div><!-- /app -->
 
 <script>
-'use strict';
 
-// ── Supabase ────────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://phtjfowiblkqkrpvwgbw.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_9-LyOjsxbt2xx2Hmpps6lg_hRQPi6Lf';
-const sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const showLoading = (show, msg='データを読み込んでいます...') => {
-  const el = document.getElementById('loading-overlay');
-  const ml = document.getElementById('loading-msg');
-  if(el) el.style.display = show ? 'flex' : 'none';
-  if(ml) ml.textContent = msg;
-};
-
-// ── Defaults ────────────────────────────────────────────────────────
-const DEF_CATS = ['シャンプー','トリートメント','カラー剤','薬剤','消耗品','備品'];
-const DEF_SUPS = ['共栄社','美薬株式会社','オッジィオット','その他'];
-
-// ── Storage ─────────────────────────────────────────────────────────
-// localStorage: config/settings のみ（端末ごと）
-const ldLocal = (k,d=null) => { try { const v=localStorage.getItem(k); return v?JSON.parse(v):d; } catch { return d; } };
-const svLocal = (k,v) => localStorage.setItem(k, JSON.stringify(v));
-const ld = ldLocal; // alias
-
-// sv: localStorage + Supabase に保存
-const sv = (k,v) => {
-  svLocal(k, v);
-  sbClient.from('nz_data').upsert({key:k, value:v, updated_at:new Date().toISOString()})
-    .then(({error}) => { if(error) console.warn('Supabase save:', k, error); });
-};
-
-// loadAll: Supabase から全データを取得
-const loadAll = async () => {
-  try {
-    const {data, error} = await sbClient.from('nz_data').select('*');
-    if(error) throw error;
-    const map = {};
-    data.forEach(row => { map[row.key] = row.value; svLocal(row.key, row.value); });
-    prods = map['nz_prods'] !== undefined ? map['nz_prods'] : ldLocal('nz_prods', []);
-    dels  = map['nz_dels']  !== undefined ? map['nz_dels']  : ldLocal('nz_dels',  []);
-    stks  = map['nz_stks']  !== undefined ? map['nz_stks']  : ldLocal('nz_stks',  []);
-    cats  = map['nz_cats']  !== undefined ? map['nz_cats']  : ldLocal('nz_cats',  DEF_CATS);
-    sups  = map['nz_sups']  !== undefined ? map['nz_sups']  : ldLocal('nz_sups',  DEF_SUPS);
-    linkMap = map['nz_linkmap'] !== undefined ? map['nz_linkmap'] : ldLocal('nz_linkmap', {});
-    return true;
-  } catch(e) {
-    console.warn('Supabase load failed, using cache:', e);
-    prods = ldLocal('nz_prods', []);
-    dels  = ldLocal('nz_dels',  []);
-    stks  = ldLocal('nz_stks',  []);
-    cats  = ldLocal('nz_cats',  DEF_CATS);
-    sups  = ldLocal('nz_sups',  DEF_SUPS);
-    linkMap = ldLocal('nz_linkmap', {});
-    return false;
+/* ── PASSCODE ── */
+const PC_CODE = '0603'; // ← ここを変更
+let pcBuf = '';
+function pcInput(n){
+  if(pcBuf.length>=4) return;
+  pcBuf += n;
+  document.getElementById('d'+(pcBuf.length-1)).classList.add('on');
+  if(pcBuf.length===4){
+    setTimeout(()=>{
+      if(pcBuf===PC_CODE){
+        document.getElementById('pcOverlay').classList.add('hide');
+      } else {
+        document.getElementById('pcErr').textContent='パスコードが違います';
+        pcBuf='';
+        [0,1,2,3].forEach(i=>document.getElementById('d'+i).classList.remove('on'));
+        setTimeout(()=>document.getElementById('pcErr').textContent='',1200);
+      }
+    },120);
   }
-};
-
-const syncNow = async () => {
-  showLoading(true, '同期中...');
-  const ok = await loadAll();
-  showLoading(false);
-  toast(ok ? 'データを同期しました' : 'オフライン — キャッシュを使用中', ok?'s':'e');
-  renderDash();
-  const active = document.querySelector('.nl.active');
-  if(active && active.dataset.p) render(active.dataset.p);
-};
-
-// ── State ────────────────────────────────────────────────────────────
-let prods=[], dels=[], stks=[], cats=DEF_CATS, sups=DEF_SUPS, linkMap={};
-let cfg   = ldLocal('nz_cfg', {apiKey:'', gasUrl:''});
-let charts={}, curImg=null, extItems=[];
-
-// ── Helpers ─────────────────────────────────────────────────────────
-const ym = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-const catBadge = cat => { const i=cats.indexOf(cat); return `<span class="badge cc-${i>=0?i%8:5}">${cat||'—'}</span>`; };
-const stockBadge = p => { if(p.stock===0)return'<span class="badge out">欠品</span>';if(p.stock<=p.target)return'<span class="badge low">要発注</span>';return(p.target>0&&p.stock>p.target*2)?'<span class="badge over">過多</span>':'<span class="badge ok">適正</span>'; };
-const $ = id => document.getElementById(id);
-const toast = (msg,t='s') => { const el=$('toast');el.textContent=msg;el.className=`show t${t}`;clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3000); };
-const gasSync = async data => { if(!cfg.gasUrl)return;try{await fetch(cfg.gasUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});}catch(e){console.warn('GAS:',e);} };
-
-// ── Navigation ───────────────────────────────────────────────────────
-document.querySelectorAll('.nl[data-p]').forEach(el => {
-  el.addEventListener('click', () => {
-    document.querySelectorAll('.nl').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.sec').forEach(x=>x.classList.remove('active'));
-    el.classList.add('active');
-    $('p-'+el.dataset.p).classList.add('active');
-    try { render(el.dataset.p); } catch(e) { console.error(e); toast('描画エラー: '+e.message,'e'); }
-  });
+}
+function pcDel(){
+  if(!pcBuf.length) return;
+  pcBuf=pcBuf.slice(0,-1);
+  [0,1,2,3].forEach(i=>document.getElementById('d'+i).classList.toggle('on',i<pcBuf.length));
+}
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('pcOverlay').classList.contains('hide')) return;
+  if(e.key>='0'&&e.key<='9') pcInput(e.key);
+  if(e.key==='Backspace') pcDel();
 });
-const render = p => {
-  if(p==='dashboard') renderDash();
-  if(p==='delivery')  renderDel();
-  if(p==='stocktake') renderStk();
-  if(p==='history')   renderHist();
-  if(p==='products')  renderProducts();
-  if(p==='report')    renderReport();
-  if(p==='settings')  renderSettings();
-};
 
-// ── Stock Value ──────────────────────────────────────────────────────
-const calcStockValue = () => { const byCat={};cats.forEach(c=>{byCat[c]={val:0,cnt:0};});prods.forEach(p=>{const v=(p.stock||0)*(p.price||0);if(!byCat[p.category])byCat[p.category]={val:0,cnt:0};byCat[p.category].val+=v;byCat[p.category].cnt+=(p.stock||0);});return{byCat,total:Object.values(byCat).reduce((s,v)=>s+v.val,0)}; };
-const renderStockValueTable = (tbodyId,totalId,statId) => {
-  const {byCat,total}=calcStockValue();
-  if($(totalId))$(totalId).textContent='¥'+total.toLocaleString();
-  if(statId&&$(statId))$(statId).textContent=total.toLocaleString();
-  const rows=cats.filter(c=>byCat[c]&&byCat[c].val>0).map(c=>{const{val,cnt}=byCat[c],pct=total>0?Math.round(val/total*100):0;return`<tr><td>${catBadge(c)}</td><td class="tr" style="color:var(--gold)">¥${val.toLocaleString()}</td><td class="tr" style="color:var(--muted)">${cnt}点</td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:4px;background:var(--bdr);max-width:120px"><div style="height:100%;width:${pct}%;background:var(--gold)"></div></div><span style="font-size:10px">${pct}%</span></div></td></tr>`;});
-  if($(tbodyId))$(tbodyId).innerHTML=rows.join('')||'<tr><td colspan="4" style="color:var(--muted);padding:14px">商品マスタに単価を登録してください</td></tr>';
-};
+const now=new Date();
+document.getElementById('mp').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月';
 
-// ── Dashboard ────────────────────────────────────────────────────────
-const renderDash = () => {
-  const now=new Date(),cur=ym(now);
-  $('s-items').textContent=prods.length;
-  $('s-alerts').textContent=prods.filter(p=>p.stock<=p.target).length;
-  const mDels=dels.filter(d=>d.date.startsWith(cur));
-  $('s-month').textContent=mDels.reduce((s,d)=>s+d.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0).toLocaleString();
-  renderStockValueTable('tb-val-cat','dash-val-total','s-val');
-  const supT={},catT={};
-  mDels.forEach(d=>d.items.forEach(i=>{supT[d.supplier]=(supT[d.supplier]||0)+(i.qty||0)*(i.price||0);catT[i.category]=(catT[i.category]||0)+(i.qty||0)*(i.price||0);}));
-  const supG=Object.values(supT).reduce((s,v)=>s+v,0),catG=Object.values(catT).reduce((s,v)=>s+v,0);
-  const mkBar=(a,g)=>`<div style="display:flex;align-items:center;gap:6px;justify-content:flex-end"><div style="width:50px;height:3px;background:var(--bdr)"><div style="height:100%;width:${g>0?Math.round(a/g*100):0}%;background:var(--gold)"></div></div><span style="font-size:10px">${g>0?Math.round(a/g*100):0}%</span></div>`;
-  $('tb-dash-sup').innerHTML=Object.keys(supT).length===0?'<tr><td colspan="3" style="color:var(--muted);padding:16px;text-align:center">今月データなし</td></tr>':Object.entries(supT).sort((a,b)=>b[1]-a[1]).map(([s,a])=>`<tr><td>${s}</td><td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td><td class="tr">${mkBar(a,supG)}</td></tr>`).join('');
-  $('tb-dash-cat').innerHTML=Object.keys(catT).length===0?'<tr><td colspan="3" style="color:var(--muted);padding:16px;text-align:center">今月データなし</td></tr>':Object.entries(catT).sort((a,b)=>b[1]-a[1]).map(([c,a])=>`<tr><td>${catBadge(c)}</td><td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td><td class="tr">${mkBar(a,catG)}</td></tr>`).join('');
-  const months=[],amounts=[];
-  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push(`${d.getMonth()+1}月`);amounts.push(dels.filter(dl=>dl.date.startsWith(ym(d))).reduce((s,dl)=>s+dl.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0));}
-  try{if(charts.trend)charts.trend.destroy();const c=$('c-trend');if(c)charts.trend=new Chart(c,{type:'bar',data:{labels:months,datasets:[{data:amounts,backgroundColor:'rgba(201,169,110,.35)',borderColor:'#c9a96e',borderWidth:1}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{color:'#222'},ticks:{color:'#555',font:{size:10}}},y:{grid:{color:'#222'},ticks:{color:'#555',font:{size:10},callback:v=>v.toLocaleString()}}}}});}catch(e){console.error(e);}
-  const alertP=prods.filter(p=>p.stock<=p.target);
-  $('alert-list').innerHTML=alertP.length===0?'<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px 0">要発注商品はありません</div>':alertP.map(p=>`<div class="ali"><div><div>${p.name}${p.detail?` <span class="detail-badge">${p.detail}</span>`:''}</div><div style="font-size:10px;color:var(--muted)">${p.category}</div></div><div style="text-align:right"><div style="color:var(--orange)">${p.stock}${p.unit||'本'}</div><div style="font-size:10px;color:var(--muted)">適正: ${p.target}</div></div></div>`).join('');
-  $('tb-stock').innerHTML=prods.map(p=>{const r=p.target>0?Math.round(p.stock/p.target*100):100,bc=r<50?'var(--red)':r<100?'var(--orange)':'var(--green)';return`<tr><td>${catBadge(p.category)}</td><td>${p.name}</td><td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td><td>${p.stock}${p.unit||'本'}</td><td>${p.target}${p.unit||'本'}</td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:3px;background:var(--bdr);max-width:60px"><div style="height:100%;width:${Math.min(r,100)}%;background:${bc}"></div></div><span style="font-size:11px">${r}%</span></div></td><td>${stockBadge(p)}</td></tr>`;}).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">商品マスタに商品を登録してください</td></tr>';
-};
+const ST=[
+  {id:'oshima', n:'大島',fn:'大島香純',bg:'110万〜',b:300000,y:0,tk:0,ju:12300,ko:0,
+   ti:[{lo:1100000,hi:Infinity,un:10000}]},
+  {id:'ujihira',n:'氏平',fn:'氏平実里',bg:null,b:230000,y:0,tk:0,ju:0,ko:9200,
+   ti:[{lo:600000,hi:800000,un:5000},{lo:800000,hi:1000000,un:7500},{lo:1000000,hi:Infinity,un:10000}]},
+  {id:'ishii',  n:'石井',fn:'石井渚',  bg:null,b:220000,y:0,tk:10000,ju:0,ko:11460,
+   ti:[{lo:600000,hi:800000,un:5000},{lo:800000,hi:1000000,un:7500},{lo:1000000,hi:Infinity,un:10000}]},
+  {id:'kondo',  n:'近藤',fn:'近藤千寿',bg:null,b:225000,y:0,tk:0,ju:0,ko:18700,
+   ti:[{lo:600000,hi:800000,un:5000},{lo:800000,hi:1000000,un:7500},{lo:1000000,hi:Infinity,un:10000}]},
+];
+const AS=[
+  {id:'akiho',  n:'秋保',fn:'秋保まこ', bg:null,b:0,y:0,tk:0,ju:0,ko:0,ti:null},
+  {id:'kasai',  n:'笠井',fn:'笠井涼花', bg:null,b:0,y:0,tk:0,ju:0,ko:0,ti:null},
+  {id:'okazaki',n:'岡崎',fn:'岡崎颯太', bg:null,b:0,y:0,tk:0,ju:0,ko:0,ti:null},
+];
+const ALL=[...ST,...AS],PM={};ALL.forEach(p=>{PM[p.id]=p;});
+const TL={1100000:'110万〜',600000:'60〜80万',800000:'80〜100万',1000000:'100万〜'};
+const fmt=n=>Math.round(n).toLocaleString('ja-JP');
+const nv=id=>parseInt(document.getElementById(id)?.value)||0;
 
-// ── Delivery ─────────────────────────────────────────────────────────
-const renderDel = () => { const sel=$('del-sup');sel.innerHTML='<option value="">仕入先を選択</option>'+sups.map(s=>`<option>${s}</option>`).join('');$('del-date').value=new Date().toISOString().slice(0,10);renderDelLog(); };
-const renderDelLog = () => {
-  const cur=ym(new Date()),rows=[];
-  dels.filter(d=>d.date.startsWith(cur)).forEach(d=>d.items.forEach(i=>{rows.push(`<tr><td>${d.date}</td><td style="font-size:11px">${d.supplier}</td><td>${i.name}</td><td style="font-size:10px;color:var(--muted)">${i.detail||'—'}</td><td>${catBadge(i.category)}</td><td>${i.qty}${i.unit||''}</td><td>¥${(i.price||0).toLocaleString()}</td><td class="tr">¥${((i.qty||0)*(i.price||0)).toLocaleString()}</td><td><button class="btn bd sm" data-del-id="${d.id}">削除</button></td></tr>`);}));
-  $('tb-dellog').innerHTML=rows.join('')||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">今月の入庫データはありません</td></tr>';
-};
-const loadImg = file => { const r=new FileReader();r.onload=e=>{curImg={data:e.target.result.split(',')[1],mediaType:file.type||'image/jpeg'};const img=$('prev');img.src=e.target.result;img.style.display='block';$('dz-inner').style.display='none';};r.readAsDataURL(file); };
+function hoba(s,ti){
+  if(!ti||!s)return{t:0,rows:[]};
+  let t=0;
+  const rows=ti.map(x=>{
+    if(s<=x.lo)return{l:TL[x.lo]||'',s:0,on:false};
+    const cap=x.hi===Infinity?s:Math.min(s,x.hi),st2=Math.floor((cap-x.lo)/50000),sub=st2*x.un;t+=sub;
+    return{l:TL[x.lo]||'',s:sub,on:st2>0};
+  });
+  return{t,rows};
+}
 
-const runAnalysis = async () => {
-  if(!curImg){toast('納品書の写真を選択してください','e');return;}
-  if(!cfg.apiKey){toast('設定画面でAPIキーを入力してください','e');return;}
-  const btn=$('btn-ana');btn.textContent='解析中...';btn.disabled=true;
-  $('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">AIが解析中...</div>';
-  $('reg-wrap').style.display='none';
-  try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'x-api-key':cfg.apiKey,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:curImg.mediaType,data:curImg.data}},{type:'text',text:`あなたは日本の美容サロン向け納品書・請求書の読み取り専門AIです。
-画像を注意深く読み取り、以下のJSON形式のみで返答してください。説明文・コードブロック不要。
-{"supplier":"仕入先名","date":"YYYY-MM-DD","items":[{"name":"商品名","detail":"サイズや仕様","category":"カテゴリ","qty":数量,"unit":"本","price":単価}]}
-・商品名は画像の文字をそのままコピー（省略・翻訳禁止）
-・detailにはサイズ等。なければ空文字
-・仕入先は画像から読む（不明なら空文字）
-・数量は1行ごとの個別の数
-・単価は1本あたりの価格（小計・合計と混同しない）
-・全行を漏れなく抽出
-・日付はYYYY-MM-DD（不明なら今日）
-・カテゴリ: ${cats.join('/')}`}]}]})});
-    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${res.status}`);}
+function upP(p){
+  const b=nv('b-'+p.id),y=nv('y-'+p.id),tk=nv('tk-'+p.id),ju=nv('ju-'+p.id),ko=nv('ko-'+p.id);
+  const uri=nv('uri-'+p.id),gijutsu=nv('gijutsu-'+p.id),shutcho=nv('shutcho-'+p.id);
+  let h=0,tRows=[];
+  if(p.ti){const r=hoba(nv('sh-'+p.id),p.ti);h=r.t;tRows=r.rows;}
+  const total=b+y+tk+ju+ko+uri+gijutsu+shutcho+h;
+  document.getElementById('pt-'+p.id).innerHTML='¥'+fmt(total);
+
+  // breakdown
+  const fields=[
+    {k:'基本給',v:b,fixed:true},{k:'役付手当',v:y,fixed:true},{k:'特別手当',v:tk,fixed:true},
+    {k:'住宅手当',v:ju,fixed:true},{k:'交通費',v:ko,fixed:true},
+    {k:'売上達成手当',v:uri,fixed:false},{k:'技術手当',v:gijutsu,fixed:false},{k:'出張手当',v:shutcho,fixed:false},
+  ];
+  if(p.ti){
+    fields.push({k:'指名技術売上',v:nv('sh-'+p.id),fixed:false,info:true});
+    fields.push({k:'歩合',v:h,fixed:false,hoba:true});
+  }
+  let bkHTML='<table class="bk-table">';
+  fields.forEach(f=>{
+    if(f.info)return;
+    const zero=f.v===0?'zero':'';
+    const tag=f.fixed?'<span class="tag">固定</span>':'<span class="tag var">変動</span>';
+    const hTag=f.hoba?'<span class="tag">歩合</span>':'';
+    bkHTML+=`<tr class="${zero}"><td>${f.k}${tag}${hTag}</td><td>${f.v>0?'¥'+fmt(f.v):'—'}</td></tr>`;
+  });
+  if(p.ti&&tRows.length){
+    tRows.forEach(r=>{if(r.on)bkHTML+=`<tr><td style="padding-left:16px;font-size:10px;color:var(--t3)">└ ${r.l}</td><td style="font-size:10px;color:var(--t3)">¥${fmt(r.s)}</td></tr>`;});
+  }
+  bkHTML+=`<tr class="gold"><td>支給合計</td><td>¥${fmt(total)}</td></tr></table>`;
+
+  let hobaHTML='';
+  if(p.ti){
+    const sh=nv('sh-'+p.id);
+    hobaHTML=`<div class="hb"><div><div class="hb-l">歩合（指名技術売上 ¥${fmt(sh)}）</div><div style="margin-top:3px">${tRows.map(r=>`<div class="tier-row ${r.on?'':'dm'}"><span>${r.l}</span><span class="tv2">${r.s>0?'¥'+fmt(r.s):'—'}</span></div>`).join('')}</div></div><div class="hb-v">¥${fmt(h)}<small>円</small></div></div>`;
+  }
+  document.getElementById('bk-'+p.id).innerHTML=bkHTML;
+  if(p.ti) document.getElementById('hb-'+p.id).innerHTML=hobaHTML;
+  upG();
+}
+
+function upG(){
+  const items=ALL.map(p=>{
+    const b=nv('b-'+p.id),y=nv('y-'+p.id),tk=nv('tk-'+p.id),ju=nv('ju-'+p.id),ko=nv('ko-'+p.id);
+    const uri=nv('uri-'+p.id),g2=nv('gijutsu-'+p.id),sc2=nv('shutcho-'+p.id);
+    let h=0;if(p.ti)h=hoba(nv('sh-'+p.id),p.ti).t;
+    return{n:p.n,t:b+y+tk+ju+ko+uri+g2+sc2+h};
+  });
+  const total=items.reduce((s,x)=>s+x.t,0);
+  document.getElementById('gt').innerHTML='¥'+fmt(total)+'<small>円</small>';
+  document.getElementById('gt-bd').innerHTML=items.map(x=>`<div class="gb-item">${x.n} <span>¥${fmt(x.t)}</span></div>`).join('');
+}
+
+function tgF(id){
+  const fp=document.getElementById('fp-'+id),btn=document.getElementById('eb-'+id),op=fp.classList.toggle('op');
+  btn.textContent=op?'閉じる':'編集';btn.classList.toggle('op',op);
+}
+
+function sv(){
+  const d={};
+  ALL.forEach(p=>{d[p.id]={b:document.getElementById('b-'+p.id)?.value||'',y:document.getElementById('y-'+p.id)?.value||'',tk:document.getElementById('tk-'+p.id)?.value||'',ju:document.getElementById('ju-'+p.id)?.value||'',ko:document.getElementById('ko-'+p.id)?.value||''};});
+  try{localStorage.setItem('nr_f3',JSON.stringify(d));}catch(e){}
+}
+function ld(){
+  try{
+    const r=localStorage.getItem('nr_f3');if(!r)return;
+    const d=JSON.parse(r);
+    ALL.forEach(p=>{
+      if(!d[p.id])return;
+      ['b','y','tk','ju','ko'].forEach(k=>{const el=document.getElementById(k+'-'+p.id);if(el&&d[p.id][k])el.value=d[p.id][k];});
+    });
+  }catch(e){}
+}
+let ak='';
+function onAk(){
+  ak=document.getElementById('ak').value.trim();
+  const ok=ak.startsWith('sk-ant-')&&ak.length>30;
+  document.getElementById('aSt').textContent=ok?'✓ OK':'未設定';
+  document.getElementById('aSt').className='ast '+(ok?'ok':'ng');
+  uSB();try{if(ok)localStorage.setItem('nr_ak',ak);}catch(e){}
+}
+function tEye(){const i=document.getElementById('ak');i.type=i.type==='password'?'text':'password';}
+function ldAk(){try{const k=localStorage.getItem('nr_ak');if(k){document.getElementById('ak').value=k;ak=k;onAk();}}catch(e){}}
+
+let cb64=null,fr=false;
+function uSB(){document.getElementById('sb').disabled=!(ak.startsWith('sk-ant-')&&ak.length>30&&fr);}
+function cImg(file){
+  return new Promise(res=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width,h=img.height,mx=1200;
+        if(w>mx){h=Math.round(h*mx/w);w=mx;}if(h>mx){w=Math.round(w*mx/h);h=mx;}
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        const du=c.toDataURL('image/jpeg',0.82),b64=du.split(',')[1];
+        res({b64,kb:Math.round(b64.length*3/4/1024),w,h});
+      };img.src=ev.target.result;
+    };r.readAsDataURL(file);
+  });
+}
+async function onF(e){
+  const f=e.target.files[0];if(!f)return;setSl('圧縮中...','');
+  try{
+    const{b64,kb,w,h}=await cImg(f);cb64=b64;
+    document.getElementById('uImg').src='data:image/jpeg;base64,'+b64;
+    document.getElementById('uFn').textContent=f.name;
+    document.getElementById('uInfo').textContent=`圧縮: ${Math.round(f.size/1024)}KB → ${kb}KB (${w}×${h}px)`;
+    document.getElementById('ud').style.display='none';document.getElementById('upP').style.display='flex';
+    fr=true;uSB();setSl('スキャンボタンを押してください。','');
+  }catch(e){setSl('読み込みエラー','err');}
+}
+function setSl(m,c){const e=document.getElementById('sl');e.textContent=m;e.className='sl '+c;}
+function sPg(p,l){document.getElementById('pgf').style.width=p+'%';document.getElementById('pgl').textContent=l;}
+
+async function doOCR(){
+  if(!cb64||!ak)return;
+  const btn=document.getElementById('sb');btn.disabled=true;
+  btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 解析中...';
+  document.getElementById('dg').style.display='none';
+  document.getElementById('pgw').style.display='block';sPg(10,'送信中...');setSl('','');
+  const ctrl=new AbortController(),to=setTimeout(()=>ctrl.abort(),60000);
+  try{
+    sPg(35,'AI解析中...');
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',signal:ctrl.signal,
+      headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:250,messages:[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:cb64}},
+        {type:'text',text:'ホットペッパービューティーの管理画面から4名の「指名技術売上」を読み取ってください。\n大島/大島香純/かすみ→oshima\n氏平/氏平実里/みのり→ujihira\n石井/石井渚/なぎさ→ishii\n近藤/近藤千寿/ちず→kondo\nJSONのみ返答。値は整数（円）、見つからなければnull。\n{"oshima":数値or null,"ujihira":数値or null,"ishii":数値or null,"kondo":数値or null}'}
+      ]}]})
+    });
+    clearTimeout(to);sPg(80,'処理中...');
     const data=await res.json();
-    const text=data.content[0].text;
-    let parsed;
-    try{const m=text.match(/\{[\s\S]*\}/);parsed=JSON.parse(m?m[0]:text);}catch{throw new Error('JSON解析失敗');}
-    extItems=(parsed.items||[]).map(i=>({name:i.name||'',detail:i.detail||'',category:i.category||cats[0],qty:Number(i.qty)||0,unit:i.unit||'本',price:Number(i.price)||0,linkedId:undefined}));
-    if(parsed.supplier){const sel=$('del-sup'),exists=[...sel.options].some(o=>o.value===parsed.supplier);if(!exists){const opt=document.createElement('option');opt.value=opt.textContent=parsed.supplier+'（解析）';sel.appendChild(opt);sel.value=opt.value;}else sel.value=parsed.supplier;}
-    if(parsed.date)$('del-date').value=parsed.date;
-    if(extItems.length===0){$('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品が検出できませんでした</div>';}
-    else{renderEditItems();$('reg-wrap').style.display='block';}
-  }catch(e){$('ana-result').innerHTML=`<div style="color:var(--red);font-size:12px;padding:14px;background:rgba(196,82,82,.05);border:1px solid rgba(196,82,82,.2)">エラー: ${e.message}</div>`;}
-  finally{btn.textContent='✦ AI解析を実行';btn.disabled=false;}
-};
+    if(data.error){setSl('APIエラー：'+data.error.message,'err');document.getElementById('dg').style.display='block';document.getElementById('dg').textContent=JSON.stringify(data.error);return;}
+    const raw=(data.content?.[0]?.text||'').trim();
+    document.getElementById('dg').style.display='block';document.getElementById('dg').textContent='AI返答：'+raw;
+    sPg(95,'反映中...');
+    const m=raw.match(/\{[\s\S]*?\}/);if(!m){setSl('解析失敗','err');return;}
+    const parsed=JSON.parse(m[0]);let found=0;
+    ST.forEach(s=>{if(parsed[s.id]!=null&&!isNaN(parsed[s.id])){document.getElementById('sh-'+s.id).value=Number(parsed[s.id]);upP(s);found++;}});
+    sPg(100,'完了');setSl(found>0?found+'名分を読み取りました。':'検出できませんでした。手動入力してください。',found>0?'ok':'err');
+    setTimeout(()=>{document.getElementById('pgw').style.display='none';},1500);
+  }catch(err){
+    clearTimeout(to);
+    setSl(err.name==='AbortError'?'タイムアウト。もう一度試してください。':'エラー：'+err.message,'err');
+    document.getElementById('pgw').style.display='none';
+  }
+  btn.disabled=false;
+  btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> スタイリスト4名の指名技術売上を一括スキャン';
+}
 
-const autoMatch = (name, detail) => {
-  // 1. linkMapに記憶があればそれを優先
-  const normKey = (name+(detail||'')).toLowerCase().replace(/\s/g,'');
-  const nameKey = name.toLowerCase().replace(/\s/g,'');
-  if(linkMap[normKey]) { const p=prods.find(p=>p.id===linkMap[normKey]); if(p) return p; }
-  if(linkMap[nameKey]) { const p=prods.find(p=>p.id===linkMap[nameKey]); if(p) return p; }
-  // 2. 完全一致
-  const exact = prods.find(p=>p.name===name&&(p.detail||'')===(detail||''));
-  if(exact) return exact;
-  const nameOnly = prods.find(p=>p.name===name);
-  if(nameOnly) return nameOnly;
-  // 3. 部分一致
-  return prods.find(p=>{const pn=(p.name+(p.detail||'')).toLowerCase().replace(/\s/g,'');return pn===normKey||pn.includes(normKey)||normKey.includes(pn);})||null;
-};
-
-// 紐付けを記憶
-const saveLinkMap = (invoiceName, invoiceDetail, productId) => {
-  if(!productId) return;
-  const normKey = (invoiceName+(invoiceDetail||'')).toLowerCase().replace(/\s/g,'');
-  const nameKey = invoiceName.toLowerCase().replace(/\s/g,'');
-  linkMap[normKey] = productId;
-  linkMap[nameKey] = productId;
-  sv('nz_linkmap', linkMap);
-};
-
-const renderEditItems = () => {
-  extItems.forEach(item=>{if(item.linkedId===undefined){const m=autoMatch(item.name,item.detail);item.linkedId=m?m.id:'';}});
-  const total=extItems.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
-  $('ana-result').innerHTML=`
-    <div style="font-size:10px;letter-spacing:.14em;color:var(--muted);margin-bottom:12px">解析結果 — 編集してから登録（${extItems.length}点）</div>
-    ${extItems.map((item,idx)=>{const matched=prods.find(p=>p.id===item.linkedId);return`<div style="border:1px solid var(--bdr);padding:12px;margin-bottom:8px">
-      <div style="font-size:10px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between"><span># ${idx+1}</span><button class="btn bd sm" data-remove="${idx}">✕ 削除</button></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div style="grid-column:1/-1"><label>商品名</label><input type="text" value="${item.name.replace(/"/g,'&quot;')}" data-idx="${idx}" data-field="name"></div>
-        <div style="grid-column:1/-1"><label>詳細</label><input type="text" value="${(item.detail||'').replace(/"/g,'&quot;')}" data-idx="${idx}" data-field="detail"></div>
-        <div style="grid-column:1/-1"><label style="display:flex;justify-content:space-between"><span>登録商品との紐付け</span><span style="font-size:10px;color:${matched?'var(--green)':'var(--muted)'}">${matched?'✓ '+matched.name:'未紐付け'}</span></label>
-          <select data-idx="${idx}" data-field="linkedId" data-rerender="1"><option value="">— 紐付けなし</option>${prods.map(p=>`<option value="${p.id}" ${p.id===item.linkedId?'selected':''}>${p.name}${p.detail?' / '+p.detail:''} [${p.stock}${p.unit||'本'}]</option>`).join('')}</select></div>
-        <div><label>カテゴリ</label><select data-idx="${idx}" data-field="category">${cats.map(c=>`<option ${c===item.category?'selected':''}>${c}</option>`).join('')}</select></div>
-        <div><label>単位</label><select data-idx="${idx}" data-field="unit">${['本','袋','箱','個','缶','kg'].map(u=>`<option ${u===(item.unit||'本')?'selected':''}>${u}</option>`).join('')}</select></div>
-        <div><label>数量</label><input type="number" min="0" value="${item.qty}" data-idx="${idx}" data-field="qty"></div>
-        <div><label>単価（円）</label><input type="number" min="0" value="${item.price||0}" data-idx="${idx}" data-field="price"></div>
+function doPDF(){
+  const month = document.getElementById('mp').textContent;
+  let rows = '';
+  ALL.forEach(p => {
+    const b2=nv('b-'+p.id),y2=nv('y-'+p.id),tk=nv('tk-'+p.id),ju=nv('ju-'+p.id),ko=nv('ko-'+p.id);
+    const uri=nv('uri-'+p.id),gijutsu=nv('gijutsu-'+p.id),shutcho=nv('shutcho-'+p.id);
+    let h=0; if(p.ti) h=hoba(nv('sh-'+p.id),p.ti).t;
+    const total=b2+y2+tk+ju+ko+uri+(p.ti?0:gijutsu)+shutcho+h;
+    const fields=[
+      {l:'基本給',v:b2},{l:'役付手当',v:y2},{l:'特別手当',v:tk},
+      {l:'住宅手当',v:ju},{l:'交通費',v:ko},
+      {l:'売上達成手当',v:uri},{l:'出張手当',v:shutcho},
+    ];
+    if(!p.ti) fields.push({l:'技術手当',v:gijutsu});
+    if(p.ti){ fields.push({l:'指名技術売上',v:nv('sh-'+p.id)}); fields.push({l:'歩合',v:h}); }
+    rows += `<div style="margin-bottom:14px;border:1px solid #e0ddd6;border-radius:6px;overflow:hidden;font-family:sans-serif">
+      <div style="background:#2C2C2A;padding:9px 14px;display:flex;justify-content:space-between">
+        <span style="color:#B8965A;font-size:13px;font-weight:bold">${p.fn}</span>
+        <span style="color:#B8965A;font-size:13px;font-weight:bold">&#165;${fmt(total)}</span>
       </div>
-      <div style="margin-top:8px;font-size:11px;color:var(--muted);text-align:right">小計 ¥${((item.qty||0)*(item.price||0)).toLocaleString()}</div>
-    </div>`;}).join('')}
-    <button class="btn bg sm" data-add-item="1" style="margin-bottom:12px">＋ 行を追加</button>
-    <div style="border-top:1px solid var(--bdr);padding-top:10px;display:flex;justify-content:space-between;font-size:12px">
-      <span style="color:var(--muted)">合計</span><span style="color:var(--gold)">¥${total.toLocaleString()}</span>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;font-family:sans-serif">
+        ${fields.filter(f=>f.v>0).map((f,i)=>`
+        <tr style="background:${i%2===0?'#fff':'#f8f6f2'}">
+          <td style="padding:4px 12px;color:#5F5E5A;border-bottom:1px solid #f0ede6">${f.l}</td>
+          <td style="padding:4px 12px;text-align:right;color:#1A1A18;border-bottom:1px solid #f0ede6">&#165;${fmt(f.v)}</td>
+        </tr>`).join('')}
+        <tr style="background:#F1EFE8">
+          <td style="padding:6px 12px;font-weight:bold;color:#1A1A18">&#25903;&#32989;&#21512;&#35336;</td>
+          <td style="padding:6px 12px;text-align:right;font-weight:bold;color:#B8965A">&#165;${fmt(total)}</td>
+        </tr>
+      </table>
     </div>`;
-};
-
-// 解析結果エリアのイベントは card 親要素で委譲
-document.querySelector('#p-delivery').addEventListener('input', e => {
-  const el=e.target,idx=el.dataset.idx,field=el.dataset.field;
-  if(idx===undefined||!field)return;
-  const i=parseInt(idx);if(!isNaN(i)&&extItems[i])extItems[i][field]=(field==='qty'||field==='price')?Number(el.value)||0:el.value;
-});
-document.querySelector('#p-delivery').addEventListener('change', e => {
-  const el=e.target,idx=el.dataset.idx,field=el.dataset.field;
-  if(idx===undefined||!field)return;
-  const i=parseInt(idx);if(!isNaN(i)&&extItems[i]){extItems[i][field]=(field==='qty'||field==='price')?Number(el.value)||0:el.value;if(el.dataset.rerender)renderEditItems();}
-});
-document.querySelector('#p-delivery').addEventListener('click', e => {
-  const rem=e.target.closest('[data-remove]');
-  if(rem){const idx=parseInt(rem.dataset.remove);extItems.splice(idx,1);if(extItems.length===0){$('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品がありません</div>';$('reg-wrap').style.display='none';}else renderEditItems();return;}
-  if(e.target.closest('[data-add-item]')){extItems.push({name:'',detail:'',category:cats[0]||'消耗品',qty:0,unit:'本',price:0,linkedId:''});renderEditItems();$('reg-wrap').style.display='block';}
-});
-
-const registerDelivery = () => {
-  const supplier=$('del-sup').value||'不明',date=$('del-date').value||new Date().toISOString().slice(0,10);
-  if(extItems.length===0){toast('登録する商品がありません','e');return;}
-  const itemsToSave=extItems.map(i=>({...i}));
-  dels.push({id:Date.now().toString(),date,supplier,items:itemsToSave});
-  sv('nz_dels',dels);
-  let upd=0;
-  itemsToSave.forEach(item=>{
-    let p=item.linkedId?prods.find(p=>p.id===item.linkedId):null;
-    if(!p)p=prods.find(p=>p.name===item.name&&(p.detail||'')===(item.detail||''));
-    if(!p)p=prods.find(p=>p.name===item.name);
-    if(p){
-      p.stock=(p.stock||0)+(item.qty||0);
-      if(item.price>0)p.price=item.price;
-      upd++;
-      // 紐付けを記憶
-      saveLinkMap(item.name, item.detail, p.id);
-    }
   });
-  sv('nz_prods',prods);
-  gasSync({type:'delivery',date,supplier,items:itemsToSave});
-  toast(upd>0?`入庫を記録しました（在庫更新: ${upd}商品）`:'入庫を記録しました（在庫未更新 — 商品マスタを確認してください）');
-  extItems=[];curImg=null;
-  $('reg-wrap').style.display='none';
-  $('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:30px 0">納品書をアップロードすると<br>ここに解析結果が表示されます</div>';
-  $('prev').style.display='none';$('dz-inner').style.display='block';$('fi').value='';
-  renderDelLog();renderDash();
-};
-
-// ── Stocktake ────────────────────────────────────────────────────────
-const renderStk = () => {
-  renderStockValueTable('tb-stk-val','stk-val-total',null);
-  const list=$('stk-list');
-  if(prods.length===0){list.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:24px">商品マスタに商品を登録してください</div>';return;}
-  const grouped={};cats.forEach(c=>{grouped[c]=[];});prods.forEach(p=>{if(!grouped[p.category])grouped[p.category]=[];grouped[p.category].push(p);});
-  list.innerHTML=cats.filter(c=>grouped[c]&&grouped[c].length>0).map(c=>`
-    <div style="font-size:10px;letter-spacing:.1em;color:var(--muted);padding:10px 0 4px;border-bottom:1px solid var(--bdr);margin-bottom:4px">${c}</div>
-    ${grouped[c].map(p=>`<div class="ski" style="grid-template-columns:1fr 90px 60px 60px 90px 90px">
-      <div><div style="font-size:12px">${p.name}</div></div>
-      <div style="font-size:10px;color:var(--muted)">${p.detail||'—'}</div>
-      <div style="font-size:11px;color:var(--muted);text-align:center">${p.stock}</div>
-      <div style="font-size:11px;text-align:center;color:${p.stock<=p.target?'var(--orange)':'var(--muted)'}">${p.target}</div>
-      <input type="number" min="0" placeholder="実数" data-stk-id="${p.id}" data-stk-type="stock" style="text-align:center">
-      <input type="number" min="0" placeholder="${p.target}" data-stk-id="${p.id}" data-stk-type="target" style="text-align:center;border-color:rgba(201,169,110,.3)">
-    </div>`).join('')}`).join('');
-};
-const saveStocktake = () => {
-  const updated=[];
-  document.querySelectorAll('[data-stk-type="stock"]').forEach(inp=>{if(inp.value==='')return;const p=prods.find(x=>x.id===inp.dataset.stkId);if(p){p.stock=parseInt(inp.value);updated.push({productId:p.id,name:p.name,detail:p.detail||'',cat:p.category,stock:p.stock,target:p.target});}});
-  document.querySelectorAll('[data-stk-type="target"]').forEach(inp=>{if(inp.value==='')return;const p=prods.find(x=>x.id===inp.dataset.stkId);if(p){p.target=parseInt(inp.value);const ex=updated.find(u=>u.productId===p.id);if(ex)ex.target=p.target;else updated.push({productId:p.id,name:p.name,detail:p.detail||'',cat:p.category,stock:p.stock,target:p.target});}});
-  if(updated.length===0){toast('変更がありません','e');return;}
-  sv('nz_prods',prods);stks.push({id:Date.now().toString(),date:new Date().toISOString().slice(0,10),items:updated});sv('nz_stks',stks);
-  gasSync({type:'stocktake',items:updated});toast(`${updated.length}件を更新しました`);renderStk();renderDash();
-};
-
-// ── History ──────────────────────────────────────────────────────────
-const renderHist = () => {
-  const now=new Date(),cur=ym(now),mDels=dels.filter(d=>d.date.startsWith(cur));
-  const golds=['rgba(201,169,110,.7)','rgba(160,130,80,.7)','rgba(120,95,55,.7)','rgba(230,210,150,.7)','rgba(80,60,30,.7)','rgba(175,155,100,.7)'];
-  const catT={},supT={},supC={},supCat={};
-  mDels.forEach(d=>d.items.forEach(i=>{catT[i.category]=(catT[i.category]||0)+(i.qty||0)*(i.price||0);supT[d.supplier]=(supT[d.supplier]||0)+(i.qty||0)*(i.price||0);supC[d.supplier]=(supC[d.supplier]||0)+1;if(!supCat[d.supplier])supCat[d.supplier]={};supCat[d.supplier][i.category]=(supCat[d.supplier][i.category]||0)+(i.qty||0)*(i.price||0);}));
-  try{['cat','sup'].forEach(k=>{const data=k==='cat'?catT:supT;if(charts[k])charts[k].destroy();const c=$(k==='cat'?'c-cat':'c-sup');if(c)charts[k]=new Chart(c,{type:'doughnut',data:{labels:Object.keys(data),datasets:[{data:Object.values(data),backgroundColor:golds,borderColor:'#161616',borderWidth:2}]},options:{plugins:{legend:{position:'bottom',labels:{color:'#888',font:{size:10},padding:10}}}}});});}catch(e){console.error(e);}
-  const sup3={};for(let m=1;m<=3;m++){const d=new Date(now.getFullYear(),now.getMonth()-m,1);dels.filter(dl=>dl.date.startsWith(ym(d))).forEach(dl=>{const t=dl.items.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);sup3[dl.supplier]=(sup3[dl.supplier]||0)+t;});}
-  $('tb-sup-sum').innerHTML=Object.keys(supT).length===0?'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">データがありません</td></tr>':Object.entries(supT).sort((a,b)=>b[1]-a[1]).map(([s,a])=>{const tc=Object.entries(supCat[s]||{}).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([c])=>catBadge(c)).join(' ');return`<tr><td>${s}</td><td class="tr" style="color:var(--gold)">¥${a.toLocaleString()}</td><td class="tr">${supC[s]}件</td><td class="tr" style="color:var(--muted)">¥${(sup3[s]||0).toLocaleString()}</td><td>${tc}</td></tr>`;}).join('');
-  const itemMap={};mDels.forEach(d=>d.items.forEach(i=>{const key=i.name+'|'+(i.detail||'');if(!itemMap[key])itemMap[key]={name:i.name,detail:i.detail||'',category:i.category,qty:0,amt:0};itemMap[key].qty+=(i.qty||0);itemMap[key].amt+=(i.qty||0)*(i.price||0);}));
-  $('tb-top').innerHTML=Object.values(itemMap).sort((a,b)=>b.qty-a.qty).slice(0,10).map((r,i)=>`<tr><td style="color:var(--muted);font-size:11px">${i+1}</td><td>${r.name}</td><td style="font-size:10px;color:var(--muted)">${r.detail||'—'}</td><td>${catBadge(r.category)}</td><td class="tr" style="color:var(--gold)">${r.qty}本</td><td class="tr">¥${r.amt.toLocaleString()}</td></tr>`).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">今月のデータがありません</td></tr>';
-  $('tb-over').innerHTML=prods.map(p=>{let avg3=0;for(let m=1;m<=3;m++){const d=new Date(now.getFullYear(),now.getMonth()-m,1);avg3+=dels.filter(dl=>dl.date.startsWith(ym(d))).reduce((s,dl)=>s+dl.items.filter(i=>i.name===p.name).reduce((t,i)=>t+(i.qty||0),0),0);}const avg=Math.round(avg3/3),tm=mDels.reduce((s,d)=>s+d.items.filter(i=>i.name===p.name).reduce((t,i)=>t+(i.qty||0),0),0),stay=avg>0?Math.round(p.stock/(avg/30))+'日':'—';return`<tr><td>${p.name}</td><td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td><td>${tm}${p.unit||'本'}</td><td>${avg}${p.unit||'本'}</td><td>${avg>0&&tm>avg*1.5?'<span class="badge low">過多</span>':'<span class="badge ok">適正</span>'}</td><td>${stay}</td></tr>`;}).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">データがありません</td></tr>';
-  const sel=$('hist-ym'),months=[];for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({val:ym(d),lbl:`${d.getFullYear()}年${d.getMonth()+1}月`});}
-  const cur2=sel.value||months[0].val;sel.innerHTML=months.map(m=>`<option value="${m.val}" ${m.val===cur2?'selected':''}>${m.lbl}</option>`).join('');
-  renderHistLog();
-};
-const renderHistLog = () => {
-  const sel=$('hist-ym');if(!sel)return;
-  const filtered=dels.filter(d=>d.date.startsWith(sel.value)),rows=[];
-  filtered.forEach(d=>d.items.forEach((item,iIdx)=>{const sub=(item.qty||0)*(item.price||0);rows.push(`<tr style="cursor:pointer" data-hist-del="${d.id}" data-hist-idx="${iIdx}"><td>${d.date}</td><td style="font-size:11px">${d.supplier}</td><td>${item.name}</td><td style="font-size:10px;color:var(--muted)">${item.detail||'—'}</td><td>${catBadge(item.category)}</td><td>${item.qty}${item.unit||''}</td><td>¥${(item.price||0).toLocaleString()}</td><td class="tr">¥${sub.toLocaleString()}</td><td><button class="btn bd sm" data-del-item-del="${d.id}" data-del-item-idx="${iIdx}">削除</button></td></tr><tr id="hd-${d.id}-${iIdx}" style="display:none"><td colspan="9" style="background:rgba(201,169,110,.04);padding:12px 20px"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;font-size:11px"><div><div style="color:var(--muted);margin-bottom:3px">仕入先</div>${d.supplier}</div><div><div style="color:var(--muted);margin-bottom:3px">日付</div>${d.date}</div><div><div style="color:var(--muted);margin-bottom:3px">商品名</div>${item.name}</div><div><div style="color:var(--muted);margin-bottom:3px">詳細</div>${item.detail||'—'}</div><div><div style="color:var(--muted);margin-bottom:3px">カテゴリ</div>${catBadge(item.category)}</div><div><div style="color:var(--muted);margin-bottom:3px">数量</div><span style="color:var(--gold)">${item.qty}${item.unit||'本'}</span></div><div><div style="color:var(--muted);margin-bottom:3px">単価</div>¥${(item.price||0).toLocaleString()}</div><div><div style="color:var(--muted);margin-bottom:3px">小計</div><span style="color:var(--gold)">¥${sub.toLocaleString()}</span></div></div></td></tr>`);}));
-  const total=filtered.reduce((s,d)=>s+d.items.reduce((t,i)=>t+(i.qty||0)*(i.price||0),0),0);
-  $('tb-hist-log').innerHTML=rows.join('')+(rows.length>0?`<tr style="background:rgba(201,169,110,.04)"><td colspan="7" style="text-align:right;font-size:11px;color:var(--muted)">合計</td><td class="tr" style="color:var(--gold)">¥${total.toLocaleString()}</td><td></td></tr>`:'')||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">この月のデータはありません</td></tr>';
-};
-
-// ── Products ─────────────────────────────────────────────────────────
-const renderProducts = () => {
-  const fc=$('flt-cat').value,fn=$('flt-name').value.toLowerCase();
-  $('flt-cat').innerHTML='<option value="">全カテゴリ</option>'+cats.map(c=>`<option ${c===fc?'selected':''}>${c}</option>`).join('');
-  let filtered=prods;if(fc)filtered=filtered.filter(p=>p.category===fc);if(fn)filtered=filtered.filter(p=>p.name.toLowerCase().includes(fn)||(p.detail||'').toLowerCase().includes(fn));
-  const grouped={};cats.forEach(c=>{grouped[c]=[];});filtered.forEach(p=>{if(!grouped[p.category])grouped[p.category]=[];grouped[p.category].push(p);});
-  $('prod-tree').innerHTML=cats.filter(c=>grouped[c]&&grouped[c].length>0).map(c=>`
-    <div style="margin-bottom:20px">
-      <div class="cat-header" data-toggle-cat="1"><span class="cat-toggle open">▶</span>${catBadge(c)}<span style="font-size:12px;font-weight:500">${c}</span><span style="font-size:10px;color:var(--muted);margin-left:auto">${grouped[c].length}品</span></div>
-      <div>
-        <div class="prod-row" style="background:rgba(0,0,0,.2)"><div></div><div style="font-size:10px;color:var(--muted)">商品名</div><div style="font-size:10px;color:var(--muted)">詳細</div><div style="font-size:10px;color:var(--muted)">現在庫</div><div style="font-size:10px;color:var(--muted)">適正量</div><div style="font-size:10px;color:var(--muted)">仕入先</div><div></div></div>
-        ${grouped[c].map(p=>`<div class="prod-row"><div>${p.stock===0?'<span style="color:var(--red)">●</span>':p.stock<=p.target?'<span style="color:var(--orange)">●</span>':'<span style="color:var(--green)">●</span>'}</div><div>${p.name}</div><div><span class="detail-badge">${p.detail||'—'}</span></div><div>${p.stock}${p.unit||'本'}</div><div>${p.target}${p.unit||'本'}</div><div style="font-size:11px;color:var(--muted)">${p.supplier||'—'}</div><div style="display:flex;gap:5px"><button class="btn bg sm" data-edit-prod="${p.id}">編集</button><button class="btn bd sm" data-del-prod="${p.id}">削除</button></div></div>`).join('')}
+  const totalAll=ALL.reduce((s,p)=>{
+    const b2=nv('b-'+p.id),y2=nv('y-'+p.id),tk=nv('tk-'+p.id),ju=nv('ju-'+p.id),ko=nv('ko-'+p.id);
+    const uri=nv('uri-'+p.id),gijutsu=nv('gijutsu-'+p.id),shutcho=nv('shutcho-'+p.id);
+    let h=0;if(p.ti)h=hoba(nv('sh-'+p.id),p.ti).t;
+    return s+b2+y2+tk+ju+ko+uri+(p.ti?0:gijutsu)+shutcho+h;
+  },0);
+  document.getElementById('pdfContent').innerHTML=`
+    <div style="background:#2C2C2A;padding:18px 20px 14px;margin-bottom:18px;font-family:sans-serif">
+      <div style="font-size:20px;color:#B8965A;letter-spacing:0.1em;font-weight:bold;margin-bottom:2px">NEUTRIZE</div>
+      <div style="font-size:9px;color:#888780;margin-bottom:8px">&#32989;&#19982;&#26126;&#32048;</div>
+      <div style="font-size:11px;color:#B8965A;background:rgba(184,150,90,.15);display:inline-block;padding:2px 10px;border-radius:20px">${month}</div>
+    </div>
+    <div style="padding:0 14px;font-family:sans-serif">
+      ${rows}
+      <div style="background:#2C2C2A;border-radius:6px;padding:11px 14px;display:flex;justify-content:space-between;margin-bottom:14px">
+        <span style="color:#888780;font-size:11px">&#20840;&#21592;&#21512;&#35336;&#25903;&#32989;&#39069;</span>
+        <span style="color:#B8965A;font-size:17px;font-weight:bold">&#165;${fmt(totalAll)}</span>
       </div>
-    </div>`).join('')||'<div style="text-align:center;color:var(--muted);padding:30px">商品が登録されていません</div>';
-};
-const openProd = id => {
-  $('m-cat').innerHTML=cats.map(c=>`<option>${c}</option>`).join('');
-  // コピー元セレクト
-  const copyFrom = $('m-copy-from');
-  copyFrom.innerHTML='<option value="">— コピーしない</option>'+prods.map(p=>`<option value="${p.id}">${p.name}${p.detail?' / '+p.detail:''}</option>`).join('');
-  $('m-copy-wrap').style.display = id ? 'none' : 'block'; // 編集時は非表示
+      <div style="text-align:center;font-size:9px;color:#999892;padding-bottom:14px">NEUTRIZE ${month}</div>
+    </div>`;
+  const target=document.getElementById('pdfTarget');
+  target.style.display='block';
+  const btn=document.querySelector('.pbtn');
+  const orig=btn.innerHTML; btn.innerHTML='&#29983;&#25104;&#20013;...'; btn.disabled=true;
+  setTimeout(()=>{
+    html2canvas(document.getElementById('pdfContent'),{
+      scale:2,useCORS:true,backgroundColor:'#ffffff',
+      logging:false,allowTaint:true
+    }).then(canvas=>{
+      const {jsPDF}=window.jspdf;
+      const img=canvas.toDataURL('image/png');
+      const pw=210,ph=Math.ceil(canvas.height*210/canvas.width);
+      const doc=new jsPDF({orientation:'p',unit:'mm',format:[pw,ph]});
+      doc.addImage(img,'PNG',0,0,pw,ph);
+      doc.save('NEUTRIZE_'+month+'.pdf');
+      target.style.display='none';
+      btn.innerHTML=orig;btn.disabled=false;
+    }).catch(e=>{
+      alert('PDF生成エラー:'+e.message);
+      target.style.display='none';btn.innerHTML=orig;btn.disabled=false;
+    });
+  },200);
+}
 
-  if(id){
-    const p=prods.find(x=>x.id===id);if(!p)return;
-    $('m-title').textContent='商品を編集';$('m-id').value=id;
-    $('m-name').value=p.name;$('m-detail').value=p.detail||'';$('m-cat').value=p.category;
-    $('m-target').value=p.target;$('m-unit').value=p.unit||'本';
-    $('m-sup').value=p.supplier||'';$('m-stock').value=p.stock;$('m-price').value=p.price||'';
-  } else {
-    $('m-title').textContent='新規商品を追加';$('m-id').value='';
-    ['m-name','m-detail','m-sup','m-price'].forEach(i=>$(i).value='');
-    $('m-stock').value='0';$('m-target').value='';
-    copyFrom.value='';
+function mkCard(p,isSt){
+  const d=document.createElement('div');
+  d.className='sc'+(isSt?'':' as');
+  const fixedFields=`
+    <div class="g3">
+      <div class="fi"><label>基本給</label><div class="nw"><span class="yn">¥</span><input type="number" id="b-${p.id}" value="${p.b||''}" placeholder="0" step="1000" min="0" oninput="upP(PM['${p.id}']);sv()"></div></div>
+      <div class="fi"><label>役付手当</label><div class="nw"><span class="yn">¥</span><input type="number" id="y-${p.id}" value="${p.y||''}" placeholder="0" step="500" min="0" oninput="upP(PM['${p.id}']);sv()"></div></div>
+      <div class="fi"><label>特別手当</label><div class="nw"><span class="yn">¥</span><input type="number" id="tk-${p.id}" value="${p.tk||''}" placeholder="0" step="500" min="0" oninput="upP(PM['${p.id}']);sv()"></div></div>
+      <div class="fi"><label>住宅手当</label><div class="nw"><span class="yn">¥</span><input type="number" id="ju-${p.id}" value="${p.ju||''}" placeholder="0" step="1000" min="0" oninput="upP(PM['${p.id}']);sv()"></div></div>
+      <div class="fi"><label>交通費</label><div class="nw"><span class="yn">¥</span><input type="number" id="ko-${p.id}" value="${p.ko||''}" placeholder="0" step="100" min="0" oninput="upP(PM['${p.id}']);sv()"></div></div>
+    </div>`;
+  const gijutsuField = isSt ? '' : `<div class="fi"><label>技術手当</label><div class="nw"><span class="yn">¥</span><input type="number" id="gijutsu-${p.id}" value="" placeholder="0" step="500" min="0" oninput="upP(PM['${p.id}'])"></div></div>`;
+  const shimeiField = isSt ? `<div class="fi full"><label>指名技術売上（スキャン or 手入力）</label><div class="nw"><span class="yn">¥</span><input type="number" id="sh-${p.id}" class="oc" placeholder="スキャンまたは手入力" step="1000" min="0" oninput="upP(PM['${p.id}'])"></div></div>` : '';
+  const varFields=`
+    <div class="g2">
+      <div class="fi"><label>売上達成手当</label><div class="nw"><span class="yn">¥</span><input type="number" id="uri-${p.id}" value="" placeholder="0" step="500" min="0" oninput="upP(PM['${p.id}'])"></div></div>
+      <div class="fi"><label>出張手当</label><div class="nw"><span class="yn">¥</span><input type="number" id="shutcho-${p.id}" value="" placeholder="0" step="1000" min="0" oninput="upP(PM['${p.id}'])"></div></div>
+      ${gijutsuField}
+      ${shimeiField}
+    </div>`;
+
+  d.innerHTML=`
+    <div class="hd">
+      <div class="av"></div>
+      <div><span class="nk">${p.fn}</span>${p.bg?`<span class="bg">${p.bg}</span>`:''}</div>
+      <div class="td"><div class="tl2">支給合計</div><div class="tv" id="pt-${p.id}">—</div></div>
+    </div>
+    <div class="bd">
+      <div class="sec-hd"><div class="sec-name">固定給与</div><button class="eb" id="eb-${p.id}" onclick="tgF('${p.id}')">編集</button></div>
+      <div class="fp" id="fp-${p.id}">
+        <div class="fp-title">🔒 変更は自動保存・次回引き継ぎ</div>
+        ${fixedFields}
+      </div>
+      <hr class="div">
+      <div class="sec-name" style="font-size:11px;color:var(--t2);margin-bottom:8px">変動項目</div>
+      ${varFields}
+      ${isSt?`<div id="hb-${p.id}"></div>`:''}
+      <hr class="div">
+      <div class="bk-title">明細内訳</div>
+      <div id="bk-${p.id}"></div>
+    </div>`;
+  return d;
+}
+
+ST.forEach(p=>document.getElementById('ss').appendChild(mkCard(p,true)));
+AS.forEach(p=>document.getElementById('as2').appendChild(mkCard(p,false)));
+ld();ldAk();ALL.forEach(p=>upP(p));
+
+
+/* ── TABS ── */
+function switchTab(t){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('on',['calc','hist'][i]===t));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));
+  document.getElementById('tab-'+t).classList.add('on');
+  if(t==='hist') renderHist();
+}
+
+/* ── HISTORY ── */
+const HKEY='nr_hist_v1';
+function loadHist(){try{return JSON.parse(localStorage.getItem(HKEY)||'[]');}catch(e){return[];}}
+function saveHist(d){try{localStorage.setItem(HKEY,JSON.stringify(d));}catch(e){}}
+
+function saveMonth(){
+  const label=document.getElementById('mp').textContent;
+  const entries=ALL.map(p=>{
+    const b=nv('b-'+p.id),y=nv('y-'+p.id),tk=nv('tk-'+p.id),ju=nv('ju-'+p.id),ko=nv('ko-'+p.id);
+    const uri=nv('uri-'+p.id),gijutsu=nv('gijutsu-'+p.id),shutcho=nv('shutcho-'+p.id);
+    let h=0;if(p.ti)h=hoba(nv('sh-'+p.id),p.ti).t;
+    return{name:p.fn,total:b+y+tk+ju+ko+uri+gijutsu+shutcho+h,hoba:h};
+  });
+  const grand=entries.reduce((s,e)=>s+e.total,0);
+  const hist=loadHist();
+  const existing=hist.findIndex(x=>x.label===label);
+  const rec={label,entries,grand,savedAt:new Date().toLocaleString('ja-JP')};
+  if(existing>=0) hist[existing]=rec; else hist.unshift(rec);
+  saveHist(hist);
+  renderHist();
+  switchTab('hist');
+}
+
+function clearAllHist(){
+  if(!confirm('全ての履歴を削除しますか？')) return;
+  localStorage.removeItem(HKEY);renderHist();
+}
+function delMonth(label){
+  const hist=loadHist().filter(x=>x.label!==label);
+  saveHist(hist);renderHist();
+}
+
+function renderHist(){
+  document.getElementById('mp2').textContent=document.getElementById('mp').textContent;
+  const hist=loadHist();
+  const el=document.getElementById('histList');
+  if(!hist.length){el.innerHTML='<div class="hist-empty">まだ履歴がありません。<br>給与計算後に「保存」ボタンを押してください。</div>';document.getElementById('chartWrap').style.display='none';return;}
+  document.getElementById('chartWrap').style.display='block';
+  el.innerHTML=hist.map(r=>`
+    <div class="hist-month">
+      <div class="hist-month-label">${r.label} <button class="hist-del" onclick="delMonth('${r.label}')">削除</button></div>
+      <table class="hist-table">
+        ${r.entries.map(e=>`<tr><td>${e.name}</td><td>¥${fmt(e.total)}</td></tr>`).join('')}
+        <tr class="total"><td>合計</td><td>¥${fmt(r.grand)}</td></tr>
+      </table>
+    </div>`).join('');
+  drawChart(hist);
+}
+
+function drawChart(hist){
+  const canvas=document.getElementById('myChart');
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.parentElement.clientWidth-24,H=160;
+  canvas.width=W*dpr;canvas.height=H*dpr;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
+
+  const data=[...hist].reverse();
+  const vals=data.map(d=>d.grand);
+  const max=Math.max(...vals)*1.15||1,min=0;
+  const pad={t:10,r:10,b:30,l:60};
+  const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
+
+  ctx.clearRect(0,0,W,H);
+
+  // grid
+  ctx.strokeStyle='rgba(0,0,0,.06)';ctx.lineWidth=1;
+  [0,.25,.5,.75,1].forEach(f=>{
+    const y=pad.t+cH*(1-f);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.stroke();
+    ctx.fillStyle='#999892';ctx.font='9px sans-serif';ctx.textAlign='right';
+    ctx.fillText((Math.round(max*f/10000)*10000/10000).toLocaleString()+'円',pad.l-4,y+3);
+  });
+
+  if(data.length===1){
+    // single bar
+    const x=pad.l+cW/2,barW=40;
+    const bH=cH*(vals[0]/max);
+    const y=pad.t+cH-bH;
+    ctx.fillStyle='#B8965A';ctx.beginPath();ctx.roundRect(x-barW/2,y,barW,bH,4);ctx.fill();
+    ctx.fillStyle='#5F5E5A';ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillText(data[0].label,x,H-8);
+    return;
   }
-  $('prod-modal').classList.add('open');
-};
-const closeProd = () => $('prod-modal').classList.remove('open');
-const saveProd = () => {
-  const name=$('m-name').value.trim();if(!name){toast('商品名を入力してください','e');return;}
-  const obj={name,detail:$('m-detail').value.trim(),category:$('m-cat').value,target:parseInt($('m-target').value)||0,unit:$('m-unit').value,supplier:$('m-sup').value.trim(),stock:parseInt($('m-stock').value)||0,price:parseInt($('m-price').value)||0};
-  const eid=$('m-id').value;
-  if(eid){const idx=prods.findIndex(p=>p.id===eid);if(idx>=0)prods[idx]={...prods[idx],...obj};}
-  else{prods.push({id:Date.now().toString(),...obj});if(obj.supplier&&!sups.includes(obj.supplier)){sups.push(obj.supplier);sv('nz_sups',sups);}}
-  sv('nz_prods',prods);closeProd();renderProducts();renderDash();
-  toast(eid?'商品を更新しました':'商品を追加しました');
-};
 
-// ── Report ───────────────────────────────────────────────────────────
-const renderReport = () => {
-  const sel=$('rpt-month'),now=new Date(),months=[];for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({val:ym(d),lbl:`${d.getFullYear()}年${d.getMonth()+1}月`});}
-  const cur=sel.value||months[0].val;sel.innerHTML=months.map(m=>`<option value="${m.val}" ${m.val===cur?'selected':''}>${m.lbl}</option>`).join('');
-  const[y,m]=sel.value.split('-');$('rpt-period').textContent=`${y}年${parseInt(m)}月 仕入れ・在庫レポート`;
-  const mDels=dels.filter(d=>d.date.startsWith(sel.value)),catT={},supT={},supC={};
-  mDels.forEach(d=>{d.items.forEach(i=>{catT[i.category]=(catT[i.category]||0)+(i.qty||0)*(i.price||0);});supT[d.supplier]=(supT[d.supplier]||0)+d.items.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);supC[d.supplier]=(supC[d.supplier]||0)+1;});
-  const grand=Object.values(catT).reduce((s,v)=>s+v,0);
-  $('rpt-cat').innerHTML=Object.entries(catT).map(([c,a])=>`<tr><td>${catBadge(c)}</td><td class="tr">¥${a.toLocaleString()}</td><td class="tr">${grand>0?Math.round(a/grand*100):0}%</td><td><div style="height:5px;background:var(--bdr)"><div style="height:100%;width:${grand>0?Math.round(a/grand*100):0}%;background:var(--gold)"></div></div></td></tr>`).join('')||'<tr><td colspan="4" style="color:var(--muted)">データなし</td></tr>';
-  $('rpt-sup').innerHTML=Object.entries(supT).map(([s,a])=>`<tr><td>${s}</td><td class="tr">¥${a.toLocaleString()}</td><td class="tr">${supC[s]}件</td></tr>`).join('')||'<tr><td colspan="3" style="color:var(--muted)">データなし</td></tr>';
-  $('rpt-stk').innerHTML=prods.map(p=>`<tr><td>${catBadge(p.category)}</td><td>${p.name}</td><td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td><td>${p.stock}${p.unit||'本'}</td><td>${p.target}${p.unit||'本'}</td><td>${stockBadge(p)}</td></tr>`).join('')||'<tr><td colspan="6" style="color:var(--muted)">データなし</td></tr>';
-  const rows=[];mDels.forEach(d=>d.items.forEach(i=>rows.push(`<tr><td>${d.date}</td><td>${d.supplier}</td><td>${i.name}</td><td style="font-size:10px;color:var(--muted)">${i.detail||'—'}</td><td>${catBadge(i.category)}</td><td>${i.qty}${i.unit||''}</td><td class="tr">¥${((i.qty||0)*(i.price||0)).toLocaleString()}</td></tr>`)));
-  $('rpt-det').innerHTML=rows.join('')||'<tr><td colspan="7" style="color:var(--muted)">データなし</td></tr>';
-};
+  // line chart
+  const pts=data.map((d,i)=>({x:pad.l+i*(cW/(data.length-1)),y:pad.t+cH*(1-d.grand/max)}));
 
-// ── Settings ─────────────────────────────────────────────────────────
-const renderSettings = () => {
-  if(cfg.apiKey){$('inp-api').value=cfg.apiKey;$('api-st').textContent='✓ APIキーが設定されています';$('api-st').style.color='var(--green)';}
-  if(cfg.gasUrl)$('inp-gas').value=cfg.gasUrl;
-  $('auto-deduct-toggle').checked=ldLocal('nz_auto_deduct',false);
-  const lr=ldLocal('nz_deduct_last',null);$('deduct-last-run').textContent=lr?`最終実行: ${lr}`:'最終実行: 未実行';
-  renderDeductRates();renderCatList();renderSupList();
-};
+  // area fill
+  const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+cH);
+  grad.addColorStop(0,'rgba(184,150,90,.25)');grad.addColorStop(1,'rgba(184,150,90,.02)');
+  ctx.beginPath();ctx.moveTo(pts[0].x,pad.t+cH);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[pts.length-1].x,pad.t+cH);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
 
-// ── Auto Deduction ────────────────────────────────────────────────────
-const calcDailyRate = p => {const now=new Date();let total=0;for(let m=1;m<=3;m++){const d=new Date(now.getFullYear(),now.getMonth()-m,1);dels.filter(dl=>dl.date.startsWith(ym(d))).forEach(dl=>dl.items.forEach(i=>{if(i.name===p.name&&(i.detail||'')===(p.detail||''))total+=(i.qty||0);}));}return{monthlyAvg:total/3,dailyRate:total/90};};
-const runAutoDeduct = (manual=false) => {
-  const enabled=ldLocal('nz_auto_deduct',false);if(!enabled&&!manual)return;
-  const today=new Date().toISOString().slice(0,10),lastDate=ldLocal('nz_deduct_last',null);
-  if(!manual&&lastDate===today)return;
-  const daysElapsed=lastDate?Math.max(1,Math.floor((new Date(today)-new Date(lastDate))/(1000*60*60*24))):1;
-  const log=[];
-  prods.forEach(p=>{const{dailyRate}=calcDailyRate(p);if(dailyRate<=0)return;const actual=Math.min(p.stock||0,Math.round(dailyRate*daysElapsed));if(actual>0){p.stock=Math.max(0,(p.stock||0)-actual);log.push({name:p.name,deducted:actual});}});
-  sv('nz_prods',prods);svLocal('nz_deduct_last',today);
-  const logs=ldLocal('nz_deduct_log',[]);if(log.length>0)logs.push({date:today,days:daysElapsed,items:log});svLocal('nz_deduct_log',logs.slice(-90));
-  if(manual){toast(log.length>0?`${log.length}商品の在庫を自動減算しました`:'減算対象の商品がありません');renderSettings();renderDash();}
-};
-const renderDeductRates = () => {
-  const today=new Date().toISOString().slice(0,10),lastDate=ldLocal('nz_deduct_last',null),daysElapsed=lastDate?Math.max(0,Math.floor((new Date(today)-new Date(lastDate))/(1000*60*60*24))):1;
-  const rows=prods.map(p=>{const{monthlyAvg,dailyRate}=calcDailyRate(p);if(monthlyAvg===0)return null;const td=Math.round(dailyRate*daysElapsed*10)/10;return`<tr><td>${p.name}</td><td style="font-size:10px;color:var(--muted)">${p.detail||'—'}</td><td>${catBadge(p.category)}</td><td class="tr">${monthlyAvg.toFixed(1)}${p.unit||'本'}/月</td><td class="tr" style="color:var(--gold)">${dailyRate.toFixed(2)}${p.unit||'本'}/日</td><td class="tr" style="color:${td>0?'var(--orange)':'var(--muted)'}">${td>0?'-'+td:'—'}</td></tr>`;}).filter(Boolean);
-  $('tb-deduct-rates').innerHTML=rows.join('')||'<tr><td colspan="6" style="color:var(--muted);padding:16px;text-align:center">発注履歴がないと計算できません</td></tr>';
-};
-const renderCatList = () => { $('cat-list').innerHTML=cats.map((c,i)=>`<div class="sort-row"><div style="display:flex;gap:4px;flex-direction:column"><button class="btn bg sm" style="padding:2px 6px;line-height:1" data-move-cat="${i}" data-dir="-1" ${i===0?'disabled':''}>▲</button><button class="btn bg sm" style="padding:2px 6px;line-height:1" data-move-cat="${i}" data-dir="1" ${i===cats.length-1?'disabled':''}>▼</button></div><input type="text" value="${c}" data-edit-cat="${i}" style="flex:1;padding:5px 8px;font-size:12px"><span class="badge cc-${i%8}">${c}</span><button class="btn bd sm" data-del-cat="${i}">削除</button></div>`).join(''); };
-const renderSupList = () => { $('sup-list').innerHTML=sups.map((s,i)=>`<div class="sort-row"><input type="text" value="${s}" data-edit-sup="${i}" style="flex:1;padding:5px 8px;font-size:12px"><button class="btn bd sm" data-del-sup="${i}">削除</button></div>`).join(''); };
-const exportData = () => {const b=new Blob([JSON.stringify({prods,dels,stks,cats,sups},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`neutrize-${new Date().toISOString().slice(0,10)}.json`;a.click();toast('エクスポートしました');};
-const importData = inp => {const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(d.prods){prods=d.prods;sv('nz_prods',prods);}if(d.dels){dels=d.dels;sv('nz_dels',dels);}if(d.stks){stks=d.stks;sv('nz_stks',stks);}if(d.cats){cats=d.cats;sv('nz_cats',cats);}if(d.sups){sups=d.sups;sv('nz_sups',sups);}toast('インポートしました（Supabaseに同期中）');renderDash();}catch{toast('読み込みに失敗しました','e');}};r.readAsText(f);};
+  // line
+  ctx.beginPath();ctx.strokeStyle='#B8965A';ctx.lineWidth=2;ctx.lineJoin='round';
+  pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();
 
-// ── 全イベント一元管理 ────────────────────────────────────────────────
-document.addEventListener('click', e => {
-  const t = e.target;
-  if(t.id==='btn-sync') syncNow();
-  if(t.id==='btn-ana') runAnalysis();
-  if(t.id==='btn-reg') registerDelivery();
-  if(t.id==='btn-stk') saveStocktake();
-  if(t.id==='btn-add-prod') openProd();
-  if(t.id==='btn-save-prod') saveProd();
-  if(t.id==='btn-cancel-prod') closeProd();
-  if(t.id==='prod-modal') closeProd();
-  if(t.id==='btn-save-api'){const k=$('inp-api').value.trim();if(!k.startsWith('sk-')){toast('有効なAPIキーを入力してください','e');return;}cfg.apiKey=k;svLocal('nz_cfg',cfg);$('api-st').textContent='✓ 保存しました';$('api-st').style.color='var(--green)';toast('APIキーを保存しました');}
-  if(t.id==='btn-save-gas'){cfg.gasUrl=$('inp-gas').value.trim();svLocal('nz_cfg',cfg);toast('GAS URLを保存しました');}
-  if(t.id==='btn-test-gas'){if(!cfg.gasUrl){toast('GAS URLを入力してください','e');return;}fetch(cfg.gasUrl).then(()=>toast('接続成功')).catch(()=>toast('接続に失敗しました','e'));}
-  if(t.id==='btn-run-deduct') runAutoDeduct(true);
-  if(t.id==='btn-reset-deduct'){if(!confirm('最終実行日をリセットしますか？'))return;svLocal('nz_deduct_last',null);localStorage.removeItem('nz_deduct_last');toast('リセットしました');renderSettings();}
-  if(t.id==='btn-add-cat'){const v=$('inp-cat').value.trim();if(!v){toast('カテゴリ名を入力してください','e');return;}if(cats.includes(v)){toast('すでに存在します','e');return;}cats.push(v);sv('nz_cats',cats);$('inp-cat').value='';renderCatList();toast('カテゴリを追加しました');}
-  if(t.id==='btn-add-sup'){const v=$('inp-sup2').value.trim();if(!v){toast('仕入先名を入力してください','e');return;}if(sups.includes(v)){toast('すでに存在します','e');return;}sups.push(v);sv('nz_sups',sups);$('inp-sup2').value='';renderSupList();toast('仕入先を追加しました');}
-  if(t.id==='btn-export') exportData();
-  if(t.id==='btn-import-trigger') $('imp-file').click();
-  if(t.id==='btn-clear'){
-    if(!confirm('全データを削除しますか？\nこの操作は取り消せません。'))return;
-    ['nz_prods','nz_dels','nz_stks','nz_cats','nz_sups','nz_deduct_last','nz_deduct_log'].forEach(k=>localStorage.removeItem(k));
-    ['nz_prods','nz_dels','nz_stks','nz_cats','nz_sups'].forEach(k=>sbClient.from('nz_data').delete().eq('key',k).then());
-    prods=[];dels=[];stks=[];cats=DEF_CATS;sups=DEF_SUPS;toast('全データを削除しました');renderDash();
-  }
-  if(t.id==='auto-deduct-toggle'){svLocal('nz_auto_deduct',t.checked);toast(t.checked?'自動減算を有効にしました':'自動減算を無効にしました');renderSettings();}
-  if(t.dataset.delId){if(!confirm('この入庫データを削除しますか？'))return;dels=dels.filter(d=>d.id!==t.dataset.delId);sv('nz_dels',dels);renderDelLog();renderDash();}
-  if(t.dataset.delItemDel!==undefined){e.stopPropagation();const delId=t.dataset.delItemDel,idx=parseInt(t.dataset.delItemIdx);if(!confirm('この行を削除しますか？'))return;const d=dels.find(x=>x.id===delId);if(d){d.items.splice(idx,1);if(d.items.length===0)dels=dels.filter(x=>x.id!==delId);}sv('nz_dels',dels);renderHistLog();renderDelLog();renderDash();}
-  if(t.dataset.editProd) openProd(t.dataset.editProd);
-  if(t.dataset.delProd){if(!confirm('この商品を削除しますか？'))return;prods=prods.filter(p=>p.id!==t.dataset.delProd);sv('nz_prods',prods);renderProducts();renderDash();}
-  if(t.dataset.moveCat!==undefined){const i=parseInt(t.dataset.moveCat),j=i+parseInt(t.dataset.dir);if(j>=0&&j<cats.length){[cats[i],cats[j]]=[cats[j],cats[i]];sv('nz_cats',cats);renderCatList();}}
-  if(t.dataset.delCat!==undefined){const i=parseInt(t.dataset.delCat);if(!confirm(`「${cats[i]}」を削除しますか？`))return;cats.splice(i,1);sv('nz_cats',cats);renderCatList();toast('削除しました');}
-  if(t.dataset.delSup!==undefined){const i=parseInt(t.dataset.delSup);if(!confirm(`「${sups[i]}」を削除しますか？`))return;sups.splice(i,1);sv('nz_sups',sups);renderSupList();toast('削除しました');}
-  const toggleCat=t.closest('[data-toggle-cat]');if(toggleCat){const body=toggleCat.nextElementSibling,tog=toggleCat.querySelector('.cat-toggle'),open=body.style.display!=='none';body.style.display=open?'none':'block';tog.classList.toggle('open',!open);}
-  const histRow=t.closest('[data-hist-del]');if(histRow&&!t.dataset.delItemDel){const det=$(`hd-${histRow.dataset.histDel}-${histRow.dataset.histIdx}`);if(det)det.style.display=det.style.display==='none'?'table-row':'none';}
-  const remBtn=t.closest('[data-remove]');if(remBtn){const idx=parseInt(remBtn.dataset.remove);extItems.splice(idx,1);if(extItems.length===0){$('ana-result').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">商品がありません</div>';$('reg-wrap').style.display='none';}else renderEditItems();}
-  if(t.closest('[data-add-item]')){extItems.push({name:'',detail:'',category:cats[0]||'消耗品',qty:0,unit:'本',price:0,linkedId:''});renderEditItems();$('reg-wrap').style.display='block';}
-});
+  // dots + labels
+  pts.forEach((p,i)=>{
+    ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fillStyle='#B8965A';ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#5F5E5A';ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillText(data[i].label,p.x,H-8);
+  });
+}
 
-document.addEventListener('input', e => {
-  const t=e.target;
-  if(t.dataset.idx!==undefined&&t.dataset.field){const i=parseInt(t.dataset.idx),f=t.dataset.field;if(!isNaN(i)&&extItems[i])extItems[i][f]=(f==='qty'||f==='price')?Number(t.value)||0:t.value;}
-  if(t.dataset.editCat!==undefined){cats[parseInt(t.dataset.editCat)]=t.value;sv('nz_cats',cats);}
-  if(t.dataset.editSup!==undefined){sups[parseInt(t.dataset.editSup)]=t.value;sv('nz_sups',sups);}
-  if(t.id==='flt-name'||t.id==='flt-cat') renderProducts();
-
-  // 商品マスタ コピー機能
-  if(t.id==='m-copy-from' && t.value) {
-    const p=prods.find(x=>x.id===t.value);
-    if(p){
-      $('m-name').value=p.name;
-      $('m-detail').value=p.detail||'';
-      $('m-cat').value=p.category;
-      $('m-target').value=p.target;
-      $('m-unit').value=p.unit||'本';
-      $('m-sup').value=p.supplier||'';
-      $('m-price').value=p.price||'';
-      $('m-stock').value='0'; // 在庫数は0からスタート
-      toast('コピーしました。内容を編集して保存してください');
-    }
-  }
-});
-document.addEventListener('change', e => {
-  const t=e.target;
-  if(t.dataset.idx!==undefined&&t.dataset.field){const i=parseInt(t.dataset.idx),f=t.dataset.field;if(!isNaN(i)&&extItems[i]){extItems[i][f]=(f==='qty'||f==='price')?Number(t.value)||0:t.value;if(t.dataset.rerender)renderEditItems();}}
-  if(t.id==='hist-ym') renderHistLog();
-  if(t.id==='flt-cat') renderProducts();
-  if(t.id==='rpt-month') renderReport();
-  if(t.id==='imp-file') importData(t);
-});
-
-const dz=$('dz');
-dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
-dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
-dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');if(e.dataTransfer.files[0])loadImg(e.dataTransfer.files[0]);});
-$('fi').addEventListener('change',e=>{if(e.target.files[0])loadImg(e.target.files[0]);});
-
-// ── Init ─────────────────────────────────────────────────────────────
-(async () => {
-  showLoading(true);
-  const ok = await loadAll();
-  showLoading(false);
-  if(!ok) toast('オフラインモード（キャッシュを使用）','e');
-  try { runAutoDeduct(); } catch(e) { console.error(e); }
-  renderDash();
-})();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- PDF render target -->
+<div id="pdfTarget" style="display:none;position:fixed;left:-9999px;top:0;width:600px;background:#fff;font-family:'Noto Sans JP',sans-serif;padding:0">
+  <div id="pdfContent"></div>
+</div>
 </body>
 </html>
