@@ -514,17 +514,17 @@ function doPDF(){
       {l:'売上達成手当',v:uri},{l:'出張手当',v:shutcho},
     ];
     if(!p.ti) fields.push({l:'技術手当',v:gijutsu});
-    if(p.ti){ fields.push({l:'指名技術売上',v:nv('sh-'+p.id)}); fields.push({l:'歩合',v:h}); }
+    if(p.ti){ fields.push({l:'指名技術売上',v:nv('sh-'+p.id)}); fields.push({l:'歩合',v:h,always:true}); }
     rows += `<div style="margin-bottom:14px;border:1px solid #e0ddd6;border-radius:6px;overflow:hidden;font-family:sans-serif">
       <div style="background:#2C2C2A;padding:9px 14px;display:flex;justify-content:space-between">
         <span style="color:#B8965A;font-size:13px;font-weight:bold">${p.fn}</span>
         <span style="color:#B8965A;font-size:13px;font-weight:bold">&#165;${fmt(total)}</span>
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:11px;font-family:sans-serif">
-        ${fields.filter(f=>f.v>0).map((f,i)=>`
-        <tr style="background:${i%2===0?'#fff':'#f8f6f2'}">
-          <td style="padding:4px 12px;color:#5F5E5A;border-bottom:1px solid #f0ede6">${f.l}</td>
-          <td style="padding:4px 12px;text-align:right;color:#1A1A18;border-bottom:1px solid #f0ede6">&#165;${fmt(f.v)}</td>
+        ${fields.filter(f=>f.v>0||f.always).map((f,i)=>`
+        <tr style="background:${f.always?'#F5ECD9':i%2===0?'#fff':'#f8f6f2'}">
+          <td style="padding:4px 12px;color:${f.always?'#633806':'#5F5E5A'};border-bottom:1px solid #f0ede6">${f.l}</td>
+          <td style="padding:4px 12px;text-align:right;color:${f.always?'#B8965A':'#1A1A18'};font-weight:${f.always?'bold':'normal'};border-bottom:1px solid #f0ede6">${f.v>0?'&#165;'+fmt(f.v):'&#8212;'}</td>
         </tr>`).join('')}
         <tr style="background:#F1EFE8">
           <td style="padding:6px 12px;font-weight:bold;color:#1A1A18">&#25903;&#32989;&#21512;&#35336;</td>
